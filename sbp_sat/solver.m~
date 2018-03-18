@@ -17,8 +17,8 @@ end
 % time_dep = [nargin(par.source)>2 0];
 
 
-%% Storing index of non-zero entries in system matrices (separately for
-                                                           % each equation)
+%% Storing index of non-zero entries 
+
 % corresponding to every row in Ax, stores the non-zero indices
 Ix = cellfun(@find,num2cell(par.system_data.Ax',1),'Un',0);
 Iy = cellfun(@find,num2cell(par.system_data.Ay',1),'Un',0);
@@ -81,7 +81,8 @@ U = cell(1,par.n_eqn); dxU = U; dyU = U; force = U; UTemp = U;
 k_RK = cell(4,1); % to store the 4 slopes- k1, k2, k3 and k4, i.e. L(U,t)
 
 for j = 1:par.n_eqn
-    U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j);
+    U{j} = X{1}*0+...
+        capargs(par.initial_condition,X{1},Y{1},j);
     
     force{j} = X{1}*0;
     bc_values{j} = X{1}*0;
@@ -132,7 +133,10 @@ while t < par.t_end
             % [3] W is one vector having a value stored at each grid node
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
                 [par.system_data.Ax(i,Ix{i}),par.system_data.Ay(i,Iy{i})]);
-                        
+            
+            %             % Force term and boundary term should be computed before-hand
+            %             force{i} = 0;  bc_values{i} = 0;
+            
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});
             
