@@ -183,6 +183,22 @@ cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
 
+U_theo = cell(1,par.n_eqn);
+error = cell(1,par.n_eqn);
+for j = 1:par.n_eqn
+    U_theo{j} = X{1}*0 + capargs(par.theoretical_solution,X{1},Y{1},t,j);
+    error{j} = U{j} - U_theo{j};
+end
+[output.error] = error{:};
+
+error_l2 = zeros(par.n_eqn,1);
+for j = 1:par.n_eqn
+    error_l2(j) = norm(error{j},1);
+end
+error_l2 = num2cell(error_l2);
+[output.error_l2] = error_l2{:};
+
+
 end
 
 
