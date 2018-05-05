@@ -46,13 +46,16 @@ for k = 1:length(resolution)                       % Loop over various grid reso
         error = abs(solution(j).U-U_theo);               % Difference between num. and true sol.
         int_x = dot(transpose(error),transpose(solution(j).Px * error),2);  % integral along x.
         int_xy = sum(solution(j).Py*int_x);  % integral along xy.
-        error_l2(j,k) = int_xy;%Sc. L2 error.
+        error_l2(j,k) = sqrt(int_xy);%Sc. L2 error.
     end
 end
 figure
 loglog( (resolution), error_l2(1,:), '-o' )
 xlabel('# cells in each direction'), ylabel('l2-error')
 title('Convergence plot')
+
+rate = log(error_l2(1,4)/error_l2(1,1)) / log((resolution(1))/(resolution(4)));
+rate
 
 % rate = log(error_l2(1,4)/error_l2(1,1)) / log(sqrt(resolution(4))/sqrt(resolution(1)));
 % rate2 = log2( error_l2(1,3)/error_l2(1,4) );
