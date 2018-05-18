@@ -16,6 +16,9 @@ end
 % % find which of the given data is time dependent
 % time_dep = [nargin(par.source)>2 0];
 
+% % find which of the given data is time dependent
+% time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo)>2];
+
 
 %% Storing index of non-zero entries in system matrices (separately for
                                                            % each equation)
@@ -84,7 +87,51 @@ for j = 1:par.n_eqn
     U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j);
     
     force{j} = X{1}*0;
+end
+
+%% Related to boundary treatment
+
+% data structure for storing the values at the boundaries
+bc_values = cell(1,par.n_eqn);
+for j = 1:par.n_eqn
     bc_values{j} = X{1}*0;
+end
+
+% we need to know which elements are coupled with which one at the
+% boundaries. The 
+% ID = 1
+% a loop over all the boundaries
+% consider the coupling for the Sigma * B term
+bc_coupling = cell(par.num_bc,1);
+% consider the coupling for the Sigma * g term
+bc_coupling_g = cell(par.num_bc,1);
+
+% we need to do this fixing for the machine error
+for i = 1 : par.num_bc
+    % for the boundary id=i, we find the variables to which every variable
+    % in the moment system
+    % is coupled 
+    % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
+    % i. the matrix penalty{i} contains the penalty matrix at the boundary
+    % with ID = i.
+    bc_coupling{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system_data.penalty_B{i},2), 'Un', 0 );
+        % num2cell(par.system_data.penalty_B{i},2) splits B{i} into 
+        % separate cells where dim specifies which dimensions of A to 
+        % include in each cell
+    bc_coupling_g{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system_data.penalty{i},2), 'Un', 0 );
+end
+
+% scaling for the boundary conditions
+bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
+
+%the boundary inhomogeneity. Every component of the cell will be equal to
+%the number of boundar conditions which we need to prescribe. 
+bc_g = cell(par.num_bc,1);
+
+% compute the boundary inhomogeneity
+for j = 1:par.num_bc
+    % need to convert to cell for the computations which follow
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system_data.B{j},j,0));
 end
 
 %% Time Loop
@@ -115,10 +162,76 @@ while t < par.t_end
     
     UTemp = U;
     for RK = 1 : par.RK_order
+        
+        for j = 1:par.num_bc
+            % need to convert to cell for the computations which follow
+            bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system_data.B{j},j,t_temp(RK)));
+        end
+%         evaluate = time_dep & (t_temp(RK) > 0);
+%             
+%             if evaluate(1)
+%                 for j = par.source_ind    
+%                          force{j} = capargs(par.source,X,j,t_temp(RK)); 
+%                 end
+%             end
+%             
+%             if evaluate(2)
+%                 for j = 1:par.num_bc
+%                  % need to convert to cell for the computations which follow
+%                     bc_g{j} = num2cell(capargs(par.bc_inhomo,par.B{j},j,t_temp(RK)));
+%    
+%                 end
+%             end
+            
         for i = 1:par.n_eqn
             dxU{i} = DX{1} * UTemp{i};
             dyU{i} = UTemp{i} * DY{1}; % DY is actually transpose of dy
         end
+        
+        %
+        % extract all the values at x = 1, last row of the matrix.
+        bc_ID = 1;
+        values = cellfun(@(a) a(end,:),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+%                 the term, values(bc_coupling{bc_ID}{j}), gives us the
+%                 value of all the variables, at the boundary, which are
+%                 coupled with the j-th variable. 
+%                 par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})
+%                 gives us the j-th row of the penalty matrix and the
+%                 entries in all those columns which have no zeros.
+            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling{bc_ID}{j}),...
+                                  par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j}) ) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
+                                  par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+        end
+
+        bc_ID = 2;
+        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
+                                  par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
+                                  par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+        end
+
+        bc_ID = 3;
+        values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
+                                par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
+                                par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+        end
+
+        bc_ID = 4;
+        values = cellfun(@(a) a(:,1),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
+                                par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
+                                par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+        end
+        %
         
         for i = 1 : par.n_eqn
             % Multiplication of dxU and dyU by system matrices Ax and Ay
@@ -217,10 +330,12 @@ end
 
 function S = sumcell(A,w)
 % Add vector of cells A, weighted with (corresponding entries of) vector w.
-S = A{1}*w(1); % S is a vector as A{1} is vector. Need this separately for
+S = 0; % *S is a vector as A{1} is vector*. Need this separately for
 % initialization of S with proper length? NOPE
-for j = 2:length(w)
-    S = S+A{j}*w(j);
+% A{1} can also be a matrix, right? then mat. vect. multip. *WRONG* A all
+% the entries of matrix but A{i} has non-zero ith column entries
+for j = 1:length(w)
+    S = S + A{j}*w(j);
 end
 end
 
