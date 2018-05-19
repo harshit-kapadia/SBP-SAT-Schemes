@@ -23,8 +23,8 @@ end
 %% Storing index of non-zero entries in system matrices (separately for
                                                            % each equation)
 % corresponding to every row in Ax, stores the non-zero indices
-Ix = cellfun(@find,num2cell(par.system_data.Ax',1),'Un',0);
-Iy = cellfun(@find,num2cell(par.system_data.Ay',1),'Un',0);
+Ix = cellfun(@find,num2cell(par.system.Ax',1),'Un',0);
+Iy = cellfun(@find,num2cell(par.system.Ay',1),'Un',0);
 % each row of Ax in separate cell as here num2cell(Ax',1)
 % what does 'Un',0 do? and purpose of Ix, Iy? --> now clear
 % Error using cellfun
@@ -48,7 +48,7 @@ y{1} = par.ax(3):h(2):par.ax(4);
 %% Time-step
 
 % a crude approximation for delta_t
-par.dt = par.CFL * min(h)/abs(eigs(par.system_data.Ax,1,'lm')); % 1 eigenv.
+par.dt = par.CFL * min(h)/abs(eigs(par.system.Ax,1,'lm')); % 1 eigenv.
 % with largest magnitude
 
 
@@ -102,9 +102,9 @@ end
 % ID = 1
 % a loop over all the boundaries
 % consider the coupling for the Sigma * B term
-bc_coupling = cell(par.num_bc,1);
+bc_coupling_penalty_B = cell(par.num_bc,1);
 % consider the coupling for the Sigma * g term
-bc_coupling_g = cell(par.num_bc,1);
+bc_coupling_penalty = cell(par.num_bc,1);
 
 % we need to do this fixing for the machine error
 for i = 1 : par.num_bc
@@ -114,11 +114,11 @@ for i = 1 : par.num_bc
     % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
     % i. the matrix penalty{i} contains the penalty matrix at the boundary
     % with ID = i.
-    bc_coupling{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system_data.penalty_B{i},2), 'Un', 0 );
-        % num2cell(par.system_data.penalty_B{i},2) splits B{i} into 
+    bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
+        % num2cell(par.system.penalty_B{i},2) splits B{i} into 
         % separate cells where dim specifies which dimensions of A to 
         % include in each cell
-    bc_coupling_g{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system_data.penalty{i},2), 'Un', 0 );
+    bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
 end
 
 % scaling for the boundary conditions
@@ -131,7 +131,7 @@ bc_g = cell(par.num_bc,1);
 % compute the boundary inhomogeneity
 for j = 1:par.num_bc
     % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system_data.B{j},j,0));
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,0));
 end
 
 %% Time Loop
@@ -165,7 +165,7 @@ while t < par.t_end
         
         for j = 1:par.num_bc
             % need to convert to cell for the computations which follow
-            bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system_data.B{j},j,t_temp(RK)));
+            bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t_temp(RK)));
         end
 %         evaluate = time_dep & (t_temp(RK) > 0);
 %             
@@ -193,43 +193,43 @@ while t < par.t_end
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-%                 the term, values(bc_coupling{bc_ID}{j}), gives us the
+%                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
 %                 value of all the variables, at the boundary, which are
 %                 coupled with the j-th variable. 
-%                 par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})
+%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
 %                 gives us the j-th row of the penalty matrix and the
 %                 entries in all those columns which have no zeros.
-            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling{bc_ID}{j}),...
-                                  par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j}) ) - ...
-                                  sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
-                                  par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
 
         bc_ID = 2;
         values = cellfun(@(a) a(:,end),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
-                                  par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
-                                  sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
-                                  par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
 
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
-                                par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
-                                sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
-                                par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
 
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling{bc_ID}{j}), ...
-                                par.system_data.penalty_B{bc_ID}(j,bc_coupling{bc_ID}{j})) - ...
-                                sumcell(bc_g{bc_ID}(bc_coupling_g{bc_ID}{j}),...
-                                par.system_data.penalty{bc_ID}(j,bc_coupling_g{bc_ID}{j})) );
+            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         %
         
@@ -244,7 +244,7 @@ while t < par.t_end
             % Ax(1, [3 4 5]) gives (1,3), (1,4) and (1, 5) entries of Ax
             % [3] W is one vector having a value stored at each grid node
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
-                [par.system_data.Ax(i,Ix{i}),par.system_data.Ay(i,Iy{i})]);
+                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);
                         
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});

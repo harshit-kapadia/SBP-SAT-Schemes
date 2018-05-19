@@ -23,7 +23,7 @@ par = struct(...
 
 par.t_plot = linspace(0,par.t_end,50);
 
-[par.system_data] = get_system_data(par.n_eqn);
+[par.system] = get_system(par.n_eqn);
 
 % % the moment variable to be output
 par.mom_output = 2;
@@ -33,32 +33,32 @@ par.mom_output = 2;
 % for i = 1 : par.num_bc
 %     alpha = (i-1) * pi/2;
 %     projector =  global_projector(par.n_mom,alpha, ...
-%                                   par.system_data.Perm,par.system_data.InvPerm);
+%                                   par.system.Perm,par.system.InvPerm);
 %                               
-%     par.system_data.penalty_B{i}  =  full(projector' * par.system_data.Sigma * ...
-%                                      par.system_data.BInflow * projector);
+%     par.system.penalty_B{i}  =  full(projector' * par.system.Sigma * ...
+%                                      par.system.BInflow * projector);
 %                                  
-%     par.system_data.penalty{i}  =  full(projector' * par.system_data.Sigma);
+%     par.system.penalty{i}  =  full(projector' * par.system.Sigma);
 % end
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
-par.system_data.penalty_B = cell(par.num_bc,1);
-par.system_data.penalty = cell(par.num_bc,1);
-par.system_data.B = cell(par.num_bc,1);
+par.system.penalty_B = cell(par.num_bc,1);
+par.system.penalty = cell(par.num_bc,1);
+par.system.B = cell(par.num_bc,1);
 
-par.system_data.penalty{1} = zeros(par.n_eqn) ;
-par.system_data.penalty{2} = zeros(par.n_eqn) ;
-par.system_data.penalty{3} = -1 * eye(par.n_eqn) ;
-par.system_data.penalty{4} = -1 * eye(par.n_eqn) ;
+par.system.penalty{1} = zeros(par.n_eqn) ;
+par.system.penalty{2} = zeros(par.n_eqn) ;
+par.system.penalty{3} = -1 * eye(par.n_eqn) ;
+par.system.penalty{4} = -1 * eye(par.n_eqn) ;
 
-par.system_data.B{1} = zeros(par.n_eqn) ;
-par.system_data.B{2} = zeros(par.n_eqn) ;
-par.system_data.B{3} =  eye(par.n_eqn) ;
-par.system_data.B{4} = eye(par.n_eqn) ;
+par.system.B{1} = zeros(par.n_eqn) ;
+par.system.B{2} = zeros(par.n_eqn) ;
+par.system.B{3} =  eye(par.n_eqn) ;
+par.system.B{4} = eye(par.n_eqn) ;
 
 for i = 1 : par.num_bc
-    par.system_data.penalty_B{i} = par.system_data.penalty{i}*par.system_data.B{i};
+    par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
 %========================================================================
@@ -73,13 +73,13 @@ solution = solver(par);
 % Problem Specific Functions
 %========================================================================
 
-function[system_data] = get_system_data(n_equ)
+function[system] = get_system(n_equ)
 
 value_x = ones(n_equ);
-system_data.Ax = spdiags([value_x], [0], n_equ, n_equ);
+system.Ax = spdiags([value_x], [0], n_equ, n_equ);
 
 value_y = ones(n_equ);
-system_data.Ay = spdiags([value_y], [0], n_equ, n_equ);
+system.Ay = spdiags([value_y], [0], n_equ, n_equ);
 
 end
 
