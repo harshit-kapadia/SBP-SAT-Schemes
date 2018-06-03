@@ -104,6 +104,7 @@ end
 % a loop over all the boundaries
 % consider the coupling for the Sigma * B term
 bc_coupling_penalty_B = cell(par.num_bc,1);
+
 % consider the coupling for the Sigma * g term
 bc_coupling_penalty = cell(par.num_bc,1);
 
@@ -285,9 +286,9 @@ while t < par.t_end
     end
     
     %% Plotting
-    if par.to_plot
+    if par.to_plot && mod(step_count,10) == 0
         
-        surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -296,7 +297,7 @@ while t < par.t_end
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([-0.1 1]);
+        zlim([-0.5 1]);
         
         drawnow
     end

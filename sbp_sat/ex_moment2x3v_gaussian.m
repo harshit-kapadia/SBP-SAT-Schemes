@@ -16,7 +16,7 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',true...
+    'to_plot',false...
     );
 
 
@@ -26,7 +26,7 @@ par.system.penalty_B = cell(par.num_bc,1);
 par.system.penalty = cell(par.num_bc,1);
 par.system.B = cell(par.num_bc,1);
 par.system.rotator = cell(par.num_bc,1);
-par.Kn = 0.1;
+par.Kn = inf;
 
 par.system.Ax = dvlp_Ax2D(M);
 par.system.P = dvlp_Prod2D(M);
@@ -62,6 +62,18 @@ for i = 1 : par.num_bc
 end
 
 result = solver(par);
+
+filename = strcat('result_',num2str(M),'.txt');
+
+dlmwrite(filename,result(1).X(:)','delimiter','\t');
+dlmwrite(filename,result(1).Y(:)','delimiter','\t');
+
+for i = 1 : length(result)
+    dlmwrite(filename,result(i).sol(:)','delimiter','\t','-append');
+end
+
+
+
 
 % legend('2d code','1d code');
 % filename = 'density.txt';
