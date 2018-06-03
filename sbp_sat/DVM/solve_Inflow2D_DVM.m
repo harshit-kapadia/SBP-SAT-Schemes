@@ -18,8 +18,8 @@ par = struct(...
 'compute_theta',@compute_theta...
 );
 
-par.Kn = inf;
-par.t_plot = true;
+par.Kn = 0.1;
+par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
 % number of points in the spatial discretization
 par.n = [50 50];
@@ -85,13 +85,14 @@ density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
 theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
 sigma_xx = compute_sigmaxx(temp,par.system.Ax,par.system.Ay,par.all_w);
 
-filename = 'result_DVM.txt';
-dlmwrite(filename,result(1,1).X','delimiter','\t','precision',10);
-dlmwrite(filename,density','delimiter','\t','-append','precision',10);
-dlmwrite(filename,ux','delimiter','\t','-append','precision',10);
-dlmwrite(filename,uy','delimiter','\t','-append','precision',10);
-dlmwrite(filename,theta','delimiter','\t','-append','precision',10);
-dlmwrite(filename,sigma_xx','delimiter','\t','-append','precision',10);
+filename = 'result_Inflow_Comp/result_DVM.txt';
+dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
+dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
+dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
 
 end
 

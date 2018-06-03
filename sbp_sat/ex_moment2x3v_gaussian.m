@@ -63,10 +63,10 @@ end
 
 result = solver(par);
 
-filename = strcat('result_',num2str(M),'.txt');
+filename = strcat('DVM/result_Inflow_Comp/result_',num2str(M),'.txt');
 
 dlmwrite(filename,result(1).X(:)','delimiter','\t');
-dlmwrite(filename,result(1).Y(:)','delimiter','\t');
+dlmwrite(filename,result(1).Y(:)','delimiter','\t','-append');
 
 for i = 1 : length(result)
     dlmwrite(filename,result(i).sol(:)','delimiter','\t','-append');
