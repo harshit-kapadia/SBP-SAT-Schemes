@@ -10,6 +10,7 @@ par = struct(...
     'n_eqn',10,... % number of eq per grid point
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
+    'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
     'n',[100 100],... % numbers of grid cells in each coordinate direction
     't_end',0.2,... % end time of computation
@@ -53,12 +54,12 @@ end
 % %========================================================================
 % % Run solver
 % %========================================================================
-% 
+%
 % % % solve the system
 % % solution = solver(par);
-% 
+%
 % resolution = [16 32 64 128 256];
-% 
+%
 % error_l2 = zeros(par.n_eqn,length(resolution));
 % for k = 1:length(resolution)                       % Loop over various grid resolutions.
 %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
@@ -76,13 +77,13 @@ end
 % loglog( (resolution), error_l2(1,:), '-o' )
 % xlabel('# cells in each direction'), ylabel('l2-error')
 % title('Convergence plot')
-% 
+%
 % rate = log(error_l2(1,4)/error_l2(1,1)) / log((resolution(1))/(resolution(4)));
 % rate
-% 
+%
 % % rate = log(error_l2(1,4)/error_l2(1,1)) / log(sqrt(resolution(4))/sqrt(resolution(1)));
 % % rate2 = log2( error_l2(1,3)/error_l2(1,4) );
-% 
+%
 % % convg_rate = zeros(par.n_eqn,length(resolution));
 % % for i = 1:1 % loop over components
 % %     for j = 2:length(resolution)
@@ -157,42 +158,36 @@ system.Ay = spdiags([value_y], [0], n_equ, n_equ);
 end
 
 function f = initial_condition(x,y)
-% Maxwellian/Gaussian
-x0 = 0.5; % centered in the middle of domain
-y0 = 0.5;
-sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near 
-sigma_y = 0.1;                           % boundary function value = 0
-f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) );
+f = sin(pi*x) .* sin(pi*y);
 end
 
 function f = theoretical_solution(x,y,t)
-% Maxwellian/Gaussian
-a = 1; % wave speed
-x0 = 0.5 + a*t; % centered in the middle of domain
-y0 = 0.5 + a*t;
-sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near 
-sigma_y = 0.1;                           % boundary function value = 0
-f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) );
+f = sin(pi*x) .* sin(pi*y) .* cos(pi*t);
+end
+
+function f = source(x,y,t)
+f = (-1*sin(pi*x).*sin(pi*y).*sin(pi*t)) + (cos(pi*x).*sin(pi*y).*cos(pi*t)) +...
+    (sin(pi*x).*cos(pi*y).*cos(pi*t)) ;
 end
 
 function f = bc_inhomo(B,bc_id,t)
-    switch bc_id
-        % east boundary but in matrix - south, i.e. last row -> x-dir #cell
-        case 1
-            boundary_value = 0;
+switch bc_id
+    % east boundary but in matrix - south, i.e. last row -> x-dir #cell
+    case 1
+        boundary_value = 0;
         % north boundary
-        case 2
-            boundary_value = 0;
+    case 2
+        boundary_value = 0;
         % west boundary
-        case 3
-            boundary_value = 0; % for g = 0
+    case 3
+        boundary_value = 0; % for g = 0
         % south boundary
-        case 4
-            boundary_value = 0; % for g = 0
-    end
-    
-    f = boundary_value * diag(B); % multiplying by diag(B) so the structure
-    % we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
+    case 4
+        boundary_value = 0; % for g = 0
+end
+
+f = boundary_value * diag(B); % multiplying by diag(B) so the structure
+% we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
 end
 
 % function f = regular_unitstep(t) % regularized unitstep function
