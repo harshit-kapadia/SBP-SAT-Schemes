@@ -9,13 +9,13 @@
 ### Request the time you need for execution in minutes
 ### The format for the parameter is: [hour:]minute,
 ### that means for 80 minutes you could also use this: 1:20
-#BSUB -W 1:20
+#BSUB -W 5:20
  
 ### Request memory you need for your job in MB
-#BSUB -M 3000
+#BSUB -M 10000
  
 ### Change to the work directory
-cd /home/ns179556/SBP_1D/
+cd /home/ns179556/SBP_2D/sbp_sat
  
 ### load modules and execute
 module load MISC

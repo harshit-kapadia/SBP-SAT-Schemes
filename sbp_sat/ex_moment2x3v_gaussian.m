@@ -26,7 +26,7 @@ par.system.penalty_B = cell(par.num_bc,1);
 par.system.penalty = cell(par.num_bc,1);
 par.system.B = cell(par.num_bc,1);
 par.system.rotator = cell(par.num_bc,1);
-par.Kn = inf;
+par.Kn = 0.1;
 
 par.system.Ax = dvlp_Ax2D(M);
 par.system.P = dvlp_Prod2D(M);

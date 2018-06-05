@@ -1,0 +1,325 @@
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 42997368[35]: <MATLAB_ARRAY[35]> in cluster <rcc> Exited
+
+Job <MATLAB_ARRAY[35]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sun Jun  3 11:09:53 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sun Jun  3 11:09:59 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sun Jun  3 11:09:59 2018
+Terminated at Sun Jun  3 12:30:25 2018
+Results reported at Sun Jun  3 12:30:25 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[35]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/solving_Inflow2D_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 1:20
+ 
+### Request memory you need for your job in MB
+#BSUB -M 10000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/solver_HC2D_$LSB_JOBINDEX.log <<EOF
+run ex_moment2x3v_gaussian($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+TERM_RUNLIMIT: job killed after reaching LSF run time limit.
+Exited with exit code 140.
+
+Resource usage summary:
+
+    CPU time :                                   4855.00 sec.
+    Max Memory :                                 3609 MB
+    Average Memory :                             3238.58 MB
+    Total Requested Memory :                     10000.00 MB
+    Delta Memory :                               6391.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                55
+    Run time :                                   4826 sec.
+    Turnaround time :                            4832 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2017b
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.15969
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017b (9.3.0.713579) 64-bit (glnxa64)
+                             September 14, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.0464
+
+        4389
+
+    50
+
+time: neqn: step_count 
+    0.0927
+
+        4389
+
+   100
+
+time: neqn: step_count 
+    0.1391
+
+        4389
+
+   150
+
+time: neqn: step_count 
+    0.1854
+
+        4389
+
+   200
+
+time: neqn: step_count 
+    0.2318
+
+        4389
+
+   250
+
+User defined signal 2
+
+------------------------------------------------------------------------
+       Segmentation violation detected at Sun Jun  3 12:30:21 2018
+------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding      : Disabled - No sandbox or build area path
+  Crash Mode          : continue (default)
+  Current Graphics Driver: Unknown software 
+  Current Visual      : None
+  Default Encoding    : UTF-8
+  Deployed            : false
+  GNU C Library       : 2.17 stable
+  Host Name           : linuxbcsc67.rz.RWTH-Aachen.DE
+  MATLAB Architecture : glnxa64
+  MATLAB Entitlement ID: 870147
+  MATLAB Root         : /rwthfs/rz/SW/MATLAB/matlab_2017b
+  MATLAB Version      : 9.3.0.713579 (R2017b)
+  OpenGL              : software
+  Operating System    : Linux 3.10.0-693.21.1.el7.x86_64 #1 SMP Wed Mar 7 19:03:37 UTC 2018 x86_64
+  Processor ID        : x86 Family 6 Model 46 Stepping 6, GenuineIntel
+  Virtual Machine     : Java 1.8.0_121-b13 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  Window System       : No active display
+
+Fault Count: 1
+
+
+Abnormal termination:
+Segmentation violation
+
+Register State (from fault):
+  RAX = 0000000000000000  RBX = 0000000000763540
+  RCX = ffffffffffffffff  RDX = 00007fdeff082b60
+  RSP = 00007ffe67625040  RBP = 00007ffe676250f0
+  RSI = 00007ffe67625230  RDI = 0000000000000009
+
+   R8 = 0000000000763500   R9 = 0000000000000000
+  R10 = 0000000000000000  R11 = 0000000000000246
+  R12 = 00007ffe67625100  R13 = 00007ffe67625230
+  R14 = 00007fdeff082710  R15 = 0000000000000002
+
+  RIP = 00007fded307c33e  EFL = 0000000000010246
+
+   CS = 0033   FS = 0000   GS = 0000
+
+Stack Trace (from fault):
+[  0] 0x00007fded307c33e /rwthfs/rz/SW/MATLAB/matlab_2017b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09577278
+[  1] 0x00007fdefcebb5e0                             /lib64/libpthread.so.0+00062944
+[  2] 0x00007fdefceb7943                             /lib64/libpthread.so.0+00047427 pthread_cond_wait+00000195
+[  3] 0x00007fdee9843523                            bin/glnxa64/libmwmcr.so+00582947
+[  4] 0x00007fdee9844714                            bin/glnxa64/libmwmcr.so+00587540
+[  5] 0x00007fdee9844a93                            bin/glnxa64/libmwmcr.so+00588435 _Z12mcr_run_mainRKN5boost9function0IiEEbb+00000243
+[  6] 0x00007fdeea4dd5a8                       bin/glnxa64/libmwMVMLocal.so+00427432
+[  7] 0x00007fdefe8ca38d                            bin/glnxa64/libmwmvm.so+02507661
+[  8] 0x00007fdefe8ca85e                            bin/glnxa64/libmwmvm.so+02508894
+[  9] 0x0000000000406070 /rwthfs/rz/SW/MATLAB/matlab_2017b/bin/glnxa64/MATLAB+00024688
+[ 10] 0x00007fdefcb0ac05                                   /lib64/libc.so.6+00138245 __libc_start_main+00000245
+[ 11] 0x0000000000406231 /rwthfs/rz/SW/MATLAB/matlab_2017b/bin/glnxa64/MATLAB+00025137
+[ 12] 0x0000000000000000                                   <unknown-module>+00000000
+
+
+If this problem is reproducible, please submit a Service Request via:
+    http://www.mathworks.com/support/contact_us/
+
+A technical support engineer might contact you with further information.
+
+Thank you for your help.** This crash report has been saved to disk as /home/ns179556/matlab_crash_dump.15969-1 **
+
+
+
+MATLAB is exiting because of fatal error
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 42998268[35]: <MATLAB_ARRAY[35]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[35]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sun Jun  3 16:20:02 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sun Jun  3 16:20:08 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sun Jun  3 16:20:08 2018
+Terminated at Sun Jun  3 18:08:10 2018
+Results reported at Sun Jun  3 18:08:10 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[35]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/solving_Inflow2D_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 5:20
+ 
+### Request memory you need for your job in MB
+#BSUB -M 10000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/solver_HC2D_$LSB_JOBINDEX.log <<EOF
+run ex_moment2x3v_gaussian($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   6386.63 sec.
+    Max Memory :                                 3770 MB
+    Average Memory :                             3404.77 MB
+    Total Requested Memory :                     10000.00 MB
+    Delta Memory :                               6230.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                55
+    Run time :                                   6488 sec.
+    Turnaround time :                            6488 sec.
+
+The output (if any) follows:
+
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_CTYPE = "UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to the standard locale ("C").
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2017b
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.29462
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017b (9.3.0.713579) 64-bit (glnxa64)
+                             September 14, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.0464
+
+        4389
+
+    50
+
+time: neqn: step_count 
+    0.0927
+
+        4389
+
+   100
+
+time: neqn: step_count 
+    0.1391
+
+        4389
+
+   150
+
+time: neqn: step_count 
+    0.1854
+
+        4389
+
+   200
+
+time: neqn: step_count 
+    0.2318
+
+        4389
+
+   250
+
+time: neqn: step_count 
+    0.2782
+
+        4389
+
+   300
+
+324 time steps
+CPU-times
+ advection:        5000.51s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:>> 
