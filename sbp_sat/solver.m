@@ -288,7 +288,7 @@ while t < par.t_end
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -297,7 +297,7 @@ while t < par.t_end
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([-0.5 1]);
+        zlim([0 1.0]);
         
         drawnow
     end

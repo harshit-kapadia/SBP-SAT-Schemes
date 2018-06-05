@@ -22,6 +22,7 @@ par = struct(...
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
+disp('developing system');
 par.system.penalty_B = cell(par.num_bc,1);
 par.system.penalty = cell(par.num_bc,1);
 par.system.B = cell(par.num_bc,1);
@@ -60,6 +61,8 @@ end
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
+
+disp('done developing system');
 
 result = solver(par);
 

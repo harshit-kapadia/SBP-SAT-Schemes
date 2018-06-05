@@ -2,7 +2,7 @@ function [penalty] = dvlp_penalty_char(An,B)
 modAn = compute_Amod(An);
 Xminus = compute_Xminus(An);
 
-if norm(B) == 0
+if norm(full(B)) == 0
     penalty = Xminus * 0;
 else
     penalty = 0.5 * (An-modAn) * Xminus * inv(B*Xminus);
