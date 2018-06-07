@@ -7,7 +7,7 @@ clc
 %========================================================================
 par = struct(...
     'name','wave-equation',... % name of example
-    'n_eqn',10,... % number of eq per grid point
+    'n_eqn',3,... % number of variables
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
@@ -18,6 +18,7 @@ par = struct(...
     'CFL',0.5,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
+    'get_penalty',@get_penalty,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -25,30 +26,11 @@ par = struct(...
 
 par.t_plot = linspace(0,par.t_end,50);
 
-[par.system] = get_system(par.n_eqn);
+par.c = 1 ; % wave speed
+[par.system] = get_system(par.c);
 
-% % the moment variable to be output
-par.mom_output = 2;
+[par.system] = get_penalty(par.system, par.num_bc, par.c);
 
-% we need the boundary matrix and the penalty matrix for all the
-% boundaries
-par.system.penalty_B = cell(par.num_bc,1);
-par.system.penalty = cell(par.num_bc,1);
-par.system.B = cell(par.num_bc,1);
-
-par.system.penalty{1} = zeros(par.n_eqn) ;
-par.system.penalty{2} = zeros(par.n_eqn) ;
-par.system.penalty{3} = -1 * eye(par.n_eqn) ;
-par.system.penalty{4} = -1 * eye(par.n_eqn) ;
-
-par.system.B{1} = zeros(par.n_eqn) ;
-par.system.B{2} = zeros(par.n_eqn) ;
-par.system.B{3} =  eye(par.n_eqn) ;
-par.system.B{4} = eye(par.n_eqn) ;
-
-for i = 1 : par.num_bc
-    par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
-end
 
 % %========================================================================
 % % Run solver
@@ -146,13 +128,40 @@ xlabel('x'), ylabel('y')
 % Problem Specific Functions
 %========================================================================
 
-function[system] = get_system(n_equ)
+function[system] = get_system(c)
+system.Ax = [0 c^2 0; 1 0 0; 0 0 0];
+system.Ay = [0 0 c^2; 0 0 0; 1 0 0];
+end
 
-value_x = ones(n_equ);
-system.Ax = spdiags([value_x], [0], n_equ, n_equ);
+function[system] = get_penalty(system, num_bc, c)
+system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
+system.ny = [0 1 0 -1] ;
 
-value_y = ones(n_equ);
-system.Ay = spdiags([value_y], [0], n_equ, n_equ);
+% we need the boundary matrix and the penalty matrix for all the
+% boundaries
+system.penalty_B = cell(num_bc,1);
+system.penalty = cell(num_bc,1);
+system.B = cell(num_bc,1);
+
+system.A_n = cell(num_bc,1);
+
+for i = 1 : num_bc
+    system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+    system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
+    
+    A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
+    
+    [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
+    
+    diag_Lambda = diag(system.Lambda{i});
+    column_index = find(diag_Lambda<0);
+    system.X_n_neg{i} = system.X_n{i}(:,column_index);
+    
+    system.penalty{i} = 0.5 * ( (system.A_n{i}-A_n_positive{i}) *...
+                  system.X_n_neg{i} * inv(system.B{i}*system.X_n_neg{i}) );
+    
+    system.penalty_B{i} = system.penalty{i}*system.B{i};
+end
 
 end
 
@@ -160,7 +169,7 @@ function f = initial_condition(x,y)
 % Maxwellian/Gaussian
 x0 = 0.5; % centered in the middle of domain
 y0 = 0.5;
-sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near 
+sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near
 sigma_y = 0.1;                           % boundary function value = 0
 f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) );
 end
@@ -170,29 +179,29 @@ function f = theoretical_solution(x,y,t)
 a = 1; % wave speed
 x0 = 0.5 + a*t; % centered in the middle of domain
 y0 = 0.5 + a*t;
-sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near 
+sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near
 sigma_y = 0.1;                           % boundary function value = 0
 f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) );
 end
 
 function f = bc_inhomo(B,bc_id,t)
-    switch bc_id
-        % east boundary but in matrix - south, i.e. last row -> x-dir #cell
-        case 1
-            boundary_value = 0;
+switch bc_id
+    % east boundary but in matrix - south, i.e. last row -> x-dir #cell
+    case 1
+        boundary_value = 0;
         % north boundary
-        case 2
-            boundary_value = 0;
+    case 2
+        boundary_value = 0;
         % west boundary
-        case 3
-            boundary_value = 0; % for g = 0
+    case 3
+        boundary_value = 0; % for g = 0
         % south boundary
-        case 4
-            boundary_value = 0; % for g = 0
-    end
-    
-    f = boundary_value * diag(B); % multiplying by diag(B) so the structure
-    % we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
+    case 4
+        boundary_value = 0; % for g = 0
+end
+
+f = boundary_value * diag(B); % multiplying by diag(B) so the structure
+% we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
 end
 
 % function f = regular_unitstep(t) % regularized unitstep function
