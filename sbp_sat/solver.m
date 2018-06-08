@@ -14,7 +14,7 @@ if par.num_bc ~=4
 end
 
 % find which of the given data is time dependent
-time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo)>2];
+time_dep = [nargin(par.source)>3 nargin(par.bc_inhomo)>2];
 
 
 %% Storing index of non-zero entries in system matrices (separately for
@@ -287,32 +287,14 @@ while t < par.t_end
         disp(step_count);
     end
     
-    %     tic
-    %     while t>=par.t_plot(plot_count)-1e-14  % If current time has exceeded
-    %         lambda = (par.t_plot(plot_count)-t+par.dt)/par.dt; %plotting time, define
-    %         Uplot = U{par.mom_output}; % linear interpolation in time.
-    %         if plot_count==length(par.t_plot)-1      % Is final time reached?
-    %             if nargout                   % If yes, save solution at final
-    %                 output = struct('x',x{1},'y',y{1},'U',U,'Px',PX{1},'Py',PY{1});     % time.
-    %             end
-    %         else                           % If not, invoke plotting routine.
-    %             xplot = x{1};             % Assign grids at
-    %             yplot = y{1};          % outputted moments.
-    %             %             if length(par.mom_output)==1        % If only a single moment
-    %             %                 xplot = xplot{:}; yplot = yplot{:}; Uplot = Uplot{par.mom_output};% is
-    %             %             end                         % plotted, remove cell structure.
-    %             if nargout(par.output)                     % Call output rou,
-    %                 par = par.output(par,xplot,yplot,Uplot,plot_count);%tine-
-    %             else                          % allowing for it to modify the
-    %                 par.output(par,xplot,yplot,Uplot,plot_count)% struct par.
-    %             end
-    %         end
-    %         plot_count = plot_count+1;
-    %     end
     if par.to_plot
         
-%         surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        % get rid of lines in surf
+        colormap summer;
+        shading interp;
+        
+%         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -333,21 +315,6 @@ fprintf('%0.0f time steps\n',step_count)           % Display test
 cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
-
-% U_theo = cell(1,par.n_eqn);
-% error = cell(1,par.n_eqn);
-% for j = 1:par.n_eqn
-%     U_theo{j} = X{1}*0 + capargs(par.theoretical_solution,X{1},Y{1},t,j);
-%     error{j} = U{j} - U_theo{j};
-% end
-% [output.error] = error{:};
-%
-% error_l2 = zeros(par.n_eqn,1);
-% for j = 1:par.n_eqn
-%     error_l2(j) = norm(error{j},1);
-% end
-% error_l2 = num2cell(error_l2);
-% [output.error_l2] = error_l2{:};
 
 output = struct('X',X{1}, ...
     'Y',Y{1}, ...

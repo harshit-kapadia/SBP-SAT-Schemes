@@ -116,7 +116,11 @@ disp(convg_order);
 
 % plot error in domain
 figure
-contourf(X,Y,error), axis xy equal tight;
+% contourf(X,Y,error), axis xy equal tight;
+surf(X,Y,error), axis xy equal tight;
+% get rid of lines in surf
+colormap summer;
+shading interp;
 
 title('Error in domain');
 colorbar;
@@ -182,6 +186,24 @@ y0 = 0.5 + a*t;
 sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near
 sigma_y = 0.1;                           % boundary function value = 0
 f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) );
+end
+
+function f = source(x,y,var_number)
+x0 = 0.5; % centered in the middle of domain
+y0 = 0.5;
+sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near
+sigma_y = 0.1;                           % boundary function value = 0
+switch var_number
+    case 1
+        f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) )...
+            * ( (-(x-x0)/sigma_x.^2) + (-(y-y0)/sigma_y.^2) ) ;
+    case 2
+        f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) )...
+            * ( (-(x-x0)/sigma_x.^2) ) ;
+    case 3
+        f = exp( -((x-x0).^2 / (2*sigma_x.^2)) - ((y-y0).^2 / (2*sigma_y.^2)) )...
+            * ( (-(y-y0)/sigma_y.^2) ) ;
+end
 end
 
 function f = bc_inhomo(B,bc_id,t)

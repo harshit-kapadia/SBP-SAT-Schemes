@@ -7,7 +7,7 @@ clc
 %========================================================================
 par = struct(...
     'name','wave-equation',... % name of example
-    'n_eqn',10,... % number of eq per grid point
+    'n_eqn',3,... % number of eq per grid point
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
@@ -26,70 +26,10 @@ par = struct(...
 
 par.t_plot = linspace(0,par.t_end,50);
 
-[par.system] = get_system(par.n_eqn);
+par.c = 1 ; % wave speed
+[par.system] = get_system(par.c);
 
-% % the moment variable to be output
-par.mom_output = 2;
-
-% we need the boundary matrix and the penalty matrix for all the
-% boundaries
-par.system.penalty_B = cell(par.num_bc,1);
-par.system.penalty = cell(par.num_bc,1);
-par.system.B = cell(par.num_bc,1);
-
-par.system.penalty{1} = zeros(par.n_eqn) ;
-par.system.penalty{2} = zeros(par.n_eqn) ;
-par.system.penalty{3} = -1 * eye(par.n_eqn) ;
-par.system.penalty{4} = -1 * eye(par.n_eqn) ;
-
-par.system.B{1} = zeros(par.n_eqn) ;
-par.system.B{2} = zeros(par.n_eqn) ;
-par.system.B{3} =  eye(par.n_eqn) ;
-par.system.B{4} = eye(par.n_eqn) ;
-
-for i = 1 : par.num_bc
-    par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
-end
-
-% %========================================================================
-% % Run solver
-% %========================================================================
-%
-% % % solve the system
-% % solution = solver(par);
-%
-% resolution = [16 32 64 128 256];
-%
-% error_l2 = zeros(par.n_eqn,length(resolution));
-% for k = 1:length(resolution)                       % Loop over various grid resolutions.
-%     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
-%     solution = solver(par);                         % Run solver.
-%     for j = 1:1                                % Loop over solution components.
-%         [X,Y] = ndgrid(solution(j).x,solution(j).y);     % Grid on which solution lives.
-%         U_theo = theoretical_solution(X,Y,par.t_end);     % Evaluate true solution.
-%         error = abs(solution(j).U-U_theo);               % Difference between num. and true sol.
-%         int_x = dot(transpose(error),transpose(solution(j).Px * error),2);  % integral along x.
-%         int_xy = sum(solution(j).Py*int_x);  % integral along xy.
-%         error_l2(j,k) = sqrt(int_xy);%Sc. L2 error.
-%     end
-% end
-% figure
-% loglog( (resolution), error_l2(1,:), '-o' )
-% xlabel('# cells in each direction'), ylabel('l2-error')
-% title('Convergence plot')
-%
-% rate = log(error_l2(1,4)/error_l2(1,1)) / log((resolution(1))/(resolution(4)));
-% rate
-%
-% % rate = log(error_l2(1,4)/error_l2(1,1)) / log(sqrt(resolution(4))/sqrt(resolution(1)));
-% % rate2 = log2( error_l2(1,3)/error_l2(1,4) );
-%
-% % convg_rate = zeros(par.n_eqn,length(resolution));
-% % for i = 1:1 % loop over components
-% %     for j = 2:length(resolution)
-% %         convg_rate(i,j) = log2( error_l2(i,j) / error_l2(i,j) );
-% %     end
-% % end
+[par.system] = get_penalty(par.system, par.num_bc, par.c);
 
 
 %========================================================================
@@ -110,7 +50,7 @@ for k = 1:length(resolution)                       % Loop over various grid reso
         Y = solution(j).Y;
         PX = solution(j).PX;
         PY = solution(j).PY;
-        U_theo = theoretical_solution(X,Y,par.t_end);     % Evaluate true solution.
+        U_theo = theoretical_solution(X,Y,j,par.t_end);     % Evaluate true solution.
         error = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
         int_x = dot(transpose(error),transpose(PX * error),2);  % integral along x.
         int_xy = sum(PY*int_x);  % integral along xy.
@@ -135,7 +75,11 @@ disp(convg_order);
 
 % plot error in domain
 figure
-contourf(X,Y,error), axis xy equal tight;
+% contourf(X,Y,error), axis xy equal tight;
+surf(X,Y,error), axis xy equal tight;
+% get rid of lines in surf
+colormap summer;
+shading interp;
 
 title('Error in domain');
 colorbar;
@@ -147,27 +91,70 @@ xlabel('x'), ylabel('y')
 % Problem Specific Functions
 %========================================================================
 
-function[system] = get_system(n_equ)
+function[system] = get_system(c)
+system.Ax = [0 c^2 0; 1 0 0; 0 0 0];
+system.Ay = [0 0 c^2; 0 0 0; 1 0 0];
+end
 
-value_x = ones(n_equ);
-system.Ax = spdiags([value_x], [0], n_equ, n_equ);
+function[system] = get_penalty(system, num_bc, c)
+system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
+system.ny = [0 1 0 -1] ;
 
-value_y = ones(n_equ);
-system.Ay = spdiags([value_y], [0], n_equ, n_equ);
+% we need the boundary matrix and the penalty matrix for all the
+% boundaries
+system.penalty_B = cell(num_bc,1);
+system.penalty = cell(num_bc,1);
+system.B = cell(num_bc,1);
+
+system.A_n = cell(num_bc,1);
+
+for i = 1 : num_bc
+    system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+    system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
+    
+    A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
+    
+    [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
+    
+    diag_Lambda = diag(system.Lambda{i});
+    column_index = find(diag_Lambda<0);
+    system.X_n_neg{i} = system.X_n{i}(:,column_index);
+    
+    system.penalty{i} = 0.5 * ( (system.A_n{i}-A_n_positive{i}) *...
+                  system.X_n_neg{i} * inv(system.B{i}*system.X_n_neg{i}) );
+    
+    system.penalty_B{i} = system.penalty{i}*system.B{i};
+end
 
 end
 
-function f = initial_condition(x,y)
-f = sin(pi*x) .* sin(pi*y);
+function f = initial_condition(x,y,var_number)
+t = 0;
+k = 4*pi;
+switch var_number
+    case 1
+        f = sin(k*x) .* sin(k*y) .* cos(k*sqrt(2)*t);
+    case 2
+        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
+    case 3
+        f = (-1/sqrt(2)) * sin(k*x) .* cos(k*y) .* sin(k*sqrt(2)*t);
+end
 end
 
-function f = theoretical_solution(x,y,t)
-f = sin(pi*x) .* sin(pi*y) .* cos(pi*t);
+function f = theoretical_solution(x,y,var_number,t)
+k = 4*pi;
+switch var_number
+    case 1
+        f = sin(k*x) .* sin(k*y) .* cos(k*sqrt(2)*t);
+    case 2
+        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
+    case 3
+        f = (-1/sqrt(2)) * sin(k*x) .* cos(k*y) .* sin(k*sqrt(2)*t);
+end
 end
 
-function f = source(x,y,t)
-f = (-1*sin(pi*x).*sin(pi*y).*sin(pi*t)) + (cos(pi*x).*sin(pi*y).*cos(pi*t)) +...
-    (sin(pi*x).*cos(pi*y).*cos(pi*t)) ;
+function f = source(x,y,var_number)
+f = 0 ;
 end
 
 function f = bc_inhomo(B,bc_id,t)
