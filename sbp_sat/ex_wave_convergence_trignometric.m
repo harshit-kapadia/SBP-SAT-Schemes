@@ -19,6 +19,8 @@ par = struct(...
     'CFL',0.5,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
+    'get_penalty',@get_penalty,...
+    'penalty_id',2,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -29,7 +31,7 @@ par.t_plot = linspace(0,par.t_end,50);
 par.c = 1 ; % wave speed
 [par.system] = get_system(par.c);
 
-[par.system] = get_penalty(par.system, par.num_bc, par.c);
+[par.system] = get_penalty(par.system, par.num_bc, par.c, par.penalty_id);
 
 
 %========================================================================
@@ -96,7 +98,7 @@ system.Ax = [0 c^2 0; 1 0 0; 0 0 0];
 system.Ay = [0 0 c^2; 0 0 0; 1 0 0];
 end
 
-function[system] = get_penalty(system, num_bc, c)
+function[system] = get_penalty(system, num_bc, c, penalty_id)
 system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
 system.ny = [0 1 0 -1] ;
 
@@ -108,24 +110,35 @@ system.B = cell(num_bc,1);
 
 system.A_n = cell(num_bc,1);
 
-for i = 1 : num_bc
-    system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
-    system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
-    
-    A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
-    
-    [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
-    
-    diag_Lambda = diag(system.Lambda{i});
-    column_index = find(diag_Lambda<0);
-    system.X_n_neg{i} = system.X_n{i}(:,column_index);
-    
-    system.penalty{i} = 0.5 * ( (system.A_n{i}-A_n_positive{i}) *...
-                  system.X_n_neg{i} * inv(system.B{i}*system.X_n_neg{i}) );
-    
-    system.penalty_B{i} = system.penalty{i}*system.B{i};
+switch penalty_id
+    case 1
+        for i = 1 : num_bc
+            system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+            system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
+            
+            A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
+            
+            [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
+            
+            diag_Lambda = diag(system.Lambda{i});
+            column_index = find(diag_Lambda<0);
+            system.X_n_neg{i} = system.X_n{i}(:,column_index);
+            
+            system.penalty{i} = 0.5 * ( (system.A_n{i}-A_n_positive{i}) *...
+                system.X_n_neg{i} * inv(system.B{i}*system.X_n_neg{i}) );
+            
+            system.penalty_B{i} = system.penalty{i}*system.B{i};
+        end
+    case 2
+        for i = 1 : num_bc
+            system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+            system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
+            
+            system.penalty{i} = [0; system.nx(i); system.ny(i)];
+            
+            system.penalty_B{i} = system.penalty{i}*system.B{i};
+        end
 end
-
 end
 
 function f = initial_condition(x,y,var_number)
@@ -157,7 +170,7 @@ function f = source(x,y,var_number)
 f = 0 ;
 end
 
-function f = bc_inhomo(B,bc_id,t)
+function f = bc_inhomo(B,bc_id,U,t)
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
@@ -175,6 +188,9 @@ end
 
 f = boundary_value * diag(B); % multiplying by diag(B) so the structure
 % we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
+
+% f = B * U ;
+
 end
 
 % function f = regular_unitstep(t) % regularized unitstep function
