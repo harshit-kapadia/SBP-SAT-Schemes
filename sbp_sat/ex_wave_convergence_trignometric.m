@@ -7,7 +7,7 @@ clc
 %========================================================================
 par = struct(...
     'name','wave-equation',... % name of example
-    'n_eqn',10,... % number of eq per grid point
+    'n_eqn',1,... % number of eq per grid point
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
@@ -165,9 +165,9 @@ function f = theoretical_solution(x,y,t)
 f = sin(pi*x) .* sin(pi*y) .* cos(pi*t);
 end
 
-function f = source(x,y,t)
-f = (-1*sin(pi*x).*sin(pi*y).*sin(pi*t)) + (cos(pi*x).*sin(pi*y).*cos(pi*t)) +...
-    (sin(pi*x).*cos(pi*y).*cos(pi*t)) ;
+function f = source(x,y,j,t)
+f = pi * ( (-1*sin(pi*x).*sin(pi*y).*sin(pi*t)) + (cos(pi*x).*sin(pi*y).*cos(pi*t)) +...
+    (sin(pi*x).*cos(pi*y).*cos(pi*t)) );
 end
 
 function f = bc_inhomo(B,bc_id,t)

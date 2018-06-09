@@ -261,6 +261,10 @@ while t < par.t_end
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});
             
+
+        end
+        
+        for i = 1 : par.n_eqn
             if RK ~= par.RK_order
                 UTemp{i} = U{i} + k_RK{RK}{i} * dt_temp(RK + 1);
             end
