@@ -14,7 +14,7 @@ if par.num_bc ~=4
 end
 
 % find which of the given data is time dependent
-time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo)>2];
+time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo)>3];
 
 
 %% Storing index of non-zero entries in system matrices (separately for
@@ -130,7 +130,7 @@ bc_g = cell(par.num_bc,1);
 % compute the boundary inhomogeneity
 for j = 1:par.num_bc
     % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t));
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,par.n_eqn,t));
 end
 
 
@@ -187,7 +187,7 @@ while t < par.t_end
         if evaluate(2)
             for j = 1:par.num_bc
                 % need to convert to cell for the computations which follow
-                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t_temp(RK)));
+                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,par.n_eqn,t_temp(RK)));
             end
         end
         
@@ -226,19 +226,28 @@ while t < par.t_end
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         
-        bc_ID = 3;
-        values = cellfun(@(a) a(1,:),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
+%         bc_ID = 3;
+%         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+%         for j = 1 : par.n_eqn
+%             bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+%                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+%                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+%         end
         
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
         for j = 1 : par.n_eqn
             bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+        
+        bc_ID = 3;
+        values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -291,43 +300,38 @@ while t < par.t_end
         disp(step_count);
     end
     
-    %     tic
-    %     while t>=par.t_plot(plot_count)-1e-14  % If current time has exceeded
-    %         lambda = (par.t_plot(plot_count)-t+par.dt)/par.dt; %plotting time, define
-    %         Uplot = U{par.mom_output}; % linear interpolation in time.
-    %         if plot_count==length(par.t_plot)-1      % Is final time reached?
-    %             if nargout                   % If yes, save solution at final
-    %                 output = struct('x',x{1},'y',y{1},'U',U,'Px',PX{1},'Py',PY{1});     % time.
-    %             end
-    %         else                           % If not, invoke plotting routine.
-    %             xplot = x{1};             % Assign grids at
-    %             yplot = y{1};          % outputted moments.
-    %             %             if length(par.mom_output)==1        % If only a single moment
-    %             %                 xplot = xplot{:}; yplot = yplot{:}; Uplot = Uplot{par.mom_output};% is
-    %             %             end                         % plotted, remove cell structure.
-    %             if nargout(par.output)                     % Call output rou,
-    %                 par = par.output(par,xplot,yplot,Uplot,plot_count);%tine-
-    %             else                          % allowing for it to modify the
-    %                 par.output(par,xplot,yplot,Uplot,plot_count)% struct par.
-    %             end
-    %         end
-    %         plot_count = plot_count+1;
-    %     end
     if par.to_plot
         
-%         surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+% %         surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+%         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+%         
+%         title(sprintf('t = %0.2f',t));
+%         colorbar;
+%         xlabel('x'), ylabel('y');
+%         
+%         
+%         xlim(par.ax([1 2]));
+%         ylim(par.ax([3 4]));
+%         zlim([-0.1 1]);
+%         
+%         drawnow
+        
+
+        plot(x{1}, U{par.var_plot}(:,end-1), x{1}, par.theoretical_solution(x{1},0,t), 'k--'), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
-        colorbar;
-        xlabel('x'), ylabel('y');
-        
-        
+        xlabel('x'), ylabel('value');
         xlim(par.ax([1 2]));
-        ylim(par.ax([3 4]));
-        zlim([-0.1 1]);
+        ylim([-1 1]);
         
         drawnow
+    
+%         if t== par.dt
+%             gif('centerline.gif')
+%         else
+%             gif
+%         end
+        
     end
     
     cputime(2) = cputime(2) + toc;

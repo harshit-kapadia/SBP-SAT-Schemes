@@ -7,13 +7,13 @@ clc
 %========================================================================
 par = struct(...
     'name','wave-equation',... % name of example
-    'n_eqn',1,... % number of eq per grid point
+    'n_eqn',10,... % number of eq per grid point
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
-    't_end',0.2,... % end time of computation
+    'n',[100 2],... % numbers of grid cells in each coordinate direction
+    't_end',0.8,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',2,...
     'CFL',0.5,...      % crude cfl number
@@ -27,9 +27,6 @@ par = struct(...
 par.t_plot = linspace(0,par.t_end,50);
 
 [par.system] = get_system(par.n_eqn);
-
-% % the moment variable to be output
-par.mom_output = 2;
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
@@ -45,62 +42,24 @@ par.system.penalty{4} = -1 * eye(par.n_eqn) ;
 par.system.B{1} = zeros(par.n_eqn) ;
 par.system.B{2} = zeros(par.n_eqn) ;
 par.system.B{3} =  eye(par.n_eqn) ;
-par.system.B{4} = eye(par.n_eqn) ;
+% par.system.B{4} = eye(par.n_eqn) ;
+par.system.B{4} = zeros(par.n_eqn) ;
 
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
-
-% %========================================================================
-% % Run solver
-% %========================================================================
-%
-% % % solve the system
-% % solution = solver(par);
-%
-% resolution = [16 32 64 128 256];
-%
-% error_l2 = zeros(par.n_eqn,length(resolution));
-% for k = 1:length(resolution)                       % Loop over various grid resolutions.
-%     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
-%     solution = solver(par);                         % Run solver.
-%     for j = 1:1                                % Loop over solution components.
-%         [X,Y] = ndgrid(solution(j).x,solution(j).y);     % Grid on which solution lives.
-%         U_theo = theoretical_solution(X,Y,par.t_end);     % Evaluate true solution.
-%         error = abs(solution(j).U-U_theo);               % Difference between num. and true sol.
-%         int_x = dot(transpose(error),transpose(solution(j).Px * error),2);  % integral along x.
-%         int_xy = sum(solution(j).Py*int_x);  % integral along xy.
-%         error_l2(j,k) = sqrt(int_xy);%Sc. L2 error.
-%     end
-% end
-% figure
-% loglog( (resolution), error_l2(1,:), '-o' )
-% xlabel('# cells in each direction'), ylabel('l2-error')
-% title('Convergence plot')
-%
-% rate = log(error_l2(1,4)/error_l2(1,1)) / log((resolution(1))/(resolution(4)));
-% rate
-%
-% % rate = log(error_l2(1,4)/error_l2(1,1)) / log(sqrt(resolution(4))/sqrt(resolution(1)));
-% % rate2 = log2( error_l2(1,3)/error_l2(1,4) );
-%
-% % convg_rate = zeros(par.n_eqn,length(resolution));
-% % for i = 1:1 % loop over components
-% %     for j = 2:length(resolution)
-% %         convg_rate(i,j) = log2( error_l2(i,j) / error_l2(i,j) );
-% %     end
-% % end
 
 
 %========================================================================
 % Run solver and study convergence
 %========================================================================
 
-resolution = [16 32 64 128];
+resolution = [200 32 64 128];
 grid_spacing = [];
 
-for k = 1:length(resolution)                       % Loop over various grid resolutions.
+for k = 1:1%length(resolution)                       % Loop over various grid resolutions.
     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
+    par.n = [resolution(k) 2];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
     disp('Resolution :');
@@ -113,11 +72,14 @@ for k = 1:length(resolution)                       % Loop over various grid reso
         U_theo = theoretical_solution(X,Y,par.t_end);     % Evaluate true solution.
         error = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
         int_x = dot(transpose(error),transpose(PX * error),2);  % integral along x.
-        int_xy = sum(PY*int_x);  % integral along xy.
+%         int_xy = sum(PY*int_x);  % integral along xy.
+        int_xy = sum(int_x); % not integrating along y
         error_temp = int_xy + error_temp;%Sc. L2 error.
     end
     error_L2(k) = sqrt(error_temp);
-    grid_spacing = [grid_spacing max(solution(1).h)];
+    grid_spacing = [grid_spacing min(solution(1).h)];
+    % grid_spacing = [grid_spacing max(solution(1).h)]; when cells in y or
+    % x are not constant at 3 for all degree of refinement
 end
 
 reference_line = exact_order(grid_spacing(1),error_L2(1),grid_spacing(end),2);
@@ -158,36 +120,41 @@ system.Ay = spdiags([value_y], [0], n_equ, n_equ);
 end
 
 function f = initial_condition(x,y)
-f = sin(pi*x) .* sin(pi*y);
+t = 0 ;
+f = cos(pi*x) .* cos(pi*t);
 end
 
 function f = theoretical_solution(x,y,t)
-f = sin(pi*x) .* sin(pi*y) .* cos(pi*t);
+f = cos(pi*x) .* cos(pi*t);
 end
 
 function f = source(x,y,j,t)
-f = pi * ( (-1*sin(pi*x).*sin(pi*y).*sin(pi*t)) + (cos(pi*x).*sin(pi*y).*cos(pi*t)) +...
-    (sin(pi*x).*cos(pi*y).*cos(pi*t)) );
+f = pi * ( (-1*cos(pi*x) .* sin(pi*t)) - (sin(pi*x) .* cos(pi*t)) ) ;
 end
 
-function f = bc_inhomo(B,bc_id,t)
+function f = bc_inhomo(B,bc_id,n_eqn,t)
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
         boundary_value = 0;
+        f = boundary_value * diag(B);
         % north boundary
     case 2
         boundary_value = 0;
+        f = boundary_value * diag(B);
         % west boundary
     case 3
-        boundary_value = 0; % for g = 0
+%         boundary_value = 0; % for g = 0
+        u_theo = ones(n_eqn,1) * theoretical_solution(0,0,t) ;
+        f = B * u_theo ;
         % south boundary
     case 4
         boundary_value = 0; % for g = 0
+        f = boundary_value * diag(B);
 end
 
-f = boundary_value * diag(B); % multiplying by diag(B) so the structure
-% we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
+% f = boundary_value * diag(B); % multiplying by diag(B) so the structure
+% % we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
 end
 
 % function f = regular_unitstep(t) % regularized unitstep function
