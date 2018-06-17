@@ -130,7 +130,7 @@ bc_g = cell(par.num_bc,1);
 % compute the boundary inhomogeneity
 for j = 1:par.num_bc
     % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,UTemp,t));
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,U,t));
 end
 
 
@@ -303,7 +303,7 @@ while t < par.t_end
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([-0.1 1]);
+        zlim([-0.75 0.75]);
         
         drawnow
     end

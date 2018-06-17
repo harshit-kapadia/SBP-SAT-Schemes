@@ -12,7 +12,7 @@ par = struct(...
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
+    'n',[100 3],... % numbers of grid cells in each coordinate direction
     't_end',0.2,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',2,...
@@ -42,7 +42,8 @@ resolution = [16 32 64 128];
 grid_spacing = [];
 
 for k = 1:length(resolution)                       % Loop over various grid resolutions.
-    par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
+%     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
+    par.n = [resolution(k) 3];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
     disp('Resolution :');
@@ -53,13 +54,15 @@ for k = 1:length(resolution)                       % Loop over various grid reso
         PX = solution(j).PX;
         PY = solution(j).PY;
         U_theo = theoretical_solution(X,Y,j,par.t_end);     % Evaluate true solution.
-        error = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
-        int_x = dot(transpose(error),transpose(PX * error),2);  % integral along x.
+        error{j} = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
+        int_x = dot(transpose(error{j}),transpose(PX * error{j}),2);  % integral along x.
         int_xy = sum(PY*int_x);  % integral along xy.
         error_temp = int_xy + error_temp;%Sc. L2 error.
     end
     error_L2(k) = sqrt(error_temp);
-    grid_spacing = [grid_spacing max(solution(1).h)];
+    grid_spacing = [grid_spacing min(solution(1).h)];
+    % grid_spacing = [grid_spacing max(solution(1).h)]; when cells in y or
+    % x are not constant at 3 for all degree of refinement
 end
 
 reference_line = exact_order(grid_spacing(1),error_L2(1),grid_spacing(end),2);
@@ -75,18 +78,19 @@ convg_order = log(error_L2(end)/error_L2(1))/log(grid_spacing(end)/grid_spacing(
 disp('convergence order');
 disp(convg_order);
 
-% plot error in domain
-figure
-% contourf(X,Y,error), axis xy equal tight;
-surf(X,Y,error), axis xy equal tight;
-% get rid of lines in surf
-colormap summer;
-shading interp;
-
-title('Error in domain');
-colorbar;
-xlabel('x'), ylabel('y')
-
+% plot error in domain --> all components separately
+for j = 1:par.n_eqn
+    figure
+    % contourf(X,Y,error), axis xy equal tight;
+    surf(X,Y,error{j}), axis xy equal tight;
+    % get rid of lines in surf
+    colormap summer;
+    shading interp;
+    
+    title(['Error in domain: variable ' num2str(j)]);
+    colorbar;
+    xlabel('x'), ylabel('y')
+end
 
 
 %========================================================================
@@ -117,6 +121,7 @@ switch penalty_id
             system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
             
             A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
+%             B1 = V * abs(Lambda) * V'
             
             [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
             
@@ -166,31 +171,57 @@ switch var_number
 end
 end
 
-function f = source(x,y,var_number)
-f = 0 ;
+function f = source(x,y,var_number,t)
+
+f = 0;
+
+% k = 4*pi;
+% switch var_number
+%     case 1
+%         f = (-1/sqrt(2)) * k * sin(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
+%     case 2
+%         f = 0;
+%     case 3
+%         f = (-1) * k * sin(k*x) .* cos(k*y) .* cos(k*sqrt(2)*t);
+% end
 end
 
 function f = bc_inhomo(B,bc_id,U,t)
+% switch bc_id
+%     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
+%     case 1
+%         f = 0 * diag(B);
+% %         f = f+1;
+% %         values = cellfun(@(a) a(end,:),U,'Un',0);
+% %         f = f * sum(B.*values); % as B and values are row vector here, and we want B*values
+%         % north boundary
+%     case 2
+%         f = 0 * diag(B);
+%         % west boundary
+%     case 3
+%         f = 0 * diag(B);
+% %         f = f+1;
+% %         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+% %         f = f * sum(B.*values); % as B and values are row vector here, and we want B*values
+%         % south boundary
+%     case 4
+%         f = 0 * diag(B); % for g = 0
+% end
+
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
-        boundary_value = 0;
+        f = 0 ; % = B * u (u is column vector with 3 variable values) (B*u should give a scalar value at the end)
         % north boundary
     case 2
-        boundary_value = 0;
+        f = 0 ;
         % west boundary
     case 3
-        boundary_value = 0; % for g = 0
+        f = 0 ;
         % south boundary
     case 4
-        boundary_value = 0; % for g = 0
+        f = 0 ; % for g = 0
 end
-
-f = boundary_value * diag(B); % multiplying by diag(B) so the structure
-% we get is cell{#bc_ID}<--{n_eqn}<--vector(size = # nodes at boundary)
-
-% f = B * U ;
-
 end
 
 % function f = regular_unitstep(t) % regularized unitstep function
