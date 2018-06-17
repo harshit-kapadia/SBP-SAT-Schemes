@@ -12,7 +12,7 @@ par = struct(...
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 3],... % numbers of grid cells in each coordinate direction
+    'n',[100 2],... % numbers of grid cells in each coordinate direction
     't_end',0.2,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',2,...
@@ -20,7 +20,7 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'get_penalty',@get_penalty,...
-    'penalty_id',2,...
+    'penalty_id',1,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -38,12 +38,12 @@ par.c = 1 ; % wave speed
 % Run solver and study convergence
 %========================================================================
 
-resolution = [16 32 64 128];
+resolution = [500 32 64 128];
 grid_spacing = [];
 
-for k = 1:length(resolution)                       % Loop over various grid resolutions.
+for k = 1:1                       % Loop over various grid resolutions.
 %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
-    par.n = [resolution(k) 3];                   % Numbers of grid cells.
+    par.n = [resolution(k) 2];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
     disp('Resolution :');
@@ -79,18 +79,19 @@ disp('convergence order');
 disp(convg_order);
 
 % plot error in domain --> all components separately
-for j = 1:par.n_eqn
-    figure
-    % contourf(X,Y,error), axis xy equal tight;
-    surf(X,Y,error{j}), axis xy equal tight;
-    % get rid of lines in surf
-    colormap summer;
-    shading interp;
-    
-    title(['Error in domain: variable ' num2str(j)]);
-    colorbar;
-    xlabel('x'), ylabel('y')
-end
+% for j = 1:par.n_eqn
+%     figure
+%     % contourf(X,Y,error), axis xy equal tight;
+%     surf(X,Y,error{j}), axis xy equal tight;
+%     % get rid of lines in surf
+%     colormap summer;        ylim(par.ax([3 4]));
+% 
+%     shading interp;
+%     
+%     title(['Error in domain: variable ' num2str(j)]);
+%     colorbar;
+%     xlabel('x'), ylabel('y')
+% end
 
 
 %========================================================================
@@ -144,6 +145,11 @@ switch penalty_id
             system.penalty_B{i} = system.penalty{i}*system.B{i};
         end
 end
+system.penalty_B{3} = system.penalty_B{3} * 0;
+system.penalty_B{4} = system.penalty_B{3} * 0;
+
+system.penalty{3} = system.penalty{3} * 0;
+system.penalty{4} = system.penalty{4} * 0;
 end
 
 function f = initial_condition(x,y,var_number)
@@ -151,11 +157,11 @@ t = 0;
 k = 4*pi;
 switch var_number
     case 1
-        f = sin(k*x) .* sin(k*y) .* cos(k*sqrt(2)*t);
+        f = sin(k*x) .* cos(k*sqrt(2)*t);
     case 2
-        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*sqrt(2)*t);
     case 3
-        f = (-1/sqrt(2)) * sin(k*x) .* cos(k*y) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * sin(k*x) .* sin(k*sqrt(2)*t);
 end
 end
 
@@ -163,30 +169,31 @@ function f = theoretical_solution(x,y,var_number,t)
 k = 4*pi;
 switch var_number
     case 1
-        f = sin(k*x) .* sin(k*y) .* cos(k*sqrt(2)*t);
+        f = sin(k*x) .* cos(k*sqrt(2)*t);
     case 2
-        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*sqrt(2)*t);
     case 3
-        f = (-1/sqrt(2)) * sin(k*x) .* cos(k*y) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * sin(k*x) .* sin(k*sqrt(2)*t);
 end
 end
 
 function f = source(x,y,var_number,t)
 
-f = 0;
+% f = 0;
 
-% k = 4*pi;
-% switch var_number
-%     case 1
-%         f = (-1/sqrt(2)) * k * sin(k*x) .* sin(k*y) .* sin(k*sqrt(2)*t);
-%     case 2
-%         f = 0;
-%     case 3
-%         f = (-1) * k * sin(k*x) .* cos(k*y) .* cos(k*sqrt(2)*t);
-% end
+k = 4*pi;
+switch var_number
+    case 1
+        f = (-1/sqrt(2)) * k * sin(k*x) .* sin(k*sqrt(2)*t);
+    case 2
+        f = 0;
+    case 3
+        f = (-1) * k * sin(k*x) .* cos(k*sqrt(2)*t);
 end
 
-function f = bc_inhomo(B,bc_id,U,t)
+end
+
+function f = bc_inhomo(B,bc_id,U,n_eqn,t)
 % switch bc_id
 %     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
 %     case 1
@@ -211,13 +218,23 @@ function f = bc_inhomo(B,bc_id,U,t)
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
-        f = 0 ; % = B * u (u is column vector with 3 variable values) (B*u should give a scalar value at the end)
+        u_theo = [] ;
+        for i = 1:n_eqn
+            u_theo = [u_theo theoretical_solution(1,0,i,t)] ;
+        end
+        u_theo = u_theo' ;
+        f = B * u_theo ; % = B * u (u is column vector with 3 variable values) (B*u should give a scalar value at the end)
         % north boundary
     case 2
         f = 0 ;
         % west boundary
     case 3
-        f = 0 ;
+        u_theo = [] ;
+        for i = 1:n_eqn
+            u_theo = [u_theo theoretical_solution(0,0,i,t)] ;
+        end
+        u_theo = u_theo' ;
+        f = B * u_theo ;;
         % south boundary
     case 4
         f = 0 ; % for g = 0

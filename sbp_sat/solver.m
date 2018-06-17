@@ -14,7 +14,7 @@ if par.num_bc ~=4
 end
 
 % find which of the given data is time dependent
-time_dep = [nargin(par.source)>3 nargin(par.bc_inhomo)>2];
+time_dep = [nargin(par.source)>3 nargin(par.bc_inhomo)>4];
 
 
 %% Storing index of non-zero entries in system matrices (separately for
@@ -130,7 +130,7 @@ bc_g = cell(par.num_bc,1);
 % compute the boundary inhomogeneity
 for j = 1:par.num_bc
     % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,U,t));
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,U,par.n_eqn,t));
 end
 
 
@@ -187,7 +187,7 @@ while t < par.t_end
         if evaluate(2)
             for j = 1:par.num_bc
                 % need to convert to cell for the computations which follow
-                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,UTemp,t_temp(RK)));
+                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,UTemp,par.n_eqn,t_temp(RK)));
             end
         end
         
@@ -289,21 +289,39 @@ while t < par.t_end
     
     if par.to_plot
         
-        surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        figure(1)
+%          surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+
         % get rid of lines in surf
         colormap summer;
         shading interp;
-        
-%         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-        
         title(sprintf('t = %0.2f',t));
-        colorbar;
+%         colorbar;
         xlabel('x'), ylabel('y');
         
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
         zlim([-0.75 0.75]);
+        
+        drawnow
+        
+   % plot 2
+        
+        
+        figure(2)
+        plot(x{1}, U{1}(:,2), x{1}, sin(4*pi*x{1})*cos(4*pi*sqrt(2)*t), 'k--') ;
+
+        title(sprintf('t = %0.2f',t));
+%         colorbar;
+        xlabel('x'), ylabel('y');
+        
+        
+        xlim(par.ax([1 2]));
+        ylim([-1 1]) ;
+%         ylim(par.ax([3 4]));
+%         zlim([-0.75 0.75]);
         
         drawnow
     end
