@@ -7,7 +7,7 @@ clc
 %========================================================================
 par = struct(...
     'name','wave-equation',... % name of example
-    'n_eqn',10,... % number of eq per grid point
+    'n_eqn',2,... % number of eq per grid point
     'initial_condition',@initial_condition,... % it is defined below
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
@@ -37,13 +37,14 @@ par.system.B = cell(par.num_bc,1);
 par.system.penalty{1} = zeros(par.n_eqn) ;
 par.system.penalty{2} = zeros(par.n_eqn) ;
 par.system.penalty{3} = -1 * eye(par.n_eqn) ;
-par.system.penalty{4} = -1 * eye(par.n_eqn) ;
+% par.system.penalty{4} = -1 * eye(par.n_eqn) ;
+par.system.penalty{4} = zeros(par.n_eqn) ;
+
 
 par.system.B{1} = zeros(par.n_eqn) ;
 par.system.B{2} = zeros(par.n_eqn) ;
 par.system.B{3} =  eye(par.n_eqn) ;
-% par.system.B{4} = eye(par.n_eqn) ;
-par.system.B{4} = zeros(par.n_eqn) ;
+par.system.B{4} = eye(par.n_eqn) ;
 
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
@@ -54,10 +55,10 @@ end
 % Run solver and study convergence
 %========================================================================
 
-resolution = [200 32 64 128];
+resolution = [16 32 64 128];
 grid_spacing = [];
 
-for k = 1:1%length(resolution)                       % Loop over various grid resolutions.
+for k = 1:length(resolution)                       % Loop over various grid resolutions.
     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
     par.n = [resolution(k) 2];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.

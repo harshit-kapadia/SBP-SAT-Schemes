@@ -179,7 +179,7 @@ while t < par.t_end
         evaluate = time_dep & (t_temp(RK) > 0);
         
         if evaluate(1)
-            for j = par.n_eqn
+            for j = 1 : par.n_eqn
                 force{j} = capargs(par.source,X{1},Y{1},j,t_temp(RK));
             end
         end
