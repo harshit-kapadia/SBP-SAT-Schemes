@@ -12,7 +12,7 @@ par = struct(...
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 2],... % numbers of grid cells in each coordinate direction
+    'n',[2 100],... % numbers of grid cells in each coordinate direction
     't_end',0.2,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',2,...
@@ -20,7 +20,7 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'get_penalty',@get_penalty,...
-    'penalty_id',1,...
+    'penalty_id',2,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -43,7 +43,7 @@ grid_spacing = [];
 
 for k = 1:length(resolution)                   % Loop over various grid resolutions.
 %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
-    par.n = [resolution(k) 2];                   % Numbers of grid cells.
+    par.n = [2 resolution(k)];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
     disp('Resolution :');
@@ -146,11 +146,11 @@ switch penalty_id
             system.penalty_B{i} = system.penalty{i}*system.B{i};
         end
 end
-system.penalty_B{2} = system.penalty_B{2} * 0;
-system.penalty_B{4} = system.penalty_B{4} * 0;
+system.penalty_B{1} = system.penalty_B{1} * 0;
+system.penalty_B{3} = system.penalty_B{3} * 0;
 
-system.penalty{2} = system.penalty{2} * 0;
-system.penalty{4} = system.penalty{4} * 0;
+system.penalty{1} = system.penalty{1} * 0;
+system.penalty{3} = system.penalty{3} * 0;
 end
 
 function f = initial_condition(x,y,var_number)
@@ -158,11 +158,11 @@ t = 0;
 k = 4*pi;
 switch var_number
     case 1
-        f = sin(k*x) .* cos(k*sqrt(2)*t);
+        f = sin(k*y) .* cos(k*sqrt(2)*t);
     case 2
-        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * sin(k*y) .* sin(k*sqrt(2)*t);
     case 3
-        f = (-1/sqrt(2)) * sin(k*x) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * cos(k*y) .* sin(k*sqrt(2)*t);
 end
 end
 
@@ -170,11 +170,11 @@ function f = theoretical_solution(x,y,var_number,t)
 k = 4*pi;
 switch var_number
     case 1
-        f = sin(k*x) .* cos(k*sqrt(2)*t);
+        f = sin(k*y) .* cos(k*sqrt(2)*t);
     case 2
-        f = (-1/sqrt(2)) * cos(k*x) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * sin(k*y) .* sin(k*sqrt(2)*t);
     case 3
-        f = (-1/sqrt(2)) * sin(k*x) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * cos(k*y) .* sin(k*sqrt(2)*t);
 end
 end
 
@@ -185,11 +185,11 @@ function f = source(x,y,var_number,t)
 k = 4*pi;
 switch var_number
     case 1
-        f = (-1/sqrt(2)) * k * sin(k*x) .* sin(k*sqrt(2)*t);
+        f = (-1/sqrt(2)) * k * sin(k*y) .* sin(k*sqrt(2)*t);
     case 2
-        f = 0;
+        f = (-1) * k * sin(k*y) .* cos(k*sqrt(2)*t);
     case 3
-        f = (-1) * k * sin(k*x) .* cos(k*sqrt(2)*t);
+        f = 0;
 end
 
 end
@@ -198,26 +198,26 @@ function f = bc_inhomo(B,bc_id,U,n_eqn,t)
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
+        f = 0 ;
+        % north boundary
+    case 2
         u_theo = [] ;
         for i = 1:n_eqn
-            u_theo = [u_theo theoretical_solution(1,0,i,t)] ;
+            u_theo = [u_theo theoretical_solution(0,1,i,t)] ;
         end
         u_theo = u_theo' ;
         f = B * u_theo ; % = B * u (u is column vector with 3 variable values) (B*u should give a scalar value at the end)
-        % north boundary
-    case 2
-        f = 0 ;
         % west boundary
     case 3
+        f = 0 ; % for g = 0
+        % south boundary
+    case 4
         u_theo = [] ;
         for i = 1:n_eqn
             u_theo = [u_theo theoretical_solution(0,0,i,t)] ;
         end
         u_theo = u_theo' ;
-        f = B * u_theo ;;
-        % south boundary
-    case 4
-        f = 0 ; % for g = 0
+        f = B * u_theo ;
 end
 end
 
