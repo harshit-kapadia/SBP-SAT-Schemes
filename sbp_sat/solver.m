@@ -179,7 +179,7 @@ while t < par.t_end
         evaluate = time_dep & (t_temp(RK) > 0);
         
         if evaluate(1)
-            for j = par.n_eqn
+            for j = 1:par.n_eqn
                 force{j} = capargs(par.source,X{1},Y{1},j,t_temp(RK));
             end
         end
@@ -202,6 +202,49 @@ while t < par.t_end
         % id = 2, y = 1, last column of Y
         % id = 3, x = 0, first row of X
         % id = 4, y = 0, first column of Y
+        
+%         bc_ID = 1;
+%         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
+%         for j = 1 : par.n_eqn
+%             %                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
+%             %                 value of all the variables, at the boundary, which are
+%             %                 coupled with the j-th variable.
+%             %                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
+%             %                 gives us the j-th row of the penalty matrix and the
+%             %                 entries in all those columns which have no zeros.
+%             bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+%                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+%                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+%         end
+        
+        bc_ID = 2;
+        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+        
+%         bc_ID = 3;
+%         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+%         for j = 1 : par.n_eqn
+%             bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+%                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+%                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+%         end
+        
+        bc_ID = 4;
+        values = cellfun(@(a) a(:,1),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+        
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
@@ -217,28 +260,10 @@ while t < par.t_end
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         
-        bc_ID = 2;
-        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-        
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
             bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-        
-        bc_ID = 4;
-        values = cellfun(@(a) a(:,1),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -289,23 +314,23 @@ while t < par.t_end
     
     if par.to_plot
         
-        figure(1)
-%          surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-        contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-
-        % get rid of lines in surf
-        colormap summer;
-        shading interp;
-        title(sprintf('t = %0.2f',t));
-%         colorbar;
-        xlabel('x'), ylabel('y');
-        
-        
-        xlim(par.ax([1 2]));
-        ylim(par.ax([3 4]));
-        zlim([-0.75 0.75]);
-        
-        drawnow
+%         figure(1)
+% %          surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+%         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+% 
+%         % get rid of lines in surf
+%         colormap summer;
+%         shading interp;
+%         title(sprintf('t = %0.2f',t));
+% %         colorbar;
+%         xlabel('x'), ylabel('y');
+%         
+%         
+%         xlim(par.ax([1 2]));
+%         ylim(par.ax([3 4]));
+%         zlim([-0.75 0.75]);
+%         
+%         drawnow
         
    % plot 2
         

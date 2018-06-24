@@ -38,10 +38,10 @@ par.c = 1 ; % wave speed
 % Run solver and study convergence
 %========================================================================
 
-resolution = [500 32 64 128];
+resolution = [16 32 64 128];
 grid_spacing = [];
 
-for k = 1:1                       % Loop over various grid resolutions.
+for k = 1:length(resolution)                   % Loop over various grid resolutions.
 %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
     par.n = [resolution(k) 2];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
@@ -57,6 +57,7 @@ for k = 1:1                       % Loop over various grid resolutions.
         error{j} = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
         int_x = dot(transpose(error{j}),transpose(PX * error{j}),2);  % integral along x.
         int_xy = sum(PY*int_x);  % integral along xy.
+%         int_xy = sum(int_x);  % not integrating along y
         error_temp = int_xy + error_temp;%Sc. L2 error.
     end
     error_L2(k) = sqrt(error_temp);
@@ -79,19 +80,19 @@ disp('convergence order');
 disp(convg_order);
 
 % plot error in domain --> all components separately
-% for j = 1:par.n_eqn
-%     figure
-%     % contourf(X,Y,error), axis xy equal tight;
-%     surf(X,Y,error{j}), axis xy equal tight;
-%     % get rid of lines in surf
-%     colormap summer;        ylim(par.ax([3 4]));
-% 
-%     shading interp;
-%     
-%     title(['Error in domain: variable ' num2str(j)]);
-%     colorbar;
-%     xlabel('x'), ylabel('y')
-% end
+for j = 1:par.n_eqn
+    figure
+    % contourf(X,Y,error), axis xy equal tight;
+    surf(X,Y,error{j}), axis xy equal tight;
+    % get rid of lines in surf
+    colormap summer;        ylim(par.ax([3 4]));
+
+    shading interp;
+    
+    title(['Error in domain: variable ' num2str(j)]);
+    colorbar;
+    xlabel('x'), ylabel('y')
+end
 
 
 %========================================================================
@@ -145,10 +146,10 @@ switch penalty_id
             system.penalty_B{i} = system.penalty{i}*system.B{i};
         end
 end
-system.penalty_B{3} = system.penalty_B{3} * 0;
-system.penalty_B{4} = system.penalty_B{3} * 0;
+system.penalty_B{2} = system.penalty_B{2} * 0;
+system.penalty_B{4} = system.penalty_B{4} * 0;
 
-system.penalty{3} = system.penalty{3} * 0;
+system.penalty{2} = system.penalty{2} * 0;
 system.penalty{4} = system.penalty{4} * 0;
 end
 
@@ -194,27 +195,6 @@ end
 end
 
 function f = bc_inhomo(B,bc_id,U,n_eqn,t)
-% switch bc_id
-%     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
-%     case 1
-%         f = 0 * diag(B);
-% %         f = f+1;
-% %         values = cellfun(@(a) a(end,:),U,'Un',0);
-% %         f = f * sum(B.*values); % as B and values are row vector here, and we want B*values
-%         % north boundary
-%     case 2
-%         f = 0 * diag(B);
-%         % west boundary
-%     case 3
-%         f = 0 * diag(B);
-% %         f = f+1;
-% %         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
-% %         f = f * sum(B.*values); % as B and values are row vector here, and we want B*values
-%         % south boundary
-%     case 4
-%         f = 0 * diag(B); % for g = 0
-% end
-
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
