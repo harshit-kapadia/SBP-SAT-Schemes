@@ -90,16 +90,52 @@ t = 0; % setting the current time
 
 %% Related to boundary treatment
 
+par.system.penalty = cell(par.num_bc,1);
+par.system.B = cell(par.num_bc,1);
+
+if par.penalty_id == 1
+    par.system.penalty{1} = cell(par.n(2)+1, 1);
+    par.system.penalty{3} = cell(par.n(2)+1, 1);
+end
+
+par.system.B{1} = cell(par.n(2)+1, 1);
+par.system.B{3} = cell(par.n(2)+1, 1);
+par.system.penalty_B = par.system.B ;
+
+for i=1:par.n(2)+1
+    par.system.B{1}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 1, y{1}(i)) ;
+    par.system.B{3}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 3, y{1}(i)) ;
+end
+par.system.B{2} = par.get_boundary_operator(par.system.nx, par.system.ny, 2, 1) ; % y=1 at bc_id=2
+par.system.B{4} = par.get_boundary_operator(par.system.nx, par.system.ny, 4, 0) ;
+
+switch par.penalty_id
+    case 1
+        assert(1==0,'penalty 1 under construction');
+    case 2
+        for i=1:par.num_bc
+            par.system.penalty{i} = par.get_penalty_2(par.system.nx, par.system.ny, i) ;
+        end
+end
+
+for i=[1 3]
+    for j=1:par.n(2)+1
+        par.system.penalty_B{i}{j} = par.system.penalty{i} * par.system.B{i}{j} ;
+    end
+end
+par.system.penalty_B{2} = par.system.penalty{2} * par.system.B{2} ;
+par.system.penalty_B{4} = par.system.penalty{4} * par.system.B{4} ;
+
+
+
 % data structure for storing the values at the boundaries
 bc_values = cell(1,par.n_eqn);
 for j = 1:par.n_eqn
     bc_values{j} = X{1}*0;
 end
 
-% we need to know which elements are coupled with which one at the
-% boundaries. The
-% ID = 1
-% a loop over all the boundaries
+
+
 % consider the coupling for the Sigma * B term
 bc_coupling_penalty_B = cell(par.num_bc,1);
 % consider the coupling for the Sigma * g term
@@ -107,18 +143,36 @@ bc_coupling_penalty = cell(par.num_bc,1);
 
 % we need to do this fixing for the machine error
 for i = 1 : par.num_bc
-    % for the boundary id=i, we find the variables to which every variable
-    % in the moment system
-    % is coupled
-    % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
-    % i. the matrix penalty{i} contains the penalty matrix at the boundary
-    % with ID = i.
     bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
     % num2cell(par.system.penalty_B{i},2) splits B{i} into
     % separate cells where dim specifies which dimensions of A to
     % include in each cell
     bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
 end
+
+% % we need to know which elements are coupled with which one at the
+% % boundaries. The
+% % ID = 1
+% % a loop over all the boundaries
+% % consider the coupling for the Sigma * B term
+% bc_coupling_penalty_B = cell(par.num_bc,1);
+% % consider the coupling for the Sigma * g term
+% bc_coupling_penalty = cell(par.num_bc,1);
+% 
+% % we need to do this fixing for the machine error
+% for i = 1 : par.num_bc
+%     % for the boundary id=i, we find the variables to which every variable
+%     % in the moment system
+%     % is coupled
+%     % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
+%     % i. the matrix penalty{i} contains the penalty matrix at the boundary
+%     % with ID = i.
+%     bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
+%     % num2cell(par.system.penalty_B{i},2) splits B{i} into
+%     % separate cells where dim specifies which dimensions of A to
+%     % include in each cell
+%     bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
+% end
 
 % scaling for the boundary conditions
 bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
@@ -203,47 +257,41 @@ while t < par.t_end
         % id = 3, x = 0, first row of X
         % id = 4, y = 0, first column of Y
         
-%         bc_ID = 1;
-%         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
-%         for j = 1 : par.n_eqn
-%             %                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
-%             %                 value of all the variables, at the boundary, which are
-%             %                 coupled with the j-th variable.
-%             %                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
-%             %                 gives us the j-th row of the penalty matrix and the
-%             %                 entries in all those columns which have no zeros.
-%             bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
-%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-%                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-%                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-%         end
+        % When penalty has only one column, (bc_coupling_penalty{bc_ID}{j})
+        % will either be 1 or 0. Now, if bc_g has values corresponding to 
+        % all grid nodes at a boundary --> these stored as row vector in
+        % each bc_g{bc_ID}. Then bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j})
+        % will become bc_g{bc_ID}(0) or bc_g{bc_ID}(1). But we want the
+        % entire bc_g{bc_ID} whenever (bc_coupling_penalty{bc_ID}{j}) is 1,
+        % i.e. penalty has non-zero entry in that row.
+        % When (bc_coupling_penalty{bc_ID}{j}) is 0 then an empty row
+        % vector is passed in sumcell for penalty. This results in empty
+        % row vector multiplied with the non-empty bc_g vector. But this is
+        % fine as the result will be a null vector.
+        % Keep in mind that keeping just bc_g{bc_ID} when penalty has 2
+        % columns will result in error. The entries in 2nd column of
+        % penalty needs to be multiplied/used for the 2nd variable which is
+        % specified at boundary, e.g. bc_g2
         
         bc_ID = 2;
         values = cellfun(@(a) a(:,end),UTemp,'Un',0);
         for j = 1 : par.n_eqn
             bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                sumcell(bc_g{bc_ID},...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         
-%         bc_ID = 3;
-%         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
-%         for j = 1 : par.n_eqn
-%             bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-%                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-%                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-%         end
         
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
         for j = 1 : par.n_eqn
             bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                sumcell(bc_g{bc_ID},...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
+        
         
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
@@ -256,16 +304,17 @@ while t < par.t_end
             %                 entries in all those columns which have no zeros.
             bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                sumcell(bc_g{bc_ID},...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
+        
         
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
             bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                sumcell(bc_g{bc_ID},...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         %

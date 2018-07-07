@@ -19,8 +19,10 @@ par = struct(...
     'CFL',0.5,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
-    'get_penalty',@get_penalty,...
-    'penalty_id',1,...
+    'get_penalty_1',@get_penalty_1,...
+    'get_penalty_2',@get_penalty_2,...
+    'get_boundary_operator',@get_boundary_operator,...
+    'penalty_id',2,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -29,9 +31,9 @@ par = struct(...
 par.t_plot = linspace(0,par.t_end,50);
 
 par.c = 1 ; % wave speed
-[par.system] = get_system(par.c);
+[par.system] = get_system(par.c, par.num_bc);
 
-[par.system] = get_penalty(par.system, par.num_bc, par.c, par.penalty_id);
+% [par.system] = get_penalty(par.system, par.num_bc, par.c, par.penalty_id);
 
 
 %========================================================================
@@ -42,7 +44,7 @@ resolution = [16 32 64 128];
 grid_spacing = [];
 
 for k = 1:length(resolution)                   % Loop over various grid resolutions.
-%     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
+    %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
     par.n = [resolution(k) 2];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
@@ -57,7 +59,7 @@ for k = 1:length(resolution)                   % Loop over various grid resoluti
         error{j} = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
         int_x = dot(transpose(error{j}),transpose(PX * error{j}),2);  % integral along x.
         int_xy = sum(PY*int_x);  % integral along xy.
-%         int_xy = sum(int_x);  % not integrating along y
+        %         int_xy = sum(int_x);  % not integrating along y
         error_temp = int_xy + error_temp;%Sc. L2 error.
     end
     error_L2(k) = sqrt(error_temp);
@@ -86,7 +88,7 @@ for j = 1:par.n_eqn
     surf(X,Y,error{j}), axis xy equal tight;
     % get rid of lines in surf
     colormap summer;        ylim(par.ax([3 4]));
-
+    
     shading interp;
     
     title(['Error in domain: variable ' num2str(j)]);
@@ -99,12 +101,25 @@ end
 % Problem Specific Functions
 %========================================================================
 
-function[system] = get_system(c)
+function[system] = get_system(c, num_bc)
 system.Ax = [0 c^2 0; 1 0 0; 0 0 0];
 system.Ay = [0 0 c^2; 0 0 0; 1 0 0];
+
+system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
+system.ny = [0 1 0 -1] ;
+
+system.A_n = cell(num_bc,1);
+for i = 1 : num_bc
+    system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+end
 end
 
-function[system] = get_penalty(system, num_bc, c, penalty_id)
+function B = get_boundary_operator(nx, ny, bc_id, y)
+alpha = y.^2 ;
+B = [1 -alpha*nx(bc_id) -alpha*ny(bc_id)] ;
+end
+
+function[system] = get_penalty_1(system, num_bc, c, penalty_id)
 system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
 system.ny = [0 1 0 -1] ;
 
@@ -123,7 +138,7 @@ switch penalty_id
             system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
             
             A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
-%             B1 = V * abs(Lambda) * V'
+            %             B1 = V * abs(Lambda) * V'
             
             [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
             
@@ -151,6 +166,14 @@ system.penalty_B{4} = system.penalty_B{4} * 0;
 
 system.penalty{2} = system.penalty{2} * 0;
 system.penalty{4} = system.penalty{4} * 0;
+end
+
+function penalty = get_penalty_2(nx, ny, bc_id)
+if bc_id == 2 | bc_id == 4
+    penalty = [0; 0; 0];
+else
+    penalty = [0; nx(bc_id); ny(bc_id)];
+end
 end
 
 function f = initial_condition(x,y,var_number)
@@ -214,7 +237,7 @@ switch bc_id
             u_theo = [u_theo theoretical_solution(0,0,i,t)] ;
         end
         u_theo = u_theo' ;
-        f = B * u_theo ;;
+        f = B * u_theo ;
         % south boundary
     case 4
         f = 0 ; % for g = 0
@@ -236,20 +259,20 @@ reference_order = [x1 x2 y1 y2];
 end
 
 % function output(par,x,y,U,step)
-% 
+%
 % % imagesc(x,y,U'), axis xy equal tight;
-% 
+%
 % % surf(x,y,U'), axis xy equal tight;
 % % % get rid of lines in surf
 % % colormap summer;
 % % shading interp;
-% 
+%
 % contourf(x,y,U'), axis xy equal tight;
-% 
+%
 % title(sprintf('t = %0.2f',par.t_plot(step)));
 % colorbar;
 % xlabel('x'), ylabel('y')
-% 
+%
 % drawnow
 % end
 
