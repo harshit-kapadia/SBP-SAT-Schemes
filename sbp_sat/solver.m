@@ -90,18 +90,30 @@ t = 0; % setting the current time
 
 %% Related to boundary treatment
 
-par.system.penalty = cell(par.num_bc,1);
 par.system.B = cell(par.num_bc,1);
-
-if par.penalty_id == 1
-    par.system.penalty{1} = cell(par.n(2)+1, 1);
-    par.system.penalty{3} = cell(par.n(2)+1, 1);
-end
-
 par.system.B{1} = cell(par.n(2)+1, 1);
 par.system.B{3} = cell(par.n(2)+1, 1);
 par.system.penalty_B = par.system.B ;
+% consider the coupling for the Sigma * B term
+bc_coupling_penalty_B = par.system.penalty_B ;
 
+% compute penalty
+switch par.penalty_id
+    case 1
+        par.system.penalty = par.system.B ;
+       % consider the coupling for the Sigma * g term
+        bc_coupling_penalty = par.system.penalty ;
+        assert(1==0,'penalty 1 under construction');
+    case 2
+        par.system.penalty = cell(par.num_bc,1) ;
+       % consider the coupling for the Sigma * g term
+        bc_coupling_penalty = par.system.penalty ;
+        for i=1:par.num_bc
+            par.system.penalty{i} = par.get_penalty_2(par.system.nx, par.system.ny, i) ;
+        end
+end
+
+% compute B
 for i=1:par.n(2)+1
     par.system.B{1}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 1, y{1}(i)) ;
     par.system.B{3}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 3, y{1}(i)) ;
@@ -109,15 +121,7 @@ end
 par.system.B{2} = par.get_boundary_operator(par.system.nx, par.system.ny, 2, 1) ; % y=1 at bc_id=2
 par.system.B{4} = par.get_boundary_operator(par.system.nx, par.system.ny, 4, 0) ;
 
-switch par.penalty_id
-    case 1
-        assert(1==0,'penalty 1 under construction');
-    case 2
-        for i=1:par.num_bc
-            par.system.penalty{i} = par.get_penalty_2(par.system.nx, par.system.ny, i) ;
-        end
-end
-
+% compute penalty_B
 for i=[1 3]
     for j=1:par.n(2)+1
         par.system.penalty_B{i}{j} = par.system.penalty{i} * par.system.B{i}{j} ;
@@ -135,56 +139,52 @@ for j = 1:par.n_eqn
 end
 
 
-
-% consider the coupling for the Sigma * B term
-bc_coupling_penalty_B = cell(par.num_bc,1);
-% consider the coupling for the Sigma * g term
-bc_coupling_penalty = cell(par.num_bc,1);
-
-% we need to do this fixing for the machine error
-for i = 1 : par.num_bc
-    bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
-    % num2cell(par.system.penalty_B{i},2) splits B{i} into
-    % separate cells where dim specifies which dimensions of A to
-    % include in each cell
-    bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
+% extracting penalty matrix non-zero entry locations
+switch par.penalty_id
+    case 1
+        assert(1==0,'penalty 1 under construction');
+    case 2
+        for i=1:par.num_bc
+            bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14),...
+                num2cell(par.system.penalty{i},2), 'Un', 0 ); % fix for machine error
+            % num2cell(par.system.penalty_B{i},2) splits penalty{i} into
+            % separate cells where dim specifies which dimensions of A to
+            % include in each cell
+        end
 end
 
-% % we need to know which elements are coupled with which one at the
-% % boundaries. The
-% % ID = 1
-% % a loop over all the boundaries
-% % consider the coupling for the Sigma * B term
-% bc_coupling_penalty_B = cell(par.num_bc,1);
-% % consider the coupling for the Sigma * g term
-% bc_coupling_penalty = cell(par.num_bc,1);
-% 
-% % we need to do this fixing for the machine error
-% for i = 1 : par.num_bc
-%     % for the boundary id=i, we find the variables to which every variable
-%     % in the moment system
-%     % is coupled
-%     % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
-%     % i. the matrix penalty{i} contains the penalty matrix at the boundary
-%     % with ID = i.
-%     bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
-%     % num2cell(par.system.penalty_B{i},2) splits B{i} into
-%     % separate cells where dim specifies which dimensions of A to
-%     % include in each cell
-%     bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
-% end
+% extracting penalty_B matrix non-zero entry locations
+for i = [1 3]
+    for j = 1:par.n(2)+1
+        bc_coupling_penalty_B{i}{j} = cellfun ( @(a) find(abs(a) > 1e-14),...
+            num2cell(par.system.penalty_B{i}{j},2), 'Un', 0 );
+    end
+end
+for i = [2 4]
+    bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14),...
+        num2cell(par.system.penalty_B{i},2), 'Un', 0 );
+end
+
 
 % scaling for the boundary conditions
 bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
 
-%the boundary inhomogeneity. Every component of the cell will be equal to
-%the number of boundar conditions which we need to prescribe.
+% boundary inhomogeneity
 bc_g = cell(par.num_bc,1);
+% bc_g{1} = [];
+% bc_g{3} = [];
 
 % compute the boundary inhomogeneity
-for j = 1:par.num_bc
+for i = [1 3]
+    for j = 1:par.n(2)+1
+        bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t));
+    end
+%     bc_g{i} = num2cell(bc_g{i});
+end
+dummy_y = [0 1 0 0] ; % storing y-coord. for bc_id = 2, 4 at 2nd and 4th location
+for j = [2 4]
     % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,U,par.n_eqn,t));
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t));
 end
 
 
@@ -239,9 +239,17 @@ while t < par.t_end
         end
         
         if evaluate(2)
-            for j = 1:par.num_bc
+            % compute the boundary inhomogeneity
+            for i = [1 3]
+                for j = 1:par.n(2)+1
+                    bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t));
+                end
+                %     bc_g{i} = num2cell(bc_g{i});
+            end
+            dummy_y = [0 1 0 0] ; % storing y-coord. for bc_id = 2, 4 at 2nd and 4th location
+            for j = [2 4]
                 % need to convert to cell for the computations which follow
-                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,UTemp,par.n_eqn,t_temp(RK)));
+                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t));
             end
         end
         
@@ -302,9 +310,9 @@ while t < par.t_end
             %                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
             %                 gives us the j-th row of the penalty matrix and the
             %                 entries in all those columns which have no zeros.
-            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                sumcell(bc_g{bc_ID},...
+            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell_2(values,...
+                par.system.penalty_B{bc_ID}, j, par.n(2)+1, par.n_eqn) - ...
+                sumcell(bc_g(bc_ID),...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         
@@ -312,9 +320,9 @@ while t < par.t_end
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID},...
+            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell_2(values,...
+                par.system.penalty_B{bc_ID}, j, par.n(2)+1, par.n_eqn) - ...
+                sumcell(bc_g(bc_ID),...
                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
         %
@@ -440,6 +448,23 @@ S = 0; % *S is a vector as A{1} is vector*. Need this separately for
 % the entries of matrix but A{i} has non-zero ith column entries
 for j = 1:length(w)
     S = S + A{j}*w(j);
+end
+end
+
+function vector = sumcell_2(A,w,var,nodes,n_eqn)
+vector = [] ;
+for i=1:nodes
+    x{i} = [];
+end
+for i=1:nodes
+    for j=1:n_eqn
+        x{i} = [x{i} A{j}(i)] ;
+        y{i} = w{i}(var,:) ;
+    end
+end
+for i=1:nodes
+    vector = [vector sum(x{i} .* y{i})] ;
+%     vector = vector + x{i} .* y{i} ;
 end
 end
 

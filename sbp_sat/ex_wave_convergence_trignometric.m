@@ -217,13 +217,13 @@ end
 
 end
 
-function f = bc_inhomo(B,bc_id,U,n_eqn,t)
+function f = bc_inhomo(B,bc_id,y,n_eqn,t)
 switch bc_id
     % east boundary but in matrix - south, i.e. last row -> x-dir #cell
     case 1
         u_theo = [] ;
         for i = 1:n_eqn
-            u_theo = [u_theo theoretical_solution(1,0,i,t)] ;
+            u_theo = [u_theo theoretical_solution(1,y,i,t)] ;
         end
         u_theo = u_theo' ;
         f = B * u_theo ; % = B * u (u is column vector with 3 variable values) (B*u should give a scalar value at the end)
@@ -234,7 +234,7 @@ switch bc_id
     case 3
         u_theo = [] ;
         for i = 1:n_eqn
-            u_theo = [u_theo theoretical_solution(0,0,i,t)] ;
+            u_theo = [u_theo theoretical_solution(0,y,i,t)] ;
         end
         u_theo = u_theo' ;
         f = B * u_theo ;
