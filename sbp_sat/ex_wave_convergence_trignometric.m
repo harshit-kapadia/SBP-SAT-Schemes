@@ -12,7 +12,7 @@ par = struct(...
     'theoretical_solution',@theoretical_solution,...
     'source',@source,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 2],... % numbers of grid cells in each coordinate direction
+    'n',[100 4],... % numbers of grid cells in each coordinate direction
     't_end',0.2,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',2,...
@@ -22,7 +22,7 @@ par = struct(...
     'get_penalty_1',@get_penalty_1,...
     'get_penalty_2',@get_penalty_2,...
     'get_boundary_operator',@get_boundary_operator,...
-    'penalty_id',2,...
+    'penalty_id',1,...
     'var_plot',1,...
     'to_plot',true,...
     'output',@output... % problem-specific output routine (defined below)
@@ -45,7 +45,7 @@ grid_spacing = [];
 
 for k = 1:length(resolution)                   % Loop over various grid resolutions.
     %     par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
-    par.n = [resolution(k) 2];                   % Numbers of grid cells.
+    par.n = [resolution(k) 4];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
     disp('Resolution :');
@@ -119,57 +119,23 @@ alpha = y.^2 ;
 B = [1 -alpha*nx(bc_id) -alpha*ny(bc_id)] ;
 end
 
-function[system] = get_penalty_1(system, num_bc, c, penalty_id)
-system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
-system.ny = [0 1 0 -1] ;
-
-% we need the boundary matrix and the penalty matrix for all the
-% boundaries
-system.penalty_B = cell(num_bc,1);
-system.penalty = cell(num_bc,1);
-system.B = cell(num_bc,1);
-
-system.A_n = cell(num_bc,1);
-
-switch penalty_id
-    case 1
-        for i = 1 : num_bc
-            system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
-            system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
-            
-            A_n_positive{i} = sqrt(system.A_n{i}' * system.A_n{i});
-            %             B1 = V * abs(Lambda) * V'
-            
-            [system.X_n{i}, system.Lambda{i}] = eig(system.A_n{i});
-            
-            diag_Lambda = diag(system.Lambda{i});
-            column_index = find(diag_Lambda<0);
-            system.X_n_neg{i} = system.X_n{i}(:,column_index);
-            
-            system.penalty{i} = 0.5 * ( (system.A_n{i}-A_n_positive{i}) *...
-                system.X_n_neg{i} * inv(system.B{i}*system.X_n_neg{i}) );
-            
-            system.penalty_B{i} = system.penalty{i}*system.B{i};
-        end
-    case 2
-        for i = 1 : num_bc
-            system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
-            system.B{i} = [1 -c^2*system.nx(i) -c^2*system.ny(i)];
-            
-            system.penalty{i} = [0; system.nx(i); system.ny(i)];
-            
-            system.penalty_B{i} = system.penalty{i}*system.B{i};
-        end
+function penalty = get_penalty_1(A_n, B, nx, ny, bc_id)
+if bc_id == 2 || bc_id == 4
+    penalty = [0; 0; 0];
+else
+    A_n_positive = sqrt(A_n' * A_n);
+    
+    [X_n, Lambda] = eig(A_n);
+    diag_Lambda = diag(Lambda);
+    column_index = diag_Lambda<0;
+    X_n_neg = X_n(:,column_index);
+    
+    penalty = 0.5 * ( (A_n-A_n_positive) * X_n_neg * inv(B*X_n_neg) );
 end
-system.penalty_B{2} = system.penalty_B{2} * 0;
-system.penalty_B{4} = system.penalty_B{4} * 0;
-
-system.penalty{2} = system.penalty{2} * 0;
-system.penalty{4} = system.penalty{4} * 0;
 end
 
 function penalty = get_penalty_2(nx, ny, bc_id)
-if bc_id == 2 | bc_id == 4
+if bc_id == 2 || bc_id == 4
     penalty = [0; 0; 0];
 else
     penalty = [0; nx(bc_id); ny(bc_id)];
@@ -257,24 +223,6 @@ function[reference_order] = exact_order(x1,y1,x2,order)
 y2 = y1 * exp(order * log(x2/x1));
 reference_order = [x1 x2 y1 y2];
 end
-
-% function output(par,x,y,U,step)
-%
-% % imagesc(x,y,U'), axis xy equal tight;
-%
-% % surf(x,y,U'), axis xy equal tight;
-% % % get rid of lines in surf
-% % colormap summer;
-% % shading interp;
-%
-% contourf(x,y,U'), axis xy equal tight;
-%
-% title(sprintf('t = %0.2f',par.t_plot(step)));
-% colorbar;
-% xlabel('x'), ylabel('y')
-%
-% drawnow
-% end
 
 
 

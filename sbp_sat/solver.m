@@ -90,102 +90,17 @@ t = 0; % setting the current time
 
 %% Related to boundary treatment
 
-par.system.B = cell(par.num_bc,1);
-par.system.B{1} = cell(par.n(2)+1, 1);
-par.system.B{3} = cell(par.n(2)+1, 1);
-par.system.penalty_B = par.system.B ;
-% consider the coupling for the Sigma * B term
-bc_coupling_penalty_B = par.system.penalty_B ;
-
-% compute penalty
-switch par.penalty_id
-    case 1
-        par.system.penalty = par.system.B ;
-       % consider the coupling for the Sigma * g term
-        bc_coupling_penalty = par.system.penalty ;
-        assert(1==0,'penalty 1 under construction');
-    case 2
-        par.system.penalty = cell(par.num_bc,1) ;
-       % consider the coupling for the Sigma * g term
-        bc_coupling_penalty = par.system.penalty ;
-        for i=1:par.num_bc
-            par.system.penalty{i} = par.get_penalty_2(par.system.nx, par.system.ny, i) ;
-        end
-end
-
-% compute B
-for i=1:par.n(2)+1
-    par.system.B{1}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 1, y{1}(i)) ;
-    par.system.B{3}{i} = par.get_boundary_operator(par.system.nx, par.system.ny, 3, y{1}(i)) ;
-end
-par.system.B{2} = par.get_boundary_operator(par.system.nx, par.system.ny, 2, 1) ; % y=1 at bc_id=2
-par.system.B{4} = par.get_boundary_operator(par.system.nx, par.system.ny, 4, 0) ;
-
-% compute penalty_B
-for i=[1 3]
-    for j=1:par.n(2)+1
-        par.system.penalty_B{i}{j} = par.system.penalty{i} * par.system.B{i}{j} ;
-    end
-end
-par.system.penalty_B{2} = par.system.penalty{2} * par.system.B{2} ;
-par.system.penalty_B{4} = par.system.penalty{4} * par.system.B{4} ;
-
-
-
 % data structure for storing the values at the boundaries
 bc_values = cell(1,par.n_eqn);
 for j = 1:par.n_eqn
     bc_values{j} = X{1}*0;
 end
 
-
-% extracting penalty matrix non-zero entry locations
-switch par.penalty_id
-    case 1
-        assert(1==0,'penalty 1 under construction');
-    case 2
-        for i=1:par.num_bc
-            bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14),...
-                num2cell(par.system.penalty{i},2), 'Un', 0 ); % fix for machine error
-            % num2cell(par.system.penalty_B{i},2) splits penalty{i} into
-            % separate cells where dim specifies which dimensions of A to
-            % include in each cell
-        end
-end
-
-% extracting penalty_B matrix non-zero entry locations
-for i = [1 3]
-    for j = 1:par.n(2)+1
-        bc_coupling_penalty_B{i}{j} = cellfun ( @(a) find(abs(a) > 1e-14),...
-            num2cell(par.system.penalty_B{i}{j},2), 'Un', 0 );
-    end
-end
-for i = [2 4]
-    bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14),...
-        num2cell(par.system.penalty_B{i},2), 'Un', 0 );
-end
-
-
 % scaling for the boundary conditions
 bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
 
 % boundary inhomogeneity
 bc_g = cell(par.num_bc,1);
-% bc_g{1} = [];
-% bc_g{3} = [];
-
-% compute the boundary inhomogeneity
-for i = [1 3]
-    for j = 1:par.n(2)+1
-        bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t));
-    end
-%     bc_g{i} = num2cell(bc_g{i});
-end
-dummy_y = [0 1 0 0] ; % storing y-coord. for bc_id = 2, 4 at 2nd and 4th location
-for j = [2 4]
-    % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t));
-end
 
 
 %% Forcing Term
@@ -238,20 +153,9 @@ while t < par.t_end
             end
         end
         
-        if evaluate(2)
-            % compute the boundary inhomogeneity
-            for i = [1 3]
-                for j = 1:par.n(2)+1
-                    bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t_temp(RK)));
-                end
-                %     bc_g{i} = num2cell(bc_g{i});
-            end
-            dummy_y = [0 1 0 0] ; % storing y-coord. for bc_id = 2, 4 at 2nd and 4th location
-            for j = [2 4]
-                % need to convert to cell for the computations which follow
-                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t_temp(RK)));
-            end
-        end
+%         if evaluate(2)
+%             % COMPUTING bc_g every time-step in the code below
+%         end
         
         for i = 1:par.n_eqn
             dxU{i} = DX{1} * UTemp{i};
@@ -265,65 +169,62 @@ while t < par.t_end
         % id = 3, x = 0, first row of X
         % id = 4, y = 0, first column of Y
         
-        % When penalty has only one column, (bc_coupling_penalty{bc_ID}{j})
-        % will either be 1 or 0. Now, if bc_g has values corresponding to 
-        % all grid nodes at a boundary --> these stored as row vector in
-        % each bc_g{bc_ID}. Then bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j})
-        % will become bc_g{bc_ID}(0) or bc_g{bc_ID}(1). But we want the
-        % entire bc_g{bc_ID} whenever (bc_coupling_penalty{bc_ID}{j}) is 1,
-        % i.e. penalty has non-zero entry in that row.
-        % When (bc_coupling_penalty{bc_ID}{j}) is 0 then an empty row
-        % vector is passed in sumcell for penalty. This results in empty
-        % row vector multiplied with the non-empty bc_g vector. But this is
-        % fine as the result will be a null vector.
-        % Keep in mind that keeping just bc_g{bc_ID} when penalty has 2
-        % columns will result in error. The entries in 2nd column of
-        % penalty needs to be multiplied/used for the 2nd variable which is
-        % specified at boundary, e.g. bc_g2
-        
-        bc_ID = 2;
-        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID},...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-        
-        
-        bc_ID = 4;
-        values = cellfun(@(a) a(:,1),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                sumcell(bc_g{bc_ID},...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-        
-        
-        bc_ID = 1;
-        values = cellfun(@(a) a(end,:),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            %                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
-            %                 value of all the variables, at the boundary, which are
-            %                 coupled with the j-th variable.
-            %                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
-            %                 gives us the j-th row of the penalty matrix and the
-            %                 entries in all those columns which have no zeros.
-            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell_2(values,...
-                par.system.penalty_B{bc_ID}, j, par.n(2)+1, par.n_eqn) - ...
-                sumcell(bc_g(bc_ID),...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-        
-        
-        bc_ID = 3;
-        values = cellfun(@(a) a(1,:),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell_2(values,...
-                par.system.penalty_B{bc_ID}, j, par.n(2)+1, par.n_eqn) - ...
-                sumcell(bc_g(bc_ID),...
-                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        for bc_ID = [2 4 1 3]
+            if rem(bc_ID,2)==0
+                b_nodes = par.n(1)+1 ;
+            else
+                b_nodes = par.n(2)+1 ;
+            end
+            
+            for i=1:b_nodes
+                if bc_ID==2
+                    y_coord = 1 ;
+                elseif bc_ID==4
+                    y_coord = 0 ;   
+                else
+                    y_coord = y{1}(i) ;
+                end
+                switch bc_ID
+                    case 1
+                        values = cellfun(@(a) a(end,i),UTemp,'Un',0);
+                    case 2
+                        values = cellfun(@(a) a(i,end),UTemp,'Un',0);
+                    case 3
+                        values = cellfun(@(a) a(1,i),UTemp,'Un',0);
+                    case 4
+                        values = cellfun(@(a) a(i,1),UTemp,'Un',0);
+                end
+                
+                par.sys.B = par.get_boundary_operator(par.system.nx, par.system.ny, bc_ID, y_coord) ;
+                
+                switch par.penalty_id
+                    case 1
+                        par.sys.penalty = par.get_penalty_1(par.system.A_n{bc_ID}, par.sys.B, par.system.nx, par.system.ny, bc_ID) ;
+                    case 2
+                        par.sys.penalty = par.get_penalty_2(par.system.nx, par.system.ny, bc_ID) ;
+                end
+                
+                par.sys.penalty_B = par.sys.penalty * par.sys.B ;
+                
+                bc_g_2{1} = (capargs(par.bc_inhomo,par.sys.B,bc_ID,y_coord,par.n_eqn,t_temp(RK)));
+                
+                for j = 1 : par.n_eqn
+                    temp_copy = bc_scaling(bc_ID) * ( sumcell(values,...
+                        par.sys.penalty_B(j,:)) - ...
+                        sumcell(bc_g_2(1), par.sys.penalty(j,:)) );
+                    switch bc_ID
+                    case 1
+                        bc_values{j}(end,i) = temp_copy;
+                    case 2
+                        bc_values{j}(i,end) = temp_copy;
+                    case 3
+                        bc_values{j}(1,i) = temp_copy;
+                    case 4
+                        bc_values{j}(i,1) = temp_copy;
+                end
+                end
+            end
+            
         end
         %
         
@@ -371,39 +272,39 @@ while t < par.t_end
     
     if par.to_plot
         
-%         figure(1)
-% %          surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-%         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
-% 
-%         % get rid of lines in surf
-%         colormap summer;
-%         shading interp;
-%         title(sprintf('t = %0.2f',t));
-% %         colorbar;
-%         xlabel('x'), ylabel('y');
-%         
-%         
-%         xlim(par.ax([1 2]));
-%         ylim(par.ax([3 4]));
-%         zlim([-0.75 0.75]);
-%         
-%         drawnow
+        %         figure(1)
+        % %          surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        %         contourf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        %
+        %         % get rid of lines in surf
+        %         colormap summer;
+        %         shading interp;
+        %         title(sprintf('t = %0.2f',t));
+        % %         colorbar;
+        %         xlabel('x'), ylabel('y');
+        %
+        %
+        %         xlim(par.ax([1 2]));
+        %         ylim(par.ax([3 4]));
+        %         zlim([-0.75 0.75]);
+        %
+        %         drawnow
         
-   % plot 2
+        % plot 2
         
         
         figure(2)
         plot(x{1}, U{1}(:,2), x{1}, sin(4*pi*x{1})*cos(4*pi*sqrt(2)*t), 'k--') ;
-
+        
         title(sprintf('t = %0.2f',t));
-%         colorbar;
+        %         colorbar;
         xlabel('x'), ylabel('y');
         
         
         xlim(par.ax([1 2]));
         ylim([-1 1]) ;
-%         ylim(par.ax([3 4]));
-%         zlim([-0.75 0.75]);
+        %         ylim(par.ax([3 4]));
+        %         zlim([-0.75 0.75]);
         
         drawnow
     end
@@ -464,7 +365,7 @@ for i=1:nodes
 end
 for i=1:nodes
     vector = [vector sum(x{i} .* y{i})] ;
-%     vector = vector + x{i} .* y{i} ;
+    %     vector = vector + x{i} .* y{i} ;
 end
 end
 
