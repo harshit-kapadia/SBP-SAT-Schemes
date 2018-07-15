@@ -242,14 +242,14 @@ while t < par.t_end
             % compute the boundary inhomogeneity
             for i = [1 3]
                 for j = 1:par.n(2)+1
-                    bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t));
+                    bc_g{i}(j) = (capargs(par.bc_inhomo,par.system.B{i}{j},i,y{1}(j),par.n_eqn,t_temp(RK)));
                 end
                 %     bc_g{i} = num2cell(bc_g{i});
             end
             dummy_y = [0 1 0 0] ; % storing y-coord. for bc_id = 2, 4 at 2nd and 4th location
             for j = [2 4]
                 % need to convert to cell for the computations which follow
-                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t));
+                bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,dummy_y(j),par.n_eqn,t_temp(RK)));
             end
         end
         
