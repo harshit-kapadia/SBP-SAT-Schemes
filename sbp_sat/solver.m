@@ -17,11 +17,11 @@ end
 time_dep = [nargin(par.source)>3 nargin(par.bc_inhomo)>4];
 
 
-%% Storing index of non-zero entries in system matrices (separately for
+%% Storing index of non-zero entries in sys matrices (separately for
 % each equation)
 % corresponding to every row in Ax, stores the non-zero indices
-Ix = cellfun(@find,num2cell(par.system.Ax',1),'Un',0);
-Iy = cellfun(@find,num2cell(par.system.Ay',1),'Un',0);
+Ix = cellfun(@find,num2cell(par.sys.Ax',1),'Un',0);
+Iy = cellfun(@find,num2cell(par.sys.Ay',1),'Un',0);
 % each row of Ax in separate cell as here num2cell(Ax',1)
 % what does 'Un',0 do? and purpose of Ix, Iy? --> now clear
 % Error using cellfun
@@ -46,7 +46,7 @@ y{1} = par.ax(3):h(2):par.ax(4);
 %% Time-step
 
 % a crude approximation for delta_t
-par.dt = par.CFL * min(h)/abs(eigs(par.system.Ax,1,'lm')); % 1 eigenv.
+par.dt = par.CFL * min(h)/abs(eigs(par.sys.Ax,1,'lm')); % 1 eigenv.
 % with largest magnitude
 
 
@@ -153,9 +153,9 @@ while t < par.t_end
             end
         end
         
-%         if evaluate(2)
-%             % COMPUTING bc_g every time-step in the code below
-%         end
+        %         if evaluate(2)
+        %             % COMPUTING bc_g every time-step in the code below
+        %         end
         
         for i = 1:par.n_eqn
             dxU{i} = DX{1} * UTemp{i};
@@ -170,6 +170,11 @@ while t < par.t_end
         % id = 4, y = 0, first column of Y
         
         for bc_ID = [2 4 1 3]
+            if par.penalty_id == 2
+                penalty = par.get_penalty_2(par.sys.nx,...
+                    par.sys.ny, bc_ID) ;
+            end
+            
             if rem(bc_ID,2)==0
                 b_nodes = par.n(1)+1 ;
             else
@@ -180,7 +185,7 @@ while t < par.t_end
                 if bc_ID==2
                     y_coord = 1 ;
                 elseif bc_ID==4
-                    y_coord = 0 ;   
+                    y_coord = 0 ;
                 else
                     y_coord = y{1}(i) ;
                 end
@@ -195,33 +200,34 @@ while t < par.t_end
                         values = cellfun(@(a) a(i,1),UTemp,'Un',0);
                 end
                 
-                par.sys.B = par.get_boundary_operator(par.system.nx, par.system.ny, bc_ID, y_coord) ;
+                B = par.get_boundary_operator(par.sys.nx,...
+                    par.sys.ny, bc_ID, y_coord) ;
                 
-                switch par.penalty_id
-                    case 1
-                        par.sys.penalty = par.get_penalty_1(par.system.A_n{bc_ID}, par.sys.B, par.system.nx, par.system.ny, bc_ID) ;
-                    case 2
-                        par.sys.penalty = par.get_penalty_2(par.system.nx, par.system.ny, bc_ID) ;
+                if par.penalty_id==1
+                    penalty = par.get_penalty_1(par.sys.A_n{bc_ID},...
+                        par.sys.A_n_positive{bc_ID},...
+                        par.sys.X_n_neg{bc_ID}, B, bc_ID) ;
                 end
                 
-                par.sys.penalty_B = par.sys.penalty * par.sys.B ;
+                penalty_B = penalty * B ;
                 
-                bc_g_2{1} = (capargs(par.bc_inhomo,par.sys.B,bc_ID,y_coord,par.n_eqn,t_temp(RK)));
+                bc_g_2{1} = (capargs(par.bc_inhomo, B, bc_ID,...
+                    y_coord, par.n_eqn, t_temp(RK)));
                 
                 for j = 1 : par.n_eqn
                     temp_copy = bc_scaling(bc_ID) * ( sumcell(values,...
-                        par.sys.penalty_B(j,:)) - ...
-                        sumcell(bc_g_2(1), par.sys.penalty(j,:)) );
+                        penalty_B(j,:)) - ...
+                        sumcell(bc_g_2(1), penalty(j,:)) );
                     switch bc_ID
-                    case 1
-                        bc_values{j}(end,i) = temp_copy;
-                    case 2
-                        bc_values{j}(i,end) = temp_copy;
-                    case 3
-                        bc_values{j}(1,i) = temp_copy;
-                    case 4
-                        bc_values{j}(i,1) = temp_copy;
-                end
+                        case 1
+                            bc_values{j}(end,i) = temp_copy;
+                        case 2
+                            bc_values{j}(i,end) = temp_copy;
+                        case 3
+                            bc_values{j}(1,i) = temp_copy;
+                        case 4
+                            bc_values{j}(i,1) = temp_copy;
+                    end
                 end
             end
             
@@ -229,7 +235,7 @@ while t < par.t_end
         %
         
         for i = 1 : par.n_eqn
-            % Multiplication of dxU and dyU by system matrices Ax and Ay
+            % Multiplication of dxU and dyU by sys matrices Ax and Ay
             % [1] dxU(Ix{i}) returns a cell with components of dxU where Ax
             % has non-zero entries for that particular row (component no.)
             % --> each dxU entry is a cell as for each component the values
@@ -239,7 +245,7 @@ while t < par.t_end
             % Ax(1, [3 4 5]) gives (1,3), (1,4) and (1, 5) entries of Ax
             % [3] W is one vector having a value stored at each grid node
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
-                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);
+                [par.sys.Ax(i,Ix{i}),par.sys.Ay(i,Iy{i})]);
             
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});
@@ -262,13 +268,13 @@ while t < par.t_end
     
     %% Plotting
     
-    % for plotting (new)
-    if mod(step_count,50) == 0
-        disp('time: neqn: step_count ');
-        disp(t);
-        disp(par.n_eqn);
-        disp(step_count);
-    end
+    %     % for plotting (new)
+    %     if mod(step_count,50) == 0
+    %         disp('time: neqn: step_count ');
+    %         disp(t);
+    %         disp(par.n_eqn);
+    %         disp(step_count);
+    %     end
     
     if par.to_plot
         
@@ -312,8 +318,8 @@ while t < par.t_end
     cputime(2) = cputime(2) + toc;
 end
 
-fprintf('%0.0f time steps\n',step_count)           % Display test
-cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
+fprintf('%0.0f time steps\n', step_count)           % Display test
+cputime = reshape([cputime;cputime/cputime(2)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
 

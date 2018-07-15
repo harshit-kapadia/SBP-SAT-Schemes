@@ -22,18 +22,18 @@ par = struct(...
     'get_penalty_1',@get_penalty_1,...
     'get_penalty_2',@get_penalty_2,...
     'get_boundary_operator',@get_boundary_operator,...
-    'penalty_id',1,...
+    'penalty_id',2,...
     'var_plot',1,...
-    'to_plot',true,...
+    'to_plot',false,...
     'output',@output... % problem-specific output routine (defined below)
     );
 
 par.t_plot = linspace(0,par.t_end,50);
 
 par.c = 1 ; % wave speed
-[par.system] = get_system(par.c, par.num_bc);
+[par.sys] = get_sys(par.c, par.num_bc);
 
-% [par.system] = get_penalty(par.system, par.num_bc, par.c, par.penalty_id);
+% [par.sys] = get_penalty(par.sys, par.num_bc, par.c, par.penalty_id);
 
 
 %========================================================================
@@ -48,7 +48,7 @@ for k = 1:length(resolution)                   % Loop over various grid resoluti
     par.n = [resolution(k) 4];                   % Numbers of grid cells.
     solution = solver(par);                         % Run solver.
     error_temp = 0;
-    disp('Resolution :');
+    fprintf('\n Resolution :');
     disp(par.n);
     for j = 1:par.n_eqn                               % Loop over solution components.
         X = solution(j).X;
@@ -68,49 +68,56 @@ for k = 1:length(resolution)                   % Loop over various grid resoluti
     % x are not constant at 3 for all degree of refinement
 end
 
-reference_line = exact_order(grid_spacing(1),error_L2(1),grid_spacing(end),2);
+% reference_line = exact_order(grid_spacing(1),error_L2(1),grid_spacing(end),2);
+%
+% % convergence plot
+% figure
+% loglog(grid_spacing, error_L2, '-o',reference_line(1:2),reference_line(3:4),'-*');
+% xlabel('h'), ylabel('l2-error');
+% legend('numerical','second order');
+% title('Convergence plot');
 
-figure
-loglog(grid_spacing, error_L2, '-o',reference_line(1:2),reference_line(3:4),'-*');
-xlabel('h'), ylabel('l2-error');
-legend('numerical','second order');
-title('Convergence plot');
-
-% convergence plot
 convg_order = log(error_L2(end)/error_L2(1))/log(grid_spacing(end)/grid_spacing(1));
 disp('convergence order');
 disp(convg_order);
 
-% plot error in domain --> all components separately
-for j = 1:par.n_eqn
-    figure
-    % contourf(X,Y,error), axis xy equal tight;
-    surf(X,Y,error{j}), axis xy equal tight;
-    % get rid of lines in surf
-    colormap summer;        ylim(par.ax([3 4]));
-    
-    shading interp;
-    
-    title(['Error in domain: variable ' num2str(j)]);
-    colorbar;
-    xlabel('x'), ylabel('y')
-end
+% % plot error in domain --> all components separately
+% for j = 1:par.n_eqn
+%     figure
+%     % contourf(X,Y,error), axis xy equal tight;
+%     surf(X,Y,error{j}), axis xy equal tight;
+%     % get rid of lines in surf
+%     colormap summer;        ylim(par.ax([3 4]));
+%
+%     shading interp;
+%
+%     title(['Error in domain: variable ' num2str(j)]);
+%     colorbar;
+%     xlabel('x'), ylabel('y')
+% end
 
 
 %========================================================================
 % Problem Specific Functions
 %========================================================================
 
-function[system] = get_system(c, num_bc)
-system.Ax = [0 c^2 0; 1 0 0; 0 0 0];
-system.Ay = [0 0 c^2; 0 0 0; 1 0 0];
+function[sys] = get_sys(c, num_bc)
+sys.Ax = [0 c^2 0; 1 0 0; 0 0 0];
+sys.Ay = [0 0 c^2; 0 0 0; 1 0 0];
 
-system.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
-system.ny = [0 1 0 -1] ;
+sys.nx = [1 0 -1 0] ; % size = num_bc and east-north-west-south order
+sys.ny = [0 1 0 -1] ;
 
-system.A_n = cell(num_bc,1);
+sys.A_n = cell(num_bc,1);
 for i = 1 : num_bc
-    system.A_n{i} = system.Ax*system.nx(i) + system.Ay*system.ny(i);
+    sys.A_n{i} = sys.Ax*sys.nx(i) + sys.Ay*sys.ny(i);
+    
+    sys.A_n_positive{i} = sqrt(sys.A_n{i}' * sys.A_n{i});
+    
+    [sys.X_n{i}, sys.Lambda{i}] = eig(sys.A_n{i});
+    diag_Lambda = diag(sys.Lambda{i});
+    column_index = diag_Lambda<0;
+    sys.X_n_neg{i} = sys.X_n{i}(:,column_index);
 end
 end
 
@@ -119,17 +126,10 @@ alpha = y.^2 ;
 B = [1 -alpha*nx(bc_id) -alpha*ny(bc_id)] ;
 end
 
-function penalty = get_penalty_1(A_n, B, nx, ny, bc_id)
+function penalty = get_penalty_1(A_n, A_n_positive, X_n_neg, B, bc_id)
 if bc_id == 2 || bc_id == 4
     penalty = [0; 0; 0];
 else
-    A_n_positive = sqrt(A_n' * A_n);
-    
-    [X_n, Lambda] = eig(A_n);
-    diag_Lambda = diag(Lambda);
-    column_index = diag_Lambda<0;
-    X_n_neg = X_n(:,column_index);
-    
     penalty = 0.5 * ( (A_n-A_n_positive) * X_n_neg * inv(B*X_n_neg) );
 end
 end
