@@ -1,6 +1,7 @@
 function output = solver_DVM_2x3v_g_varying(par)
 
-if ~isfield(par,'save_during'), par.save_during = false; end % default value of save during the computation
+% default value of save during the computation
+if ~isfield(par,'save_during'), par.save_during = false; end 
 
 if ~isfield(par,'ic'),       par.ic = @zero; end% Default: no init. cond.
 
@@ -174,14 +175,25 @@ while t < par.t_end || residual > 10^(-6)
             par.mass_matrix,par.inv_mass_matrix,rho,ux,uy,theta,par.value_f0);
         
         
-        par.b_nodes = zeros(4,1) ;
-        for bc_ID = [1 2 3 4]
-            if rem(bc_ID,2)==0
-                par.b_nodes(bc_ID) = par.n(1)+1 ;
-            else
-                par.b_nodes(bc_ID) = par.n(2)+1 ;
-            end
+        % Temperature at the wall, needed for Wall boundary implementation
+        if t_temp(RK) <= 1
+            temp_thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
+        else
+            temp_thetaW = 1;
         end
+        thetaW{1} = temp_thetaW ;
+        thetaW{2} = temp_thetaW ;
+        thetaW{3} = -temp_thetaW ;
+        thetaW{4} = -temp_thetaW ;
+        
+%         par.b_nodes = zeros(4,1) ;
+%         for bc_ID = [1 2 3 4]
+%             if rem(bc_ID,2)==0
+%                 par.b_nodes(bc_ID) = par.n(1)+1 ;
+%             else
+%                 par.b_nodes(bc_ID) = par.n(2)+1 ;
+%             end
+%         end
         % compute the derivatives for g and h
         for i = 1 : 2
             for j = 1 : par.n_eqn
@@ -190,47 +202,114 @@ while t < par.t_end || residual > 10^(-6)
             end
             
             
-            for bc_ID = [1 2 3 4]
-                for node = 1:par.b_nodes(bc_ID)
-                    switch bc_ID
-                        case 1
-                            values = cellfun(@(a) a(end,node),UTemp(i,:),'Un',0);
-                        case 2
-                            values = cellfun(@(a) a(node,end),UTemp(i,:),'Un',0);
-                        case 3
-                            values = cellfun(@(a) a(1,node),UTemp(i,:),'Un',0);
-                        case 4
-                            values = cellfun(@(a) a(node,1),UTemp(i,:),'Un',0);
-                    end
-                    
-                    bc_g = num2cell(capargs(par.bc_inhomo,...
-                        par.system.B{bc_ID}, bc_ID,par.system.Ax,...
-                        par.system.Ay,i,UTemp,node,par.all_w,t_temp(RK)));
-                    
-                    
-                    for j = 1 : par.n_eqn
-                        temp_copy = bc_scaling(bc_ID) * ( sumcell( ...
-                            values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                            par.system.penalty_B{bc_ID}(j,...
-                                bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                            sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
-                            par.system.penalty{bc_ID}(j,...
-                                bc_coupling_penalty{bc_ID}{j})) );
-                        switch bc_ID
-                            case 1
-                                bc_values{i,j}(end,node) = temp_copy;
-                            case 2
-                                bc_values{i,j}(node,end) = temp_copy;
-                            case 3
-                                bc_values{i,j}(1,node) = temp_copy;
-                            case 4
-                                bc_values{i,j}(node,1) = temp_copy;
-                        end
-                    end
-                    
-                end
-            end
+%             for bc_ID = [1 2 3 4]
+%                 for node = 1:par.b_nodes(bc_ID)
+%                     switch bc_ID
+%                         case 1
+%                             values = cellfun(@(a) a(end,node),UTemp(i,:),'Un',0);
+%                         case 2
+%                             values = cellfun(@(a) a(node,end),UTemp(i,:),'Un',0);
+%                         case 3
+%                             values = cellfun(@(a) a(1,node),UTemp(i,:),'Un',0);
+%                         case 4
+%                             values = cellfun(@(a) a(node,1),UTemp(i,:),'Un',0);
+%                     end
+%                     
+%                     bc_g = num2cell(capargs(par.bc_inhomo,...
+%                         par.system.B{bc_ID}, bc_ID,par.system.Ax,...
+%                         par.system.Ay,i,UTemp,node,par.all_w,t_temp(RK)));
+%                     
+%                     
+%                     for j = 1 : par.n_eqn
+%                         temp_copy = bc_scaling(bc_ID) * ( sumcell( ...
+%                             values(bc_coupling_penalty_B{bc_ID}{j}), ...
+%                             par.system.penalty_B{bc_ID}(j,...
+%                                 bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+%                             sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
+%                             par.system.penalty{bc_ID}(j,...
+%                                 bc_coupling_penalty{bc_ID}{j})) );
+%                         switch bc_ID
+%                             case 1
+%                                 bc_values{i,j}(end,node) = temp_copy;
+%                             case 2
+%                                 bc_values{i,j}(node,end) = temp_copy;
+%                             case 3
+%                                 bc_values{i,j}(1,node) = temp_copy;
+%                             case 4
+%                                 bc_values{i,j}(node,1) = temp_copy;
+%                         end
+%                     end
+%                     
+%                 end
+%             end
             
+            
+
+            % extract all the value at x = x_start.
+            bc_ID = 1;
+            values = cellfun(@(a) a(end,:),UTemp(i,:),'Un',0);
+            rhoW{bc_ID} = -cell2mat(cellfun(@(a) a(end,:)',...
+                UTemp(1,par.pos_U{bc_ID}),'Un',0)) * par.rhoW_vect{bc_ID} ...
+                - thetaW{bc_ID} * par.rhoW_value{bc_ID} ;
+            rhoW{bc_ID} = rhoW{bc_ID}' ;
+            bc_g = capargs(par.bc_inhomo, par.system.B{bc_ID}, bc_ID,...
+                par.system.Ax, par.system.Ay, thetaW{bc_ID}, rhoW{bc_ID}, i);
+            
+             for j = 1 : par.n_eqn
+                 bc_values{i,j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                     sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
+                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+             end
+             
+             
+             bc_ID = 2;
+             values = cellfun(@(a) a(:,end),UTemp(i,:),'Un',0);
+             rhoW{bc_ID} = -cell2mat(cellfun(@(a) a(:,end),...
+                 UTemp(1,par.pos_U{bc_ID}),'Un',0)) * par.rhoW_vect{bc_ID} ...
+                 - thetaW{bc_ID} * par.rhoW_value{bc_ID} ;
+             bc_g = capargs(par.bc_inhomo, par.system.B{bc_ID}, bc_ID,...
+                 par.system.Ax, par.system.Ay, thetaW{bc_ID}, rhoW{bc_ID}, i);
+             
+             for j = 1 : par.n_eqn
+                 bc_values{i,j}(:,end) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                     sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
+                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+             end
+             
+             bc_ID = 3;
+             values = cellfun(@(a) a(1,:),UTemp(i,:),'Un',0);
+             rhoW{bc_ID} = -cell2mat(cellfun(@(a) a(1,:)',...
+                 UTemp(1,par.pos_U{bc_ID}),'Un',0)) * par.rhoW_vect{bc_ID} ...
+                 - thetaW{bc_ID} * par.rhoW_value{bc_ID} ;
+             rhoW{bc_ID} = rhoW{bc_ID}' ;
+             bc_g = capargs(par.bc_inhomo, par.system.B{bc_ID}, bc_ID,...
+                 par.system.Ax, par.system.Ay, thetaW{bc_ID}, rhoW{bc_ID}, i);
+             
+             for j = 1 : par.n_eqn
+                 bc_values{i,j}(1,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                     sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
+                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
+             end
+             
+             bc_ID = 4;
+             values = cellfun(@(a) a(:,1),UTemp(i,:),'Un',0);
+             rhoW{bc_ID} = -cell2mat(cellfun(@(a) a(:,1),...
+                 UTemp(1,par.pos_U{bc_ID}),'Un',0)) * par.rhoW_vect{bc_ID} ...
+                 - thetaW{bc_ID} * par.rhoW_value{bc_ID} ;
+             bc_g = capargs(par.bc_inhomo, par.system.B{bc_ID}, bc_ID,...
+                 par.system.Ax, par.system.Ay, thetaW{bc_ID}, rhoW{bc_ID}, i);
+             
+             for j = 1 : par.n_eqn
+                 bc_values{i,j}(:,1)= bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                     sumcell(bc_g(bc_coupling_penalty{bc_ID}{j}),...
+                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
+             end
+
+
             
             for j = 1 : par.n_eqn
                 
