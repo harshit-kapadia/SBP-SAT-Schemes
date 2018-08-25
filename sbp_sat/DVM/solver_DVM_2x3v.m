@@ -18,7 +18,7 @@ if ~isfield(par,'steady_state')
 end
 
 % find which of the given data is time dependent
-time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo)>7];
+time_dep = [nargin(par.source)>2 nargin(par.bc_inhomo_inflow)>7];
         
 % if the number of arguments are greater than 3 then definitely we have 
 % an anisotropic source term.
@@ -121,7 +121,8 @@ end
 bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
 
 
-bc_g = cell(par.num_bc,2);
+bc_g = cell(2,par.num_bc);
+rhoW = cell(par.num_bc,1);
 
 % compute the boundary inhomogeneity
 t = 0;
@@ -129,9 +130,12 @@ t = 0;
 % compute the boundary inhomogeneity at t = 0
 for i = 1 : 2
     for j = 1:par.num_bc
+       % a-priori computations can only be done for the inflow boundary
+       if ~par.wall_boundary(j)
         % need to convert to cell for the computations which follow
-        bc_g{j,i} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,par.system.Ax, ...
+        bc_g{i,j} = num2cell(capargs(par.bc_inhomo_inflow,par.system.B{j},j,par.system.Ax, ...
                                      par.system.Ay,i,U,par.all_w,t));
+       end
         
     end
 end
@@ -139,11 +143,11 @@ end
 %% Time Loop
 cputime = zeros(1,3);
 t = 0; step_count = 0;
-
+rho = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+initial_total_rho =integrate_xy(rho,PX{1},PY{1});
 
 residual = 0;
         
-
 while t < par.t_end || residual > 10^(-6)
     
     residual = 0;
@@ -178,9 +182,11 @@ while t < par.t_end || residual > 10^(-6)
          if evaluate(2)
              for i = 1 : 2
                  for j = 1:par.num_bc
+                     if ~par.wall_boundary(j)
                      % need to convert to cell for the computations which follow
-                     bc_g{j,i} = num2cell(capargs(par.bc_inhomo,par.system.B{j}, ...
+                        bc_g{i,j} = num2cell(capargs(par.bc_inhomo_inflow,par.system.B{j}, ...
                                             j,par.system.Ax,par.system.Ay,i,UTemp,par.all_w,t_temp(RK)));
+                     end
                      
                  end
              end
@@ -203,55 +209,99 @@ while t < par.t_end || residual > 10^(-6)
                  dyU{i,j} = UTemp{i,j} * DY{1}; % DY is actually transpose of dy
              end
              
-          % extract all the value at x = x_start.
+          % extract all the value at x = x_end.
+          if(par.dim_problem == 2)
               bc_ID = 1;
               values = cellfun(@(a) a(end,:),UTemp(i,:),'Un',0);
+             
+             if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
+                rhoW{bc_ID} = -sumcell(cellfun(@(a) a(end,:),...
+                              UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
+                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                % for a wall bc_g{i,bc_ID} is a cell with every element being a vector. For the in
+                %-flow boundary, every element of the cell is a scalar
+                %quantity. This is because in case of wall, the density at
+                %the wall changes along the entire boundary. 
+                bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
+                        par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
+             end
              
              for j = 1 : par.n_eqn
                  bc_values{i,j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                     sumcell(bc_g{bc_ID,i}(bc_coupling_penalty{bc_ID}{j}),...
+                     sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
              end
+          end
              
-             
-             bc_ID = 2;
-             values = cellfun(@(a) a(:,end),UTemp(i,:),'Un',0);
-             
-             for j = 1 : par.n_eqn
-                 bc_values{i,j}(:,end) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
-                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                     sumcell(bc_g{bc_ID,i}(bc_coupling_penalty{bc_ID}{j}),...
-                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-             end
-             
+          bc_ID = 2;
+          values = cellfun(@(a) a(:,end),UTemp(i,:),'Un',0);
+          
+          if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
+              rhoW{bc_ID} = -sumcell(cellfun(@(a) a(:,end),...
+                  UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
+                  - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+              
+              bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
+                  par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
+          end
+          
+          for j = 1 : par.n_eqn
+              bc_values{i,j}(:,end) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                  sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+          end
+
+          if(par.dim_problem == 2)
              bc_ID = 3;
              values = cellfun(@(a) a(1,:),UTemp(i,:),'Un',0);
+             
+             if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
+                rhoW{bc_ID} = -sumcell(cellfun(@(a) a(1,:),...
+                              UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
+                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
+                        par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
+             end
+             
              
              for j = 1 : par.n_eqn
                  bc_values{i,j}(1,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                     sumcell(bc_g{bc_ID,i}(bc_coupling_penalty{bc_ID}{j}),...
+                     sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
+          end
              
              bc_ID = 4;
              values = cellfun(@(a) a(:,1),UTemp(i,:),'Un',0);
              
+             if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
+                 rhoW{bc_ID} = -sumcell(cellfun(@(a) a(:,1),...
+                     UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
+                     - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                 bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
+                     par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
+             end
+             
              for j = 1 : par.n_eqn
                  bc_values{i,j}(:,1)= bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
-                     sumcell(bc_g{bc_ID,i}(bc_coupling_penalty{bc_ID}{j}),...
+                     sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
 
-             
-                       
+                     
              for j = 1 : par.n_eqn
                  
                  % multiplication of the derivatives and the system matrices
-                 W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
+                 if(par.dim_problem == 2)
+                    W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
                         [par.system.Ax(j,Ix{j}),par.system.Ay(j,Iy{j})]);                 
+                 else
+                    W = -sumcell(dyU(i,Iy{j}),par.system.Ay(j,Iy{j}));                 
+                 end
                     
                  k_RK{RK,i}{j} = (W + bc_values{i,j});
              
@@ -299,6 +349,9 @@ while t < par.t_end || residual > 10^(-6)
         disp(par.n_eqn);
         disp(step_count);
         disp(residual);
+        
+        disp('%density change:');
+        disp((integrate_xy(rho,PX{1},PY{1})-initial_total_rho)*100/initial_total_rho);
     end
     
     tic
@@ -368,4 +421,17 @@ end
 end
 
 
+function f = integrate_xy(data,PX,PY)
+diag_PX = diag(PX);
+diag_PY = diag(PY);
 
+% integral along x at different y points
+int_x = zeros(size(data,2),1);
+
+for i = 1 : length(int_x)
+    int_x(i) = dot(diag_PX,data(:,i));
+end
+
+% integrate along the y direction
+f = full(dot(int_x,diag_PY));
+end
