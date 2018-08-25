@@ -210,7 +210,6 @@ while t < par.t_end || residual > 10^(-6)
              end
              
           % extract all the value at x = x_end.
-          if(par.dim_problem == 2)
               bc_ID = 1;
               values = cellfun(@(a) a(end,:),UTemp(i,:),'Un',0);
              
@@ -232,7 +231,6 @@ while t < par.t_end || residual > 10^(-6)
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
              end
-          end
              
           bc_ID = 2;
           values = cellfun(@(a) a(:,end),UTemp(i,:),'Un',0);
@@ -253,7 +251,7 @@ while t < par.t_end || residual > 10^(-6)
                   par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
           end
 
-          if(par.dim_problem == 2)
+
              bc_ID = 3;
              values = cellfun(@(a) a(1,:),UTemp(i,:),'Un',0);
              
@@ -272,7 +270,7 @@ while t < par.t_end || residual > 10^(-6)
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
-          end
+
              
              bc_ID = 4;
              values = cellfun(@(a) a(:,1),UTemp(i,:),'Un',0);
@@ -296,13 +294,9 @@ while t < par.t_end || residual > 10^(-6)
              for j = 1 : par.n_eqn
                  
                  % multiplication of the derivatives and the system matrices
-                 if(par.dim_problem == 2)
                     W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
                         [par.system.Ax(j,Ix{j}),par.system.Ay(j,Iy{j})]);                 
-                 else
-                    W = -sumcell(dyU(i,Iy{j}),par.system.Ay(j,Iy{j}));                 
-                 end
-                    
+
                  k_RK{RK,i}{j} = (W + bc_values{i,j});
              
                  k_RK{RK,i}{j} = k_RK{RK,i}{j} + ...
@@ -357,9 +351,9 @@ while t < par.t_end || residual > 10^(-6)
     tic
     
     if par.t_plot
-        var_plot = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+        var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
 
-        surf(X{1},Y{1},var_plot), axis xy equal tight;
+        contourf(X{1},Y{1},var_plot), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;

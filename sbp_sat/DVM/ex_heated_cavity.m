@@ -22,12 +22,11 @@ par = struct(...
     );
 
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
-par.dim_problem = 1;    % the 2D code can also be used to the solve a 1D problem
-par.Kn = inf;
-par.t_plot = true;
+par.Kn = 0.1;
+par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
 % number of points in the spatial discretization
-par.n = [2 50];
+par.n = [100 100];
 
 [par.x_m,par.w_m] = gauss_quadrature(nc,-5,0);
 [par.x_p,par.w_p] = gauss_quadrature(nc,0,5);
@@ -68,14 +67,6 @@ par.system.penalty{3} = (-par.system.Ax-abs(par.system.Ax))/2;
 par.system.penalty{2} = (par.system.Ay-abs(par.system.Ay))/2;
 par.system.penalty{4} = (-par.system.Ay-abs(par.system.Ay))/2;
 
-if(par.dim_problem == 1)
-    par.system.penalty{1} = par.system.penalty{1} * 0;
-    par.system.penalty{3} = par.system.penalty{3} * 0;
-    
-    par.system.B{1} = par.system.B{1} * 0;
-    par.system.B{3} = par.system.B{3} * 0;
-end
-
 % develop the penalty * B matrix
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i} * par.system.B{i};
@@ -104,23 +95,35 @@ end
 density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
 [ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
 theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xx = compute_sigmaxx(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_xx = compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_xy = compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
+qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
+qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
 
 filename = 'result_Comp/result_DVM.txt';
 dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
+
 dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
+
 dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
+
 dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,sigma_xy(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
+
+dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
 end
 
 function thetaW = compute_thetaW(bc_id,t)
 thetaW = 0;
 
-if bc_id == 5 % bottom boundary
+if bc_id == 4 % bottom boundary
     if t <= 1
         thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
     else
@@ -153,6 +156,26 @@ end
 
 end
 
+% compute the Maxwellian, there are two maxellians, one corresponding to
+% g and one for h
+function f = compute_fM(Ax,Ay,rho,ux,uy,theta,id,id_sys)
+
+vx = Ax(id,id);
+vy = Ay(id,id);
+
+
+switch id_sys
+    
+    % maxwellian for g
+    case 1
+        f = (vx * ux + vy * uy + ((vx^2 + vy^2)/2 - 1) * theta + rho) * f0(vx,vy);
+        % maxwellian for h
+    case 2
+        f = theta * f0(vx,vy)/sqrt(2);
+end
+
+end
+
 function f = bc_inhomo_inflow(B,bc_id,Ax,Ay,id_sys,U,all_weights,t)
 
     rho = 0;
@@ -174,25 +197,16 @@ end
 % we have two systems of the same type
 function f = ic(x,y,Ax,Ay,mass_matrix,inv_mass_matrix,value_f0)
 
-rho = exp(-(y-0.5).*(y-0.5)*100);
+%rho = exp(-(y-0.5).*(y-0.5)*100);
 %rho = exp(-(x-0.5).*(x-0.5)*100);
-%rho = x * 0;
+rho = x * 0;
 ux = x * 0;
 uy = x * 0;
 theta = x * 0;
 
-% f = store_minimized_entropy(Ax,Ay, ...
-%      mass_matrix,inv_mass_matrix,rho,ux,uy,theta,value_f0);
+f = store_minimized_entropy(Ax,Ay, ...
+     mass_matrix,inv_mass_matrix,rho,ux,uy,theta,value_f0);
  
-f = cell(2,size(Ax,2));
-
-for j = 1 : size(f,2)
-    vx = Ax(j,j);
-    vy = Ay(j,j);
-    f{1,j} = rho * f0(vx,vy);
-    f{2,j} = theta;
-end
-
 end
 
 % f0 corresponding to the 2d velocity space
@@ -265,7 +279,7 @@ end
 
 % compute the sigma xx
 % compute the temperature
-function f = compute_sigmaxx(U,Ax,Ay,all_weights)
+function f = compute_sigma_xx(U,Ax,Ay,all_weights)
 
 [points_x,points_y] = size(U{1,1});
 
@@ -285,23 +299,104 @@ end
 
 end
 
-% compute the Maxwellian, there are two maxellians, one corresponding to
-% g and one for h
-function f = compute_fM(Ax,Ay,rho,ux,uy,theta,id,id_sys)
+function f = compute_sigma_xy(U,Ax,Ay,all_weights)
 
-vx = Ax(id,id);
-vy = Ay(id,id);
+[points_x,points_y] = size(U{1,1});
+
+f = zeros(points_x,points_y);
+
+% scale by the He1(xi_1)He1(xi_2)
+all_weights_xy = (diag(Ax).*diag(Ay)).*all_weights;
+
+for k = 1 : length(all_weights)
+    f = f +  all_weights_xy(k)*U{1,k};
+end
+
+end
+
+function f = compute_sigma_yy(U,Ax,Ay,all_weights)
+
+[points_x,points_y] = size(U{1,1});
+
+f = zeros(points_x,points_y);
+
+% scale by the He2(xi_1)
+all_weights_x = (diag(Ax).*diag(Ax)-1).*all_weights/sqrt(2);
+
+% scale by He2(xi_2)
+all_weights_y = (diag(Ay).*diag(Ay)-1).*all_weights/sqrt(2);
 
 
-switch id_sys
+for k = 1 : length(all_weights)
+    f = f + sqrt(2) * ((-all_weights_x(k) + 2 * all_weights_y(k))*U{1,k} - ...
+        all_weights(k)*U{2,k})/3;
+end
+
+end
+
+function f = compute_qx(U,Ax,Ay,all_weights)
+[points_x,points_y] = size(U{1,1});
+
+f = zeros(points_x,points_y);
+
+vx = diag(Ax);
+vy = diag(Ay);
+
+% scale the weights by He_3(xi_1)
+all_weights_He_3_x = He_3(vx).*all_weights;
+
+all_weights_He_1_x_He_2_y = (He_1(vx).*He_2(vy)).*all_weights;
+
+all_weights_He_1_x = He_1(vx).*all_weights;
+
+for i = 1 : length(all_weights)
+    temp_g = U{1,i};
+    temp_h = U{2,i};
     
-    % maxwellian for g
-    case 1
-        f = (vx * ux + vy * uy + ((vx^2 + vy^2)/2 - 1) * theta + rho) * f0(vx,vy);
-        % maxwellian for h
-    case 2
-        f = theta * f0(vx,vy)/sqrt(2);
+    f = f + (sqrt(3) * all_weights_He_3_x(i) * temp_g + all_weights_He_1_x_He_2_y(i) * temp_g + ...
+            all_weights_He_1_x(i) * temp_h)/sqrt(2);
 end
 
 end
+
+function f = compute_qy(U,Ax,Ay,all_weights)
+[points_x,points_y] = size(U{1,1});
+
+f = zeros(points_x,points_y);
+
+vx = diag(Ax);
+vy = diag(Ay);
+
+% scale the weights by He_3(xi_1)
+all_weights_He_3_y = He_3(vy).*all_weights;
+
+all_weights_He_2_x_He_1_y = (He_2(vx).*He_1(vy)).*all_weights;
+
+all_weights_He_1_y = He_1(vy).*all_weights;
+
+for i = 1 : length(all_weights)
+    temp_g = U{1,i};
+    temp_h = U{2,i};
+    
+    f = f + (sqrt(3) * all_weights_He_3_y(i) * temp_g + all_weights_He_2_x_He_1_y(i) * temp_g + ...
+            all_weights_He_1_y(i) * temp_h)/sqrt(2);
+end
+
+end
+
+% hermite polynomial of degree 3
+function f = He_3(c)
+f = (c.*c-3).*c/sqrt(6);
+end
+
+function f = He_2(c)
+f = (c.*c - 1)/sqrt(2);
+end
+
+function f = He_1(c)
+f = c;
+end
+
+
+
 

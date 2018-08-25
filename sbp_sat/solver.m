@@ -288,7 +288,7 @@ while t < par.t_end
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        surf(X{1},Y{1},U{par.var_plot}), axis xy equal tight;
+        contourf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
