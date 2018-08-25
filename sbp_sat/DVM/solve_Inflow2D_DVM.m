@@ -19,7 +19,7 @@ par = struct(...
 );
 
 par.Kn = 0.1;
-par.t_plot = false;
+par.t_plot = true;
 par.n_eqn = (2 * nc) * (2 * nc);
 % number of points in the spatial discretization
 par.n = [50 50];
@@ -80,19 +80,19 @@ for i = 1 : 2
     end
 end
 
-density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
-[ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
-theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xx = compute_sigmaxx(temp,par.system.Ax,par.system.Ay,par.all_w);
-
-filename = 'result_Inflow_Comp/result_DVM.txt';
-dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
-dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
-dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
+% density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
+% [ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
+% theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
+% sigma_xx = compute_sigmaxx(temp,par.system.Ax,par.system.Ay,par.all_w);
+% 
+% filename = 'result_Inflow_Comp/result_DVM.txt';
+% dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
+% dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
+% dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
 
 end
 
@@ -127,12 +127,15 @@ theta = x * 0;
 f = store_minimized_entropy(Ax,Ay, ...
                     mass_matrix,inv_mass_matrix,rho,ux,uy,theta,value_f0);
 
+
+
 end
 
 % f0 corresponding to the 2d velocity space
 function f = f0(vx,vy)
 f = exp(-(vx^2+vy^2)/2)/(2 * pi);
 end
+
 
 % compute the density on the complete grid
 function f = compute_density(U,Ax,Ay,all_weights)
