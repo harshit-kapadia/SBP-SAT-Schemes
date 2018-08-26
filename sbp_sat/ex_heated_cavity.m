@@ -75,14 +75,15 @@ for j = 1 : par.n_eqn
 end
 
 
-density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
-[ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
-theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xx = compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xy = compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
-qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
-qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
+density = compute_density(temp);
+ux = compute_ux(temp);
+uy = compute_uy(temp);
+theta = compute_theta(temp);
+sigma_xx = compute_sigma_xx(temp);
+sigma_xy = compute_sigma_xy(temp);
+sigma_yy = compute_sigma_yy(temp);
+qx = compute_qx(temp);
+qy = compute_qy(temp);
 
 filename = strcat('DVM/result_Comp/result_M',num2str(M),'.txt');
 dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);

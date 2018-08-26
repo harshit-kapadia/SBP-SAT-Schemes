@@ -1,0 +1,359 @@
+Sender: LSF System <lsfadmin@linuxbmc0276>
+Subject: Job 44191434[3]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 22:33:08 2018
+Job was executed on host(s) <linuxbmc0276>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 22:33:11 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 22:33:11 2018
+Terminated at Sat Aug 25 22:33:38 2018
+Results reported at Sat Aug 25 22:33:38 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   23.41 sec.
+    Max Memory :                                 861 MB
+    Average Memory :                             167.00 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4139.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                10
+    Run time :                                   27 sec.
+    Turnaround time :                            30 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.2868
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.1071
+
+    13
+
+    50
+
+time: neqn: step_count 
+    0.2142
+
+    13
+
+   100
+
+time: neqn: step_count 
+    0.3213
+
+    13
+
+   150
+
+time: neqn: step_count 
+    0.4284
+
+    13
+
+   200
+
+234 time steps
+CPU-times
+ advection:           7.97s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:{Reference to non-existent field 'all_w'.
+
+Error in ex_heated_cavity (line 78)
+density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
+
+Error in run (line 91)
+evalin('caller', strcat(script, ';'));
+} 
+>> Sender: LSF System <lsfadmin@linuxbmc0284>
+Subject: Job 44191549[3]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 23:10:18 2018
+Job was executed on host(s) <linuxbmc0284>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 23:10:21 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 23:10:21 2018
+Terminated at Sat Aug 25 23:10:52 2018
+Results reported at Sat Aug 25 23:10:52 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   26.73 sec.
+    Max Memory :                                 885 MB
+    Average Memory :                             124.00 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4115.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                8
+    Run time :                                   31 sec.
+    Turnaround time :                            34 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.7382
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.1071
+
+    13
+
+    50
+
+time: neqn: step_count 
+    0.2142
+
+    13
+
+   100
+
+time: neqn: step_count 
+    0.3213
+
+    13
+
+   150
+
+time: neqn: step_count 
+    0.4284
+
+    13
+
+   200
+
+234 time steps
+CPU-times
+ advection:           8.77s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:{Undefined function or variable 'compute_velocity'.
+
+Error in ex_heated_cavity (line 79)
+[ux,uy] = compute_velocity(temp);
+
+Error in run (line 91)
+evalin('caller', strcat(script, ';'));
+} 
+>> Sender: LSF System <lsfadmin@linuxbmc0276>
+Subject: Job 44191596[3]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 23:57:35 2018
+Job was executed on host(s) <linuxbmc0276>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 23:57:40 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 23:57:40 2018
+Terminated at Sat Aug 25 23:58:06 2018
+Results reported at Sat Aug 25 23:58:06 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   23.36 sec.
+    Max Memory :                                 859 MB
+    Average Memory :                             167.00 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4141.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                10
+    Run time :                                   26 sec.
+    Turnaround time :                            31 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.20965
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.1071
+
+    13
+
+    50
+
+time: neqn: step_count 
+    0.2142
+
+    13
+
+   100
+
+time: neqn: step_count 
+    0.3213
+
+    13
+
+   150
+
+time: neqn: step_count 
+    0.4284
+
+    13
+
+   200
+
+234 time steps
+CPU-times
+ advection:           7.99s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:>> 

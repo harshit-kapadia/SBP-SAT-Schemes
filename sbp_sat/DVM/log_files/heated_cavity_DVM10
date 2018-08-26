@@ -1,0 +1,199 @@
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 44191344[10]: <MATLAB_ARRAY[10]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[10]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 21:02:24 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 21:02:28 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat/DVM> was used as the working directory.
+Started at Sat Aug 25 21:02:28 2018
+Terminated at Sat Aug 25 21:42:49 2018
+Results reported at Sat Aug 25 21:42:49 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[10]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_DVM%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 2:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 3000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/DVM
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2337.81 sec.
+    Max Memory :                                 1483 MB
+    Average Memory :                             1436.91 MB
+    Total Requested Memory :                     3000.00 MB
+    Delta Memory :                               1517.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                45
+    Run time :                                   2417 sec.
+    Turnaround time :                            2425 sec.
+
+The output (if any) follows:
+
+/home/ns179556/.lsbatch/1535223744.44191344.10.shell:cd:18: no such file or directory: /home/ns179556/SBP_2D/DVM
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.36628
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> delta t
+    0.0010
+
+time: neqn: step_count: residual: 
+    0.0507
+
+   400
+
+    50
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.1013
+
+   400
+
+   100
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.1520
+
+   400
+
+   150
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.2026
+
+   400
+
+   200
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.2533
+
+   400
+
+   250
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.3040
+
+   400
+
+   300
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.3546
+
+   400
+
+   350
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.4053
+
+   400
+
+   400
+
+     0
+
+%density change:
+   Inf
+
+time: neqn: step_count: residual: 
+    0.4559
+
+   400
+
+   450
+
+     0
+
+%density change:
+   Inf
+
+494 time steps
+CPU-times
+ advection:        2351.52s  100%
+plotting:            0.02s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:>> 
