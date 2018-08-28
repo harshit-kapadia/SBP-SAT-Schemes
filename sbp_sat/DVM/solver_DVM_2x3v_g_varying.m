@@ -194,21 +194,10 @@ while t < par.t_end || residual > 10^(-6)
         % we need to reconstruct the maxwellian which is independent of
         % the coming computation and therefore not influenced.
         fM = store_minimized_entropy(par.system.Ax,par.system.Ay, ...
-            par.mass_matrix,par.inv_mass_matrix,rho,ux,uy,theta,par.value_f0);
-        
+            par.mass_matrix,par.inv_mass_matrix,rho,ux,uy,theta,par.value_f0);        
         
         % Temperature at the wall, needed for Wall boundary implementation
-        if t_temp(RK) <= 1
-            temp_thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
-        else
-            temp_thetaW = 1;
-        end
-        thetaW{1} = temp_thetaW ;
-        thetaW{2} = temp_thetaW ;
-        thetaW{3} = -temp_thetaW ;
-        thetaW{4} = -temp_thetaW ;
-        
-        
+        thetaW = par.compute_thetaW(t_temp(RK)) ;
         
         % compute the derivatives for g and h
         for i = 1 : 2

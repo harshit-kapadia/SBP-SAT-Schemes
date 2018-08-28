@@ -7,7 +7,7 @@ par = struct(...
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'bc_inhomo_2',@bc_inhomo_2,... % source term (defined below)
     'ax',[0 1 0 1],... % coordinates of computational domain
-    't_end',0.3,... % the end time of the computation
+    't_end',5.0,... % the end time of the computation
     'CFL',2.0,...      % the crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'RK_order',4,...
@@ -17,7 +17,8 @@ par = struct(...
     'compute_density',@compute_density, ...
     'compute_velocity',@compute_velocity, ...
     'compute_theta',@compute_theta, ...
-    'compute_rhoW_prep',@compute_rhoW_prep...
+    'compute_rhoW_prep',@compute_rhoW_prep,...
+    'compute_thetaW',@compute_thetaW...
     );
 
 par.bc_indicator = [1 0 1 0] ; % 1 for Wall b.c.
@@ -264,6 +265,26 @@ end
 
 end
 
+% Temperature at the wall, needed for Wall boundary implementation
+function thetaW = compute_thetaW(t)
+
+thetaW{1} = 0 ;
+thetaW{2} = 0 ;
+thetaW{3} = 0 ;
+thetaW{4} = 0 ;
+
+% if t_temp(RK) <= 1
+%     temp_thetaW = exp(-1/(1-(t-1)^2)) * exp(1) ;
+% else
+%     temp_thetaW = 1 ;
+% end
+% thetaW{1} = temp_thetaW ;
+% thetaW{2} = temp_thetaW ;
+% thetaW{3} = -temp_thetaW ;
+% thetaW{4} = -temp_thetaW ;
+
+end
+
 function [vect,value,pos_U] = compute_rhoW_prep(Ax,Ay,all_weights)
 
 all_vx = diag(Ax);
@@ -313,11 +334,11 @@ for i = 1 : num_neg_x
     int_f0_vy_sq = int_f0_vy_sq + vx_m_x(i) * vy_m_x(i)^2 * ...
         f0(vx_m_x(i),vy_m_x(i)) * weight_vx_m(i);
 end
-value{1} = (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0;
+value{1} = ( (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0 ) / int_f0;
 % prepration to
 % integrate the kinetic solution with vx_p_x (outgoing normal velocity at boundary)
 % int_f_vn = sum((vx_p_x.*U(pos_vx_p)).*weight_vx_p); (actual integration)
-vect{1} = vx_p_x.*weight_vx_p;
+vect{1} = ( vx_p_x.*weight_vx_p ) / int_f0;
 
 
 int_f0 = 0;
@@ -331,10 +352,10 @@ for i = 1 : num_neg_y
     int_f0_vy_sq = int_f0_vy_sq + vy_m_y(i) * vy_m_y(i)^2 * ...
         f0(vx_m_y(i),vy_m_y(i)) * weight_vy_m(i);
 end
-value{2} = (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0;
+value{2} = ( (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0 ) / int_f0;
 % prepration to
 % integrate the kinetic solution with vy_p_y (outgoing normal velocity at boundary)
-vect{2} = vy_p_y.*weight_vy_p;
+vect{2} = ( vy_p_y.*weight_vy_p ) / int_f0;
 
 
 int_f0 = 0;
@@ -348,10 +369,10 @@ for i = 1 : num_pos_x
     int_f0_vy_sq = int_f0_vy_sq + vx_p_x(i) * vy_p_x(i)^2 * ...
         f0(vx_p_x(i),vy_p_x(i)) * weight_vx_p(i);
 end
-value{3} = (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0;
+value{3} = ( (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0 ) / int_f0;
 % prepration to
 % integrate the kinetic solution with vx_m_x (outgoing normal velocity at boundary)
-vect{3} = vx_m_x.*weight_vx_m;
+vect{3} = ( vx_m_x.*weight_vx_m ) / int_f0;
 
 
 int_f0 = 0;
@@ -365,14 +386,14 @@ for i = 1 : num_pos_y
     int_f0_vy_sq = int_f0_vy_sq + vy_p_y(i) * vy_p_y(i)^2 * ...
         f0(vx_p_y(i),vy_p_y(i)) * weight_vy_p(i);
 end
-value{4} = (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0;
+value{4} = ( (int_f0_vx_sq + int_f0_vy_sq)/2-int_f0 ) / int_f0;
 % prepration to
 % integrate the kinetic solution with vy_m_y (outgoing normal velocity at boundary)
-vect{4} = vy_m_y.*weight_vy_m;
+vect{4} = ( vy_m_y.*weight_vy_m ) / int_f0;
 
 % % final target
 % rhoW = -int_f_vn-thetaW * ((int_f0_vx_sq + int_f0_vy_sq)/2-int_f0);
-% rhoW = rhoW/int_f0;
+% rhoW = rhoW/int_f0; % division is performed while computing value{} and vect{}
 
 pos_U{1} = pos_vx_p ;
 pos_U{2} = pos_vy_p ;
