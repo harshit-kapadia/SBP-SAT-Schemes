@@ -1,10 +1,11 @@
 % we solve the Heat Conduction problem using discrete velocity method
-function solve_Wall2D_DVM(nc)
+function solve_Wall_Inflow2D_DVM(nc)
 
 par = struct(...
-    'name','Wall DVM',... % name of example
+    'name','Wall+Inflow DVM',... % name of example
     'ic',@ic,... % initial conditions
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
+    'bc_inhomo_2',@bc_inhomo_2,... % source term (defined below)
     'ax',[0 1 0 1],... % coordinates of computational domain
     't_end',0.3,... % the end time of the computation
     'CFL',2.0,...      % the crude cfl number
@@ -19,7 +20,7 @@ par = struct(...
     'compute_rhoW_prep',@compute_rhoW_prep...
     );
 
-par.bc_indicator = [1 1 1 1] ; % 1 for Wall b.c.
+par.bc_indicator = [1 0 1 0] ; % 1 for Wall b.c.
 
 par.Kn = 0.1;
 par.t_plot = true;
@@ -104,7 +105,7 @@ sigma_xx = compute_sigmaxx(temp,par.system.Ax,par.system.Ay,par.all_w);
 end
 
 
-% wall boundary condition
+% Wall boundary condition
 function f = bc_inhomo(B,bc_id,Ax,Ay,thetaW,rhoW,id_sys)
 
 % tangential velocity and normal velocity of the wall
@@ -119,6 +120,25 @@ for i = 1 : length(id)
     f{id(i)} = compute_fM(Ax,Ay,rhoW,ux,uy,thetaW,id(i),id_sys);
 end
 
+end
+
+% Inflow boundary condition
+function f = bc_inhomo_2(B,bc_id,Ax,Ay,id_sys,U,all_weights,t)
+
+    rho = 0;
+    ux = 0;
+    uy = 0;
+    
+    if t <= 1
+        thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
+    else
+        thetaIn = 1;
+    end
+  
+    id = find(diag(B) == 1);
+    
+    f = diag(B) * 0;
+    
 end
 
 % we have two systems of the same type
