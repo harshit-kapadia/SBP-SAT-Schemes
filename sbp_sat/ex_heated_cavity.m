@@ -8,16 +8,17 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
+    'n',[50 50],... % numbers of grid cells in each coordinate direction
     't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
-    'CFL',2,...      % crude cfl number
+    'CFL',1,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',false,...
-    'compute_theta',@compute_theta...
+    'to_plot',true,...
+    'compute_theta',@compute_theta,...
+    'steady_state',true...
     );
 
 
@@ -65,6 +66,15 @@ for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
+% if M == 3
+%     par.previous_M_data = 0;
+% else
+%     filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
+%     par.previous_M_data = dlmread(filename,'\t');
+% end
+
+par.previous_M_data = 0;
+
 result = solver(par);
 
 temp = cell(par.n_eqn);
@@ -85,7 +95,7 @@ sigma_yy = compute_sigma_yy(temp);
 qx = compute_qx(temp);
 qy = compute_qy(temp);
 
-filename = strcat('DVM/result_Comp/result_M',num2str(M),'.txt');
+filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
 dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -107,15 +117,31 @@ end
 % Problem Specific Functions
 %========================================================================
 
+% function f = initial_condition(x,y,j,previous_M_data,n_eqn)
+% 
+% variables_prev = size(previous_M_data,2)-2; % variables in the data
+% 
+% % project the lower order M solution to the present by extending with
+% % zeros.
+% if j > variables_prev
+%     f = x * 0;
+% else
+%     f = reshape(previous_M_data(j,:),size(x,2),size(x,1));
+% end
+% 
+% end
+
 function f = initial_condition(x,y,j)
 % Maxwellian/Gaussian
-x0 = 0.25; % centered in the middle of domain
+x0 = 0.5; % centered in the middle of domain
 y0 = 0.5;
-sigma_x = 0.1; % such that 6*sigma = 0.6 so in 0.2 length strip near 
-sigma_y = 0.1;                           % boundary function value = 0
 
 f = x * 0;
 
+switch j
+    case 1 
+        f = exp( -((x-x0).^2 * 100) - ((y-y0).^2*100) );
+end
 end
 
 function f = bc_inhomo(B,bc_id,t)    
@@ -127,6 +153,8 @@ function f = bc_inhomo(B,bc_id,t)
     else
         thetaIn = 1;
     end
+        
+    thetaIn = 0;
     
     switch bc_id
         case 4

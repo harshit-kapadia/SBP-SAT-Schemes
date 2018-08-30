@@ -6,9 +6,15 @@ function output = solver(par)
 if ~isfield(par,'initial_condition')
     par.initial_condition = @zero; % Default: no init. cond.
 end
+
+if ~isfield(par,'steady_state')
+    par.steady_state = false; % Default value for steady state
+end
+
 if ~isfield(par,'source')
     par.source = @zero; % Default: no source.
 end 
+
 if par.num_bc ~=4
     assert(1 == 0, 'not valid num bc');
 end
@@ -49,7 +55,7 @@ y{1} = par.ax(3):h(2):par.ax(4);
 %% Time-step
 
 % a crude approximation for delta_t
-par.dt = min(h)/abs(eigs(par.system.Ax,1,'lm'))/par.CFL; % 1 eigenv.
+par.dt = min(h) * par.CFL/(2 * abs(eigs(par.system.Ax,1,'lm'))); % 1 eigenv.
 % with largest magnitude
 
 
@@ -85,7 +91,7 @@ U = cell(1,par.n_eqn); dxU = U; dyU = U; force = U; UTemp = U;
 k_RK = cell(4,1); % to store the 4 slopes- k1, k2, k3 and k4, i.e. L(U,t)
 
 for j = 1:par.n_eqn
-    U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j);
+    U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j,par.previous_M_data,par.n_eqn);
     
     force{j} = X{1}*0;
 end
@@ -144,10 +150,11 @@ end
 %% Time Loop
 cputime = zeros(1,3);
 step_count = 0;
+residual = 0;
 
-while t < par.t_end
+while t < par.t_end || residual > 10^(-6)
     
-    if t+par.dt > par.t_end
+    if t+par.dt > par.t_end && ~par.steady_state
         par.dt = par.t_end-t;
     end
     
@@ -196,7 +203,17 @@ while t < par.t_end
         % id = 2, y = 1, last column of Y
         % id = 3, x = 0, first row of X
         % id = 4, y = 0, first column of Y
-        
+
+                    
+        bc_ID = 2;
+        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+%         
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
@@ -212,15 +229,6 @@ while t < par.t_end
                                   par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
 
-        bc_ID = 2;
-        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
@@ -229,7 +237,9 @@ while t < par.t_end
                                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
+        
 
+        
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
         for j = 1 : par.n_eqn
@@ -251,7 +261,8 @@ while t < par.t_end
             % Ax(1, [3 4 5]) gives (1,3), (1,4) and (1, 5) entries of Ax
             % [3] W is one vector having a value stored at each grid node
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
-                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);
+                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);            
+          
 
             
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
@@ -268,9 +279,14 @@ while t < par.t_end
         end
     end
     
+    residual = 0; % need to reinitialise
     for RK = 1 : par.RK_order
         for i = 1 : par.n_eqn
             U{i} = U{i} + weight(RK) * k_RK{RK}{i} * par.dt;
+            
+                if par.steady_state && i <= 13 % only check the residual in macroscopic quantities 
+                    residual = residual + norm(weight(RK) * k_RK{RK}{i})^2;
+                end
         end
     end
     
@@ -279,16 +295,18 @@ while t < par.t_end
     cputime(1) = cputime(1) + toc;
     
     if mod(step_count,50) == 0
-        disp('time: neqn: step_count ');
+        disp('time: neqn: step_count: ');
         disp(t);
         disp(par.n_eqn);
         disp(step_count);
+        disp('residual: ');
+        disp(residual);
     end
     
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        contourf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
+        surf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -297,9 +315,20 @@ while t < par.t_end
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([0 1.0]);
+        zlim([-1 1.0]);
         
-        drawnow
+%         var_plot = par.compute_theta(U)';
+%         plot(Y{1}(1,:),var_plot(:,1),'-o');
+%         
+%         title(sprintf('t = %0.2f',t));
+%         colorbar;
+%         xlabel('x'), ylabel('y');
+%         
+%         
+%         xlim(par.ax([1 2]));
+%         ylim([-1 1]);
+        
+        drawnow;
     end
 end
 

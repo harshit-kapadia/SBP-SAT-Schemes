@@ -1,5 +1,5 @@
 % we solve the Heat Conduction problem using discrete velocity method
-function ex_heated_cavity(nc)
+function testing_DVM(nc)
 
 par = struct(...
     'name','Inflow DVM',... % name of example
@@ -7,7 +7,7 @@ par = struct(...
     'bc_inhomo_inflow',@bc_inhomo_inflow,... % boundary inhomogeneity for inflow
     'bc_inhomo_wall',@bc_inhomo_wall,... % boundary inhomogeneity for wall 
     'ax',[0 1 0 1],... % coordinates of computational domain
-    't_end',2.0,... % the end time of the computation
+    't_end',0.5,... % the end time of the computation
     'CFL',2.0,...      % the crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'RK_order',4,...
@@ -18,16 +18,16 @@ par = struct(...
     'compute_velocity',@compute_velocity, ...
     'compute_theta',@compute_theta, ...
     'compute_rhoW_prep',@compute_rhoW_prep,...
-    'compute_thetaW',@compute_thetaW,...
-    'steady_state',true...
+    'compute_thetaW',@compute_thetaW...
     );
 
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
 par.Kn = 0.1;
-par.t_plot = false;
+par.dim_problem = 1;
+par.t_plot = true;
 par.n_eqn = (2 * nc) * (2 * nc);
 % number of points in the spatial discretization
-par.n = [25 25];
+par.n = [2 50];
 
 [par.x_m,par.w_m] = gauss_quadrature(nc,-5,0);
 [par.x_p,par.w_p] = gauss_quadrature(nc,0,5);
@@ -45,7 +45,7 @@ w_grid1D = w_grid1D(perm);
 
 w = wx_grid2D.*wy_grid2D;
 
-% Convert the matrix of grid points into an array and store as a hyperbolic
+% convert the matrix of grid points into an array and store as a hyperbolic
 % system. Do the same for both the directions.
 par.system.Ax = diag(vx_grid2D(:));
 par.system.Ay = diag(vy_grid2D(:));
@@ -68,6 +68,14 @@ par.system.penalty{3} = (-par.system.Ax-abs(par.system.Ax))/2;
 par.system.penalty{2} = (par.system.Ay-abs(par.system.Ay))/2;
 par.system.penalty{4} = (-par.system.Ay-abs(par.system.Ay))/2;
 
+if(par.dim_problem == 1)
+    par.system.B{1} = par.system.B{1} * 0;
+    par.system.B{3} = par.system.B{3} * 0;
+
+    par.system.penalty{1} = par.system.penalty{1} * 0;
+    par.system.penalty{3} = par.system.penalty{3} * 0;
+end
+
 % develop the penalty * B matrix
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i} * par.system.B{i};
@@ -84,7 +92,6 @@ par.value_f0 = arrayfun(@(x,y) f0(x,y),diag(par.system.Ax),diag(par.system.Ay));
     = compute_rhoW_prep_simple(par.system.Ax, par.system.Ay, par.all_w) ;
 
 result = solver_DVM_2x3v(par);
-
 temp = cell(2,par.n_eqn);
 
 for i = 1 : 2
@@ -102,7 +109,7 @@ sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
 qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
 qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
 
-filename = 'heated_cavity/result_DVM.txt';
+filename = 'result_Comp/result_DVM_2D.txt';
 dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -131,7 +138,6 @@ if bc_id == 4 % bottom boundary
         thetaW = 1;
     end
 end
-
 end
 
 % wall boundary condition
@@ -157,6 +163,26 @@ end
 
 end
 
+% compute the Maxwellian, there are two maxellians, one corresponding to
+% g and one for h
+function f = compute_fM(Ax,Ay,rho,ux,uy,theta,id,id_sys)
+
+vx = Ax(id,id);
+vy = Ay(id,id);
+
+
+switch id_sys
+    
+    % maxwellian for g
+    case 1
+        f = (vx * ux + vy * uy + ((vx^2 + vy^2)/2 - 1) * theta + rho) * f0(vx,vy);
+        % maxwellian for h
+    case 2
+        f = theta * f0(vx,vy)/sqrt(2);
+end
+
+end
+
 function f = bc_inhomo_inflow(B,bc_id,Ax,Ay,id_sys,U,all_weights,t)
 
     rho = 0;
@@ -171,33 +197,15 @@ function f = bc_inhomo_inflow(B,bc_id,Ax,Ay,id_sys,U,all_weights,t)
   
     id = find(diag(B) == 1);
     
-    f = diag(B) * 0; 
-end
-
-% Compute the Maxwellian, there are two maxellians, one corresponding to
-% g and one for h.
-function f = compute_fM(Ax,Ay,rho,ux,uy,theta,id,id_sys)
-
-vx = Ax(id,id);
-vy = Ay(id,id);
-
-switch id_sys
+    f = diag(B) * 0;
     
-    % maxwellian for g
-    case 1
-        f = (vx * ux + vy * uy + ((vx^2 + vy^2)/2 - 1) * theta + rho) * f0(vx,vy);
-        % maxwellian for h
-    case 2
-        f = theta * f0(vx,vy)/sqrt(2);
-end
-
 end
 
 % we have two systems of the same type
 function f = ic(x,y,Ax,Ay,mass_matrix,inv_mass_matrix,value_f0)
 
 %rho = exp(-(y-0.5).*(y-0.5)*100);
-%rho = exp(-(x-0.5).*(x-0.5)*100-(y-0.5).*(y-0.5)*100);
+%rho = exp(-(x-0.5).*(x-0.5)*100);
 rho = x * 0;
 ux = x * 0;
 uy = x * 0;

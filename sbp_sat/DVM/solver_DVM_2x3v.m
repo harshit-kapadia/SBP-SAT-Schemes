@@ -147,11 +147,9 @@ rho = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
 initial_total_rho =integrate_xy(rho,PX{1},PY{1});
 
 residual = 0;
-        
+
 while t < par.t_end || residual > 10^(-6)
-    
-    residual = 0;
-    
+   
     if ~par.steady_state
         if t+par.dt > par.t_end
             par.dt = par.t_end-t;
@@ -271,7 +269,6 @@ while t < par.t_end || residual > 10^(-6)
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
 
-             
              bc_ID = 4;
              values = cellfun(@(a) a(:,1),UTemp(i,:),'Un',0);
              
@@ -289,14 +286,16 @@ while t < par.t_end || residual > 10^(-6)
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
-
-                     
+      
              for j = 1 : par.n_eqn
                  
                  % multiplication of the derivatives and the system matrices
-                    W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
-                        [par.system.Ax(j,Ix{j}),par.system.Ay(j,Iy{j})]);                 
-
+%                     W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
+%                         [par.system.Ax(j,Ix{j}),par.system.Ay(j,Iy{j})]); 
+                 
+                 % assuming that the system is diagonal
+                    W = - (dxU{i,j} * par.system.Ax(j,j) +  dyU{i,j} * par.system.Ay(j,j));
+                    
                  k_RK{RK,i}{j} = (W + bc_values{i,j});
              
                  k_RK{RK,i}{j} = k_RK{RK,i}{j} + ...
@@ -316,43 +315,57 @@ while t < par.t_end || residual > 10^(-6)
          end
      end
     
+    rho = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+    [ux,uy] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
+    theta = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+    
     for RK = 1 : par.RK_order
         for i = 1 : 2
             for j = 1 : par.n_eqn
                 U{i,j} = U{i,j} + weight(RK) * k_RK{RK,i}{j} * par.dt;
-                
-                % if we are computing for the steady state
-                if par.steady_state
-                    residual = residual + norm(weight(RK) * k_RK{RK,i}{j})^2;
-                end
             end
         end
     end
-    
-    % earlier we computed the square of the norm
-    residual = sqrt(residual);
-    
+        
     step_count = step_count + 1;
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
 
 
-    if mod(step_count,50) == 0
-        disp('time: neqn: step_count: residual: ');
+    if mod(step_count,10) == 0
+        disp('time: neqn: step_count:');
         disp(t);
         disp(par.n_eqn);
         disp(step_count);
-        disp(residual);
         
-        disp('%density change:');
-        disp((integrate_xy(rho,PX{1},PY{1})-initial_total_rho)*100/initial_total_rho);
+        rho_new = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+        [ux_new,uy_new] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
+        theta_new = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+                
+        % if we are computing for the steady state
+        if par.steady_state
+            residual =  norm(uy-uy_new)^2+ ...
+                        norm(ux-ux_new)^2+ ...
+                        norm(theta-theta_new)^2;
+                    
+           %residual = norm(rho-rho_new)^2;
+        end
+    
+    % change in density
+        disp('change in density');
+        disp(integrate_xy(rho_new,PX{1},PY{1})-integrate_xy(rho,PX{1},PY{1}));
+    % earlier we computed the square of the norm
+        residual = sqrt(residual)/par.dt;
+        disp('residual');
+        disp(residual);
     end
     
     tic
     
     if par.t_plot
-        var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+        var_plot = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
 
+        figure(1);
         contourf(X{1},Y{1},var_plot), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
