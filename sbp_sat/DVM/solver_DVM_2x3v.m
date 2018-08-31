@@ -148,7 +148,7 @@ initial_total_rho =integrate_xy(rho,PX{1},PY{1});
 
 residual = 0;
 
-while t < par.t_end || residual > 10^(-6)
+while t < par.t_end || residual > 10^(-4)
    
     if ~par.steady_state
         if t+par.dt > par.t_end
@@ -344,11 +344,11 @@ while t < par.t_end || residual > 10^(-6)
                 
         % if we are computing for the steady state
         if par.steady_state
-            residual =  norm(uy-uy_new)^2+ ...
-                        norm(ux-ux_new)^2+ ...
-                        norm(theta-theta_new)^2;
+            %residual =  norm(uy-uy_new)^2+ ...
+            %            norm(ux-ux_new)^2+ ...
+            %            norm(theta-theta_new)^2;
                     
-           %residual = norm(rho-rho_new)^2;
+           residual = norm(theta-theta_new)^2/par.dt;
         end
     
     % change in density
