@@ -1,74 +1,3 @@
-Sender: LSF System <lsfadmin@linuxbcsc67>
-Subject: Job 44300774[4]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Exited
-
-Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-x> by user <xx505837> in cluster <rcc> at Fri Aug 31 23:12:50 2018
-Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <xx505837> in cluster <rcc> at Fri Aug 31 23:12:57 2018
-</home/xx505837> was used as the home directory.
-</home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
-Started at Fri Aug 31 23:12:57 2018
-Terminated at Sat Sep  1 01:44:57 2018
-Results reported at Sat Sep  1 01:44:57 2018
-
-Your job looked like:
-
-------------------------------------------------------------
-# LSBATCH: User input
-#!/usr/bin/env zsh
- 
-### Job name
-#BSUB -J "MATLAB_ARRAY[3-9]"
- 
-### File / path where STDOUT will be written, the %J is the job id
-#BSUB -o log_files/heated_cavity_%I
- 
-### Request the time you need for execution in minutes
-### The format for the parameter is: [hour:]minute,
-### that means for 80 minutes you could also use this: 1:20
-#BSUB -W 4:00
- 
-### Request memory you need for your job in MB
-#BSUB -M 5000
- 
-### Change to the work directory
-cd /home/ns179556/SBP_2D/sbp_sat
- 
-### load modules and execute
-module load MISC
-module load matlab
- 
- 
-# start non-interactive batch job
-matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
-run ex_heated_cavity($LSB_JOBINDEX);
-quit();
-EOF
-
-------------------------------------------------------------
-
-Exited with exit code 137.
-
-Resource usage summary:
-
-    CPU time :                                   9149.29 sec.
-    Max Memory :                                 1015 MB
-    Average Memory :                             893.55 MB
-    Total Requested Memory :                     5000.00 MB
-    Delta Memory :                               3985.00 MB
-    Max Swap :                                   -
-    Max Processes :                              5
-    Max Threads :                                49
-    Run time :                                   9141 sec.
-    Turnaround time :                            9127 sec.
-
-The output (if any) follows:
-
-/home/xx505837/.lsbatch/1535749970.44300774.4.shell:cd:18: permission denied: /home/ns179556/SBP_2D/sbp_sat
-(OK) Loading MISC environment
-(WW) Matlab affects the shell environment. Other programs may have become unusable.
-(WW) Use another terminal for any program other than matlab!
-(OK) Loading matlab 2018a
-Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
-Opening log file:  /home/xx505837/java.log.44158
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
@@ -79,7 +8,7 @@ Opening log file:  /home/xx505837/java.log.44158
 To get started, type one of these: helpwin, helpdesk, or demo.
 For product information, visit www.mathworks.com.
  
->> time: neqn: step_count: 
+time: neqn: step_count: 
     0.1750
 
     22
@@ -16360,9 +16289,9 @@ result = solver(par);
 Error in run (line 91)
 evalin('caller', strcat(script, ';'));
 } 
->> 
+
 --------------------------------------------------------------------------------
-          std::terminate() detected at Sat Sep 01 01:44:56 2018 +0200
+          std::terminate() detected at Fri Aug 31 19:00:49 2018 +0200
 --------------------------------------------------------------------------------
 
 Configuration:
@@ -16379,9 +16308,9 @@ Configuration:
   MATLAB Version           : 9.4.0.813654 (R2018a)
   OpenGL                   : software
   Operating System         : "CentOS Linux release 7.4.1708 (Core) "
-  Process ID               : 44158
-  Processor ID             : x86 Family 6 Model 46 Stepping 6, GenuineIntel
-  Session Key              : 32252740-f288-4213-921a-1849d29dad35
+  Process ID               : 3840
+  Processor ID             : x86 Family 6 Model 44 Stepping 2, GenuineIntel
+  Session Key              : 6e4bc34a-d36d-4a2e-9dce-b335f316d7e9
   Static TLS mitigation    : Disabled: Unable to open display
   Window System            : No active display
 
@@ -16391,115 +16320,115 @@ Fault Count: 1
 Abnormal termination
 
 Register State (captured):
-  RAX = 00007f652c6009a0  RBX = 00007f652c9b9c98
-  RCX = 0000000000000000  RDX = 00007f652c99dda8
-  RSP = 00007f65049fd430  RBP = 00007f65049fd7f0
-  RSI = 00007f652c7629f7  RDI = 00007f65049fd440
+  RAX = 00007f759e5a69a0  RBX = 00007f759e95fc98
+  RCX = 0000000000000000  RDX = 00007f759e943da8
+  RSP = 00007f75769a3430  RBP = 00007f75769a37f0
+  RSI = 00007f759e7089f7  RDI = 00007f75769a3440
 
-   R8 = 0000000000000000   R9 = 00007f652b8ff520
-  R10 = 00007f65049fd508  R11 = 00007f64195ab418
-  R12 = 00007f652c9a9c08  R13 = 00007f65049fdbb0
-  R14 = 00007f65049fe090  R15 = 00007f65049fe060
+   R8 = 0000000000000000   R9 = 00007f759d8a5520
+  R10 = 00007f75769a3508  R11 = 00007f7497b2d418
+  R12 = 00007f759e94fc08  R13 = 00007f75769a3bb0
+  R14 = 00007f75769a4090  R15 = 00007f75769a4060
 
-  RIP = 00007f652c6c262e  EFL = 00007f65049fd560
+  RIP = 00007f759e66862e  EFL = 00007f75769a3560
 
    CS = 0400   FS = 0000   GS = 0000
 
 Stack Trace (captured):
-[  0] 0x00007f652c6bbcd3                             bin/glnxa64/libmwfl.so+00838867
-[  1] 0x00007f652c6bbecc                             bin/glnxa64/libmwfl.so+00839372 _ZN10foundation4core4diag15stacktrace_base7captureEm+00000028
-[  2] 0x00007f652c6bdf94                             bin/glnxa64/libmwfl.so+00847764
-[  3] 0x00007f651478913a                            bin/glnxa64/libmwmcr.so+01126714
-[  4] 0x00007f651478b713                            bin/glnxa64/libmwmcr.so+01136403
-[  5] 0x00007f651478ba5a                            bin/glnxa64/libmwmcr.so+01137242
-[  6] 0x00007f651478c065                            bin/glnxa64/libmwmcr.so+01138789
-[  7] 0x00007f651478d397                            bin/glnxa64/libmwmcr.so+01143703
-[  8] 0x00007f652b61ab86 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00584582
-[  9] 0x00007f652b61abd1 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00584657
-[ 10] 0x00007f652b61ae36 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00585270 __cxa_rethrow+00000070
-[ 11] 0x00007f64270e8356                bin/glnxa64/libmwhandle_graphics.so+18666326 _ZN8graphics9primitive6canvas6Canvas10updateImplEbbPKcRKN2hg11UpdateScopeESt8functionIFvRKNSt7__cxx114listIN7mwboost10shared_ptrIN4mcos12COSEventDataEEESaISG_EEEEE+00005350
-[ 12] 0x00007f64270e8d87                bin/glnxa64/libmwhandle_graphics.so+18668935 _ZN8graphics9primitive6canvas6Canvas14initiateUpdateESt8functionIFvRKNSt7__cxx114listIN7mwboost10shared_ptrIN4mcos12COSEventDataEEESaISA_EEEEE+00000215
-[ 13] 0x00007f6426ef7df2                bin/glnxa64/libmwhandle_graphics.so+16633330 _ZN8graphics9primitive6canvas10JavaCanvas11startUpdateERKN7hgutils14UpdateViewInfoE+00000754
-[ 14] 0x00007f64338e352f                             bin/glnxa64/libmwhg.so+04347183
-[ 15] 0x00007f64338ba463                             bin/glnxa64/libmwhg.so+04179043
-[ 16] 0x00007f643370c025                             bin/glnxa64/libmwhg.so+02416677
-[ 17] 0x00007f64338ba426                             bin/glnxa64/libmwhg.so+04178982
-[ 18] 0x00007f6433770f1d                             bin/glnxa64/libmwhg.so+02830109
-[ 19] 0x00007f643388a1c4                             bin/glnxa64/libmwhg.so+03981764
-[ 20] 0x00007f643388a33a                             bin/glnxa64/libmwhg.so+03982138
-[ 21] 0x00007f643388a453                             bin/glnxa64/libmwhg.so+03982419
-[ 22] 0x00007f652c05ba57                       bin/glnxa64/libmwservices.so+03324503
-[ 23] 0x00007f652c05c21d                       bin/glnxa64/libmwservices.so+03326493 _Z26svWS_CommitDatabaseUpdates27svCommitDatabaseUpdatesType+00000141
-[ 24] 0x00007f652c0476de                       bin/glnxa64/libmwservices.so+03241694
-[ 25] 0x00007f652c04e8a8                       bin/glnxa64/libmwservices.so+03270824 _Z25svWS_ProcessPendingEventsiib+00000104
-[ 26] 0x00007f64ff65b730                            bin/glnxa64/libmwjmi.so+01255216
-[ 27] 0x00007f64d5015834                                   <unknown-module>+00000000
-[ 28] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 29] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 30] 0x00007f64d5007ad5                                   <unknown-module>+00000000
-[ 31] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 32] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 33] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 34] 0x00007f64d5008040                                   <unknown-module>+00000000
-[ 35] 0x00007f64d5008114                                   <unknown-module>+00000000
-[ 36] 0x00007f64d5007a90                                   <unknown-module>+00000000
-[ 37] 0x00007f64d50007a7                                   <unknown-module>+00000000
-[ 38] 0x00007f64fda42e96 /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+06897302
-[ 39] 0x00007f64fda842b2 /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+07164594
-[ 40] 0x00007f64fdaa376e /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+07292782
-[ 41] 0x00007f64ff5e85da                            bin/glnxa64/libmwjmi.so+00783834 _Z26mljCallStaticBooleanMethodP7_jclassP10_jmethodIDz+00000170
-[ 42] 0x00007f64ff623a1e                            bin/glnxa64/libmwjmi.so+01026590
-[ 43] 0x00007f652c02d035                       bin/glnxa64/libmwservices.so+03133493
-[ 44] 0x00007f6514784d93                            bin/glnxa64/libmwmcr.so+01109395
-[ 45] 0x00007f6514785992                            bin/glnxa64/libmwmcr.so+01112466
-[ 46] 0x00007f6514785b0a                            bin/glnxa64/libmwmcr.so+01112842
-[ 47] 0x00007f651478630a                            bin/glnxa64/libmwmcr.so+01114890
-[ 48] 0x00007f65141bdb02                   bin/glnxa64/libmwm_dispatcher.so+00543490
-[ 49] 0x00007f651419aa40                   bin/glnxa64/libmwm_dispatcher.so+00399936 _ZN13Mfh_MATLAB_fn16dispatch_fh_implEMS_FviPP11mxArray_tagiS2_EiS2_iS2_+00000448
-[ 50] 0x00007f651419abfe                   bin/glnxa64/libmwm_dispatcher.so+00400382 _ZN13Mfh_MATLAB_fn11dispatch_fhEiPP11mxArray_tagiS2_+00000030
-[ 51] 0x00007f65105d0da1                          bin/glnxa64/libmwm_lxe.so+12619169
-[ 52] 0x00007f65105d1982                          bin/glnxa64/libmwm_lxe.so+12622210
-[ 53] 0x00007f65106b9fc9                          bin/glnxa64/libmwm_lxe.so+13574089
-[ 54] 0x00007f651065b431                          bin/glnxa64/libmwm_lxe.so+13186097
-[ 55] 0x00007f650fe615a8                          bin/glnxa64/libmwm_lxe.so+04822440
-[ 56] 0x00007f650fe63cbc                          bin/glnxa64/libmwm_lxe.so+04832444
-[ 57] 0x00007f650fe6001d                          bin/glnxa64/libmwm_lxe.so+04816925
-[ 58] 0x00007f650fe59ba1                          bin/glnxa64/libmwm_lxe.so+04791201
-[ 59] 0x00007f650fe59dd9                          bin/glnxa64/libmwm_lxe.so+04791769
-[ 60] 0x00007f650fe5f846                          bin/glnxa64/libmwm_lxe.so+04814918
-[ 61] 0x00007f650fe5f92f                          bin/glnxa64/libmwm_lxe.so+04815151
-[ 62] 0x00007f650ff8e503                          bin/glnxa64/libmwm_lxe.so+06055171
-[ 63] 0x00007f650ff91cf3                          bin/glnxa64/libmwm_lxe.so+06069491
-[ 64] 0x00007f65104a1f6d                          bin/glnxa64/libmwm_lxe.so+11378541
-[ 65] 0x00007f651044f60c                          bin/glnxa64/libmwm_lxe.so+11040268
-[ 66] 0x00007f6510456448                          bin/glnxa64/libmwm_lxe.so+11068488
-[ 67] 0x00007f6510457e22                          bin/glnxa64/libmwm_lxe.so+11075106
-[ 68] 0x00007f65104e5807                          bin/glnxa64/libmwm_lxe.so+11655175
-[ 69] 0x00007f65104e5aea                          bin/glnxa64/libmwm_lxe.so+11655914
-[ 70] 0x00007f651269991a                         bin/glnxa64/libmwbridge.so+00207130 _Z8mnParserv+00000874
-[ 71] 0x00007f6514712bb8                            bin/glnxa64/libmwmcr.so+00641976
-[ 72] 0x00007f65287ade9f                         bin/glnxa64/libmwmlutil.so+06524575 _ZNSt13__future_base13_State_baseV29_M_do_setEPSt8functionIFSt10unique_ptrINS_12_Result_baseENS3_8_DeleterEEvEEPb+00000031
-[ 73] 0x00007f6529800e20                             /lib64/libpthread.so.0+00052768 pthread_once+00000080
-[ 74] 0x00007f65287ae126                         bin/glnxa64/libmwmlutil.so+06525222 _ZSt9call_onceIMNSt13__future_base13_State_baseV2EFvPSt8functionIFSt10unique_ptrINS0_12_Result_baseENS4_8_DeleterEEvEEPbEJPS1_S9_SA_EEvRSt9once_flagOT_DpOT0_+00000102
-[ 75] 0x00007f65147129d3                            bin/glnxa64/libmwmcr.so+00641491
-[ 76] 0x00007f652cf1a1a2                            bin/glnxa64/libmwmvm.so+03367330 _ZN14cmddistributor15PackagedTaskIIP10invokeFuncIN7mwboost8functionIFvvEEEEENS2_10shared_ptrINS2_13unique_futureIDTclfp_EEEEEERKT_+00000082
-[ 77] 0x00007f652cf1a4e8                            bin/glnxa64/libmwmvm.so+03368168 _ZNSt17_Function_handlerIFN7mwboost3anyEvEZN14cmddistributor15PackagedTaskIIP10createFuncINS0_8functionIFvvEEEEESt8functionIS2_ET_EUlvE_E9_M_invokeERKSt9_Any_data+00000024
-[ 78] 0x00007f6514d1ce6c                            bin/glnxa64/libmwiqm.so+00867948 _ZN7mwboost6detail8function21function_obj_invoker0ISt8functionIFNS_3anyEvEES4_E6invokeERNS1_15function_bufferE+00000028
-[ 79] 0x00007f6514d1c97f                            bin/glnxa64/libmwiqm.so+00866687 _ZN3iqm18PackagedTaskPlugin7executeEP15inWorkSpace_tagRN7mwboost10shared_ptrIN14cmddistributor17IIPCompletedEventEEE+00000447
-[ 80] 0x00007f6514cfaab1                            bin/glnxa64/libmwiqm.so+00727729
-[ 81] 0x00007f6514cddac8                            bin/glnxa64/libmwiqm.so+00608968
-[ 82] 0x00007f6514cd88bf                            bin/glnxa64/libmwiqm.so+00587967
-[ 83] 0x00007f652c04ca05                       bin/glnxa64/libmwservices.so+03262981
-[ 84] 0x00007f652c04dff2                       bin/glnxa64/libmwservices.so+03268594
-[ 85] 0x00007f652c04e8fb                       bin/glnxa64/libmwservices.so+03270907 _Z25svWS_ProcessPendingEventsiib+00000187
-[ 86] 0x00007f6514713fc3                            bin/glnxa64/libmwmcr.so+00647107
-[ 87] 0x00007f65147146a4                            bin/glnxa64/libmwmcr.so+00648868
-[ 88] 0x00007f651470d3f1                            bin/glnxa64/libmwmcr.so+00619505
-[ 89] 0x00007f65297fbe25                             /lib64/libpthread.so.0+00032293
-[ 90] 0x00007f652b0ab34d                                   /lib64/libc.so.6+01016653 clone+00000109
+[  0] 0x00007f759e661cd3                             bin/glnxa64/libmwfl.so+00838867
+[  1] 0x00007f759e661ecc                             bin/glnxa64/libmwfl.so+00839372 _ZN10foundation4core4diag15stacktrace_base7captureEm+00000028
+[  2] 0x00007f759e663f94                             bin/glnxa64/libmwfl.so+00847764
+[  3] 0x00007f758672f13a                            bin/glnxa64/libmwmcr.so+01126714
+[  4] 0x00007f7586731713                            bin/glnxa64/libmwmcr.so+01136403
+[  5] 0x00007f7586731a5a                            bin/glnxa64/libmwmcr.so+01137242
+[  6] 0x00007f7586732065                            bin/glnxa64/libmwmcr.so+01138789
+[  7] 0x00007f7586733397                            bin/glnxa64/libmwmcr.so+01143703
+[  8] 0x00007f759d5c0b86 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00584582
+[  9] 0x00007f759d5c0bd1 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00584657
+[ 10] 0x00007f759d5c0e36 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00585270 __cxa_rethrow+00000070
+[ 11] 0x00007f74b2b51356                bin/glnxa64/libmwhandle_graphics.so+18666326 _ZN8graphics9primitive6canvas6Canvas10updateImplEbbPKcRKN2hg11UpdateScopeESt8functionIFvRKNSt7__cxx114listIN7mwboost10shared_ptrIN4mcos12COSEventDataEEESaISG_EEEEE+00005350
+[ 12] 0x00007f74b2b51d87                bin/glnxa64/libmwhandle_graphics.so+18668935 _ZN8graphics9primitive6canvas6Canvas14initiateUpdateESt8functionIFvRKNSt7__cxx114listIN7mwboost10shared_ptrIN4mcos12COSEventDataEEESaISA_EEEEE+00000215
+[ 13] 0x00007f74b2960df2                bin/glnxa64/libmwhandle_graphics.so+16633330 _ZN8graphics9primitive6canvas10JavaCanvas11startUpdateERKN7hgutils14UpdateViewInfoE+00000754
+[ 14] 0x00007f74be8b652f                             bin/glnxa64/libmwhg.so+04347183
+[ 15] 0x00007f74be88d463                             bin/glnxa64/libmwhg.so+04179043
+[ 16] 0x00007f74be6df025                             bin/glnxa64/libmwhg.so+02416677
+[ 17] 0x00007f74be88d426                             bin/glnxa64/libmwhg.so+04178982
+[ 18] 0x00007f74be743f1d                             bin/glnxa64/libmwhg.so+02830109
+[ 19] 0x00007f74be85d1c4                             bin/glnxa64/libmwhg.so+03981764
+[ 20] 0x00007f74be85d33a                             bin/glnxa64/libmwhg.so+03982138
+[ 21] 0x00007f74be85d453                             bin/glnxa64/libmwhg.so+03982419
+[ 22] 0x00007f759e001a57                       bin/glnxa64/libmwservices.so+03324503
+[ 23] 0x00007f759e00221d                       bin/glnxa64/libmwservices.so+03326493 _Z26svWS_CommitDatabaseUpdates27svCommitDatabaseUpdatesType+00000141
+[ 24] 0x00007f759dfed6de                       bin/glnxa64/libmwservices.so+03241694
+[ 25] 0x00007f759dff48a8                       bin/glnxa64/libmwservices.so+03270824 _Z25svWS_ProcessPendingEventsiib+00000104
+[ 26] 0x00007f7575607730                            bin/glnxa64/libmwjmi.so+01255216
+[ 27] 0x00007f7545017494                                   <unknown-module>+00000000
+[ 28] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 29] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 30] 0x00007f7545007ad5                                   <unknown-module>+00000000
+[ 31] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 32] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 33] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 34] 0x00007f7545008040                                   <unknown-module>+00000000
+[ 35] 0x00007f7545008114                                   <unknown-module>+00000000
+[ 36] 0x00007f7545007a90                                   <unknown-module>+00000000
+[ 37] 0x00007f75450007a7                                   <unknown-module>+00000000
+[ 38] 0x00007f756f69ce96 /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+06897302
+[ 39] 0x00007f756f6de2b2 /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+07164594
+[ 40] 0x00007f756f6fd76e /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+07292782
+[ 41] 0x00007f75755945da                            bin/glnxa64/libmwjmi.so+00783834 _Z26mljCallStaticBooleanMethodP7_jclassP10_jmethodIDz+00000170
+[ 42] 0x00007f75755cfa1e                            bin/glnxa64/libmwjmi.so+01026590
+[ 43] 0x00007f759dfd3035                       bin/glnxa64/libmwservices.so+03133493
+[ 44] 0x00007f758672ad93                            bin/glnxa64/libmwmcr.so+01109395
+[ 45] 0x00007f758672b992                            bin/glnxa64/libmwmcr.so+01112466
+[ 46] 0x00007f758672bb0a                            bin/glnxa64/libmwmcr.so+01112842
+[ 47] 0x00007f758672c30a                            bin/glnxa64/libmwmcr.so+01114890
+[ 48] 0x00007f7586163b02                   bin/glnxa64/libmwm_dispatcher.so+00543490
+[ 49] 0x00007f7586140a40                   bin/glnxa64/libmwm_dispatcher.so+00399936 _ZN13Mfh_MATLAB_fn16dispatch_fh_implEMS_FviPP11mxArray_tagiS2_EiS2_iS2_+00000448
+[ 50] 0x00007f7586140bfe                   bin/glnxa64/libmwm_dispatcher.so+00400382 _ZN13Mfh_MATLAB_fn11dispatch_fhEiPP11mxArray_tagiS2_+00000030
+[ 51] 0x00007f7582576da1                          bin/glnxa64/libmwm_lxe.so+12619169
+[ 52] 0x00007f7582577982                          bin/glnxa64/libmwm_lxe.so+12622210
+[ 53] 0x00007f758265ffc9                          bin/glnxa64/libmwm_lxe.so+13574089
+[ 54] 0x00007f7582601431                          bin/glnxa64/libmwm_lxe.so+13186097
+[ 55] 0x00007f7581e075a8                          bin/glnxa64/libmwm_lxe.so+04822440
+[ 56] 0x00007f7581e09cbc                          bin/glnxa64/libmwm_lxe.so+04832444
+[ 57] 0x00007f7581e0601d                          bin/glnxa64/libmwm_lxe.so+04816925
+[ 58] 0x00007f7581dffba1                          bin/glnxa64/libmwm_lxe.so+04791201
+[ 59] 0x00007f7581dffdd9                          bin/glnxa64/libmwm_lxe.so+04791769
+[ 60] 0x00007f7581e05846                          bin/glnxa64/libmwm_lxe.so+04814918
+[ 61] 0x00007f7581e0592f                          bin/glnxa64/libmwm_lxe.so+04815151
+[ 62] 0x00007f7581f34503                          bin/glnxa64/libmwm_lxe.so+06055171
+[ 63] 0x00007f7581f37cf3                          bin/glnxa64/libmwm_lxe.so+06069491
+[ 64] 0x00007f7582447f6d                          bin/glnxa64/libmwm_lxe.so+11378541
+[ 65] 0x00007f75823f560c                          bin/glnxa64/libmwm_lxe.so+11040268
+[ 66] 0x00007f75823fc448                          bin/glnxa64/libmwm_lxe.so+11068488
+[ 67] 0x00007f75823fde22                          bin/glnxa64/libmwm_lxe.so+11075106
+[ 68] 0x00007f758248b807                          bin/glnxa64/libmwm_lxe.so+11655175
+[ 69] 0x00007f758248baea                          bin/glnxa64/libmwm_lxe.so+11655914
+[ 70] 0x00007f758463f91a                         bin/glnxa64/libmwbridge.so+00207130 _Z8mnParserv+00000874
+[ 71] 0x00007f75866b8bb8                            bin/glnxa64/libmwmcr.so+00641976
+[ 72] 0x00007f759a753e9f                         bin/glnxa64/libmwmlutil.so+06524575 _ZNSt13__future_base13_State_baseV29_M_do_setEPSt8functionIFSt10unique_ptrINS_12_Result_baseENS3_8_DeleterEEvEEPb+00000031
+[ 73] 0x00007f759b7a6e20                             /lib64/libpthread.so.0+00052768 pthread_once+00000080
+[ 74] 0x00007f759a754126                         bin/glnxa64/libmwmlutil.so+06525222 _ZSt9call_onceIMNSt13__future_base13_State_baseV2EFvPSt8functionIFSt10unique_ptrINS0_12_Result_baseENS4_8_DeleterEEvEEPbEJPS1_S9_SA_EEvRSt9once_flagOT_DpOT0_+00000102
+[ 75] 0x00007f75866b89d3                            bin/glnxa64/libmwmcr.so+00641491
+[ 76] 0x00007f759eec01a2                            bin/glnxa64/libmwmvm.so+03367330 _ZN14cmddistributor15PackagedTaskIIP10invokeFuncIN7mwboost8functionIFvvEEEEENS2_10shared_ptrINS2_13unique_futureIDTclfp_EEEEEERKT_+00000082
+[ 77] 0x00007f759eec04e8                            bin/glnxa64/libmwmvm.so+03368168 _ZNSt17_Function_handlerIFN7mwboost3anyEvEZN14cmddistributor15PackagedTaskIIP10createFuncINS0_8functionIFvvEEEEESt8functionIS2_ET_EUlvE_E9_M_invokeERKSt9_Any_data+00000024
+[ 78] 0x00007f7586cc2e6c                            bin/glnxa64/libmwiqm.so+00867948 _ZN7mwboost6detail8function21function_obj_invoker0ISt8functionIFNS_3anyEvEES4_E6invokeERNS1_15function_bufferE+00000028
+[ 79] 0x00007f7586cc297f                            bin/glnxa64/libmwiqm.so+00866687 _ZN3iqm18PackagedTaskPlugin7executeEP15inWorkSpace_tagRN7mwboost10shared_ptrIN14cmddistributor17IIPCompletedEventEEE+00000447
+[ 80] 0x00007f7586ca0ab1                            bin/glnxa64/libmwiqm.so+00727729
+[ 81] 0x00007f7586c83ac8                            bin/glnxa64/libmwiqm.so+00608968
+[ 82] 0x00007f7586c7e8bf                            bin/glnxa64/libmwiqm.so+00587967
+[ 83] 0x00007f759dff2a05                       bin/glnxa64/libmwservices.so+03262981
+[ 84] 0x00007f759dff3ff2                       bin/glnxa64/libmwservices.so+03268594
+[ 85] 0x00007f759dff48fb                       bin/glnxa64/libmwservices.so+03270907 _Z25svWS_ProcessPendingEventsiib+00000187
+[ 86] 0x00007f75866b9fc3                            bin/glnxa64/libmwmcr.so+00647107
+[ 87] 0x00007f75866ba6a4                            bin/glnxa64/libmwmcr.so+00648868
+[ 88] 0x00007f75866b33f1                            bin/glnxa64/libmwmcr.so+00619505
+[ 89] 0x00007f759b7a1e25                             /lib64/libpthread.so.0+00032293
+[ 90] 0x00007f759d05134d                                   /lib64/libc.so.6+01016653 clone+00000109
 [ 91] 0x0000000000000000                                   <unknown-module>+00000000
 
-** This crash report has been saved to disk as /home/xx505837/matlab_crash_dump.44158-1 **
+** This crash report has been saved to disk as /home/xx505837/matlab_crash_dump.3840-1 **
 
 
 

@@ -1,13 +1,476 @@
-Sender: LSF System <lsfadmin@linuxbmc0326>
-Subject: Job 44300774[9]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Exited
+Sender: LSF System <lsfadmin@linuxbmc0305>
+Subject: Job 44191434[9]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
 
-Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-x> by user <xx505837> in cluster <rcc> at Fri Aug 31 23:12:50 2018
-Job was executed on host(s) <linuxbmc0326>, in queue <normal>, as user <xx505837> in cluster <rcc> at Fri Aug 31 23:12:57 2018
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 22:33:08 2018
+Job was executed on host(s) <linuxbmc0305>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 22:33:11 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 22:33:11 2018
+Terminated at Sat Aug 25 22:36:38 2018
+Results reported at Sat Aug 25 22:36:38 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   204.02 sec.
+    Max Memory :                                 943 MB
+    Average Memory :                             824.86 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4057.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                39
+    Run time :                                   226 sec.
+    Turnaround time :                            210 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.12298
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.0514
+
+   125
+
+    50
+
+time: neqn: step_count 
+    0.1029
+
+   125
+
+   100
+
+time: neqn: step_count 
+    0.1543
+
+   125
+
+   150
+
+time: neqn: step_count 
+    0.2058
+
+   125
+
+   200
+
+time: neqn: step_count 
+    0.2572
+
+   125
+
+   250
+
+time: neqn: step_count 
+    0.3087
+
+   125
+
+   300
+
+time: neqn: step_count 
+    0.3601
+
+   125
+
+   350
+
+time: neqn: step_count 
+    0.4116
+
+   125
+
+   400
+
+time: neqn: step_count 
+    0.4630
+
+   125
+
+   450
+
+486 time steps
+CPU-times
+ advection:         185.12s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:{Reference to non-existent field 'all_w'.
+
+Error in ex_heated_cavity (line 78)
+density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
+
+Error in run (line 91)
+evalin('caller', strcat(script, ';'));
+} 
+>> Sender: LSF System <lsfadmin@linuxbmc0278>
+Subject: Job 44191549[9]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 23:10:18 2018
+Job was executed on host(s) <linuxbmc0278>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 23:10:21 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 23:10:21 2018
+Terminated at Sat Aug 25 23:13:47 2018
+Results reported at Sat Aug 25 23:13:47 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   201.91 sec.
+    Max Memory :                                 889 MB
+    Average Memory :                             595.00 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4111.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                39
+    Run time :                                   205 sec.
+    Turnaround time :                            209 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.17956
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.0514
+
+   125
+
+    50
+
+time: neqn: step_count 
+    0.1029
+
+   125
+
+   100
+
+time: neqn: step_count 
+    0.1543
+
+   125
+
+   150
+
+time: neqn: step_count 
+    0.2058
+
+   125
+
+   200
+
+time: neqn: step_count 
+    0.2572
+
+   125
+
+   250
+
+time: neqn: step_count 
+    0.3087
+
+   125
+
+   300
+
+time: neqn: step_count 
+    0.3601
+
+   125
+
+   350
+
+time: neqn: step_count 
+    0.4116
+
+   125
+
+   400
+
+time: neqn: step_count 
+    0.4630
+
+   125
+
+   450
+
+486 time steps
+CPU-times
+ advection:         184.42s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:{Undefined function or variable 'compute_velocity'.
+
+Error in ex_heated_cavity (line 79)
+[ux,uy] = compute_velocity(temp);
+
+Error in run (line 91)
+evalin('caller', strcat(script, ';'));
+} 
+>> Sender: LSF System <lsfadmin@linuxbmc0278>
+Subject: Job 44191596[9]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-linux> by user <ns179556> in cluster <rcc> at Sat Aug 25 23:57:35 2018
+Job was executed on host(s) <linuxbmc0278>, in queue <normal>, as user <ns179556> in cluster <rcc> at Sat Aug 25 23:57:40 2018
+</home/ns179556> was used as the home directory.
+</home/ns179556/SBP_2D/sbp_sat> was used as the working directory.
+Started at Sat Aug 25 23:57:40 2018
+Terminated at Sun Aug 26 00:01:04 2018
+Results reported at Sun Aug 26 00:01:04 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-9]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/heated_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 4:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/ns179556/SBP_2D/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_heated_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   201.99 sec.
+    Max Memory :                                 887 MB
+    Average Memory :                             654.86 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4113.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                39
+    Run time :                                   207 sec.
+    Turnaround time :                            209 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/ns179556/java.log.14406
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count 
+    0.0514
+
+   125
+
+    50
+
+time: neqn: step_count 
+    0.1029
+
+   125
+
+   100
+
+time: neqn: step_count 
+    0.1543
+
+   125
+
+   150
+
+time: neqn: step_count 
+    0.2058
+
+   125
+
+   200
+
+time: neqn: step_count 
+    0.2572
+
+   125
+
+   250
+
+time: neqn: step_count 
+    0.3087
+
+   125
+
+   300
+
+time: neqn: step_count 
+    0.3601
+
+   125
+
+   350
+
+time: neqn: step_count 
+    0.4116
+
+   125
+
+   400
+
+time: neqn: step_count 
+    0.4630
+
+   125
+
+   450
+
+486 time steps
+CPU-times
+ advection:         183.01s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:>> Sender: LSF System <lsfadmin@linuxbmc0482>
+Subject: Job 44297199[9]: <MATLAB_ARRAY[3-9]> in cluster <rcc> Exited
+
+Job <MATLAB_ARRAY[3-9]> was submitted from host <cluster-x> by user <xx505837> in cluster <rcc> at Fri Aug 31 17:35:27 2018
+Job was executed on host(s) <linuxbmc0482>, in queue <normal>, as user <xx505837> in cluster <rcc> at Fri Aug 31 17:35:32 2018
 </home/xx505837> was used as the home directory.
 </home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
-Started at Fri Aug 31 23:12:57 2018
-Terminated at Sat Sep  1 03:13:04 2018
-Results reported at Sat Sep  1 03:13:04 2018
+Started at Fri Aug 31 17:35:32 2018
+Terminated at Fri Aug 31 21:35:40 2018
+Results reported at Fri Aug 31 21:35:40 2018
 
 Your job looked like:
 
@@ -50,26 +513,26 @@ Exited with exit code 140.
 
 Resource usage summary:
 
-    CPU time :                                   14459.00 sec.
-    Max Memory :                                 1372 MB
-    Average Memory :                             1330.21 MB
+    CPU time :                                   14455.00 sec.
+    Max Memory :                                 1348 MB
+    Average Memory :                             1299.15 MB
     Total Requested Memory :                     5000.00 MB
-    Delta Memory :                               3628.00 MB
+    Delta Memory :                               3652.00 MB
     Max Swap :                                   -
     Max Processes :                              5
     Max Threads :                                43
     Run time :                                   14407 sec.
-    Turnaround time :                            14414 sec.
+    Turnaround time :                            14413 sec.
 
 The output (if any) follows:
 
-/home/xx505837/.lsbatch/1535749970.44300774.9.shell:cd:18: permission denied: /home/ns179556/SBP_2D/sbp_sat
+/home/xx505837/.lsbatch/1535729727.44297199.9.shell:cd:18: permission denied: /home/ns179556/SBP_2D/sbp_sat
 (OK) Loading MISC environment
 (WW) Matlab affects the shell environment. Other programs may have become unusable.
 (WW) Use another terminal for any program other than matlab!
 (OK) Loading matlab 2018a
 Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
-Opening log file:  /home/xx505837/java.log.27699
+Opening log file:  /home/xx505837/java.log.28164
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
@@ -12930,10 +13393,240 @@ time: neqn: step_count:
 residual: 
    2.4918e+37
 
+time: neqn: step_count: 
+  132.3192
+
+   125
+
+       64300
+
+residual: 
+   2.6974e+37
+
+time: neqn: step_count: 
+  132.4220
+
+   125
+
+       64350
+
+residual: 
+   2.9199e+37
+
+time: neqn: step_count: 
+  132.5249
+
+   125
+
+       64400
+
+residual: 
+   3.1608e+37
+
+time: neqn: step_count: 
+  132.6278
+
+   125
+
+       64450
+
+residual: 
+   3.4215e+37
+
+time: neqn: step_count: 
+  132.7307
+
+   125
+
+       64500
+
+residual: 
+   3.7038e+37
+
+time: neqn: step_count: 
+  132.8336
+
+   125
+
+       64550
+
+residual: 
+   4.0094e+37
+
+time: neqn: step_count: 
+  132.9365
+
+   125
+
+       64600
+
+residual: 
+   4.3402e+37
+
+time: neqn: step_count: 
+  133.0394
+
+   125
+
+       64650
+
+residual: 
+   4.6982e+37
+
+time: neqn: step_count: 
+  133.1423
+
+   125
+
+       64700
+
+residual: 
+   5.0858e+37
+
+time: neqn: step_count: 
+  133.2452
+
+   125
+
+       64750
+
+residual: 
+   5.5054e+37
+
+time: neqn: step_count: 
+  133.3481
+
+   125
+
+       64800
+
+residual: 
+   5.9596e+37
+
+time: neqn: step_count: 
+  133.4510
+
+   125
+
+       64850
+
+residual: 
+   6.4513e+37
+
+time: neqn: step_count: 
+  133.5539
+
+   125
+
+       64900
+
+residual: 
+   6.9835e+37
+
+time: neqn: step_count: 
+  133.6567
+
+   125
+
+       64950
+
+residual: 
+   7.5596e+37
+
+time: neqn: step_count: 
+  133.7596
+
+   125
+
+       65000
+
+residual: 
+   8.1833e+37
+
+time: neqn: step_count: 
+  133.8625
+
+   125
+
+       65050
+
+residual: 
+   8.8584e+37
+
+time: neqn: step_count: 
+  133.9654
+
+   125
+
+       65100
+
+residual: 
+   9.5892e+37
+
+time: neqn: step_count: 
+  134.0683
+
+   125
+
+       65150
+
+residual: 
+   1.0380e+38
+
+time: neqn: step_count: 
+  134.1712
+
+   125
+
+       65200
+
+residual: 
+   1.1237e+38
+
+time: neqn: step_count: 
+  134.2741
+
+   125
+
+       65250
+
+residual: 
+   1.2164e+38
+
+time: neqn: step_count: 
+  134.3770
+
+   125
+
+       65300
+
+residual: 
+   1.3167e+38
+
+time: neqn: step_count: 
+  134.4799
+
+   125
+
+       65350
+
+residual: 
+   1.4254e+38
+
+time: neqn: step_count: 
+  134.5828
+
+   125
+
+       65400
+
+residual: 
+   1.5429e+38
+
 User defined signal 2
 
 --------------------------------------------------------------------------------
-       Segmentation violation detected at Sat Sep 01 03:13:01 2018 +0200
+       Segmentation violation detected at Fri Aug 31 21:35:36 2018 +0200
 --------------------------------------------------------------------------------
 
 Configuration:
@@ -12950,9 +13643,9 @@ Configuration:
   MATLAB Version           : 9.4.0.813654 (R2018a)
   OpenGL                   : software
   Operating System         : "CentOS Linux release 7.4.1708 (Core) "
-  Process ID               : 27699
+  Process ID               : 28164
   Processor ID             : x86 Family 6 Model 44 Stepping 2, GenuineIntel
-  Session Key              : 8df5cdc2-a537-4be2-9b66-5c8b23c2573d
+  Session Key              : 93b9afcd-1b55-436b-b232-07843894353a
   Static TLS mitigation    : Disabled: Unable to open display
   Window System            : No active display
 
@@ -12963,35 +13656,35 @@ Abnormal termination
 
 Register State (from fault):
   RAX = 0000000000000000  RBX = 0000000000772c78
-  RCX = ffffffffffffffff  RDX = 00007fa1ba303bc0
-  RSP = 00007ffcb0be2ac0  RBP = 00007ffcb0be2b70
-  RSI = 00007ffcb0be2cb0  RDI = 0000000000000007
+  RCX = ffffffffffffffff  RDX = 00007f542607fbc0
+  RSP = 00007ffe3fa7c340  RBP = 00007ffe3fa7c3f0
+  RSI = 00007ffe3fa7c530  RDI = 0000000000000007
 
    R8 = 0000000000772c00   R9 = 0000000000000000
   R10 = 0000000000000000  R11 = 0000000000000246
-  R12 = 00007ffcb0be2b80  R13 = 00007ffcb0be2cb0
-  R14 = 00007fa1ba303740  R15 = 0000000000000000
+  R12 = 00007ffe3fa7c400  R13 = 00007ffe3fa7c530
+  R14 = 00007f542607f740  R15 = 0000000000000000
 
-  RIP = 00007fa18a7ac41e  EFL = 0000000000010246
+  RIP = 00007f53f661e41e  EFL = 0000000000010246
 
    CS = 0033   FS = 0000   GS = 0000
 
 Stack Trace (from fault):
-[  0] 0x00007fa18a7ac41e /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09593886
-[  1] 0x00007fa1b7bd3270                                   /lib64/libc.so.6+00217712
-[  2] 0x00007fa1b63ea943                             /lib64/libpthread.so.0+00047427 pthread_cond_wait+00000195
-[  3] 0x00007fa1a1317bab                            bin/glnxa64/libmwmcr.so+00748459
-[  4] 0x00007fa1a131932f                            bin/glnxa64/libmwmcr.so+00754479
-[  5] 0x00007fa1a1319704                            bin/glnxa64/libmwmcr.so+00755460 _Z12mcr_run_mainRKN7mwboost9function0IiEEbb+00000196
-[  6] 0x00007fa1a1bded5b                       bin/glnxa64/libmwMVMLocal.so+00445787
-[  7] 0x00007fa1b9aec509                            bin/glnxa64/libmwmvm.so+03265801
-[  8] 0x00007fa1b9aeb414                            bin/glnxa64/libmwmvm.so+03261460
+[  0] 0x00007f53f661e41e /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09593886
+[  1] 0x00007f542393d270                                   /lib64/libc.so.6+00217712
+[  2] 0x00007f5422154943                             /lib64/libpthread.so.0+00047427 pthread_cond_wait+00000195
+[  3] 0x00007f540d081bab                            bin/glnxa64/libmwmcr.so+00748459
+[  4] 0x00007f540d08332f                            bin/glnxa64/libmwmcr.so+00754479
+[  5] 0x00007f540d083704                            bin/glnxa64/libmwmcr.so+00755460 _Z12mcr_run_mainRKN7mwboost9function0IiEEbb+00000196
+[  6] 0x00007f540d948d5b                       bin/glnxa64/libmwMVMLocal.so+00445787
+[  7] 0x00007f5425856509                            bin/glnxa64/libmwmvm.so+03265801
+[  8] 0x00007f5425855414                            bin/glnxa64/libmwmvm.so+03261460
 [  9] 0x0000000000406d21 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/MATLAB+00027937
-[ 10] 0x00007fa1b7bbfc05                                   /lib64/libc.so.6+00138245 __libc_start_main+00000245
+[ 10] 0x00007f5423929c05                                   /lib64/libc.so.6+00138245 __libc_start_main+00000245
 [ 11] 0x0000000000407123 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/MATLAB+00028963
 [ 12] 0x0000000000000000                                   <unknown-module>+00000000
 
-** This crash report has been saved to disk as /home/xx505837/matlab_crash_dump.27699-1 **
+** This crash report has been saved to disk as /home/xx505837/matlab_crash_dump.28164-1 **
 
 
 
