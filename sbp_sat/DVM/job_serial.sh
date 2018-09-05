@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
  
 ### Job name
-#BSUB -J "MATLAB_ARRAY[5]"
+#BSUB -J "MATLAB_ARRAY[5,10]"
  
 ### File / path where STDOUT will be written, the %J is the job id
-#BSUB -o log_files/heated_cavity_DVM%I
+#BSUB -o log_files/heated_cavity_DVM_%I
  
 ### Request the time you need for execution in minutes
 ### The format for the parameter is: [hour:]minute,
@@ -22,7 +22,7 @@ module load MISC
 module load matlab
   
 # start non-interactive batch job
-matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity$LSB_JOBINDEX.log <<EOF
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_DVM_$LSB_JOBINDEX.log <<EOF
 run ex_heated_cavity($LSB_JOBINDEX);
 quit();
 EOF

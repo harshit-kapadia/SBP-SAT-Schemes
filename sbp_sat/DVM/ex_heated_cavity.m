@@ -102,7 +102,7 @@ sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
 qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
 qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
 
-filename = 'heated_cavity/result_DVM.txt';
+filename = strcat('heated_cavity/result_DVM_',num2str(nc),'.txt');
 dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
