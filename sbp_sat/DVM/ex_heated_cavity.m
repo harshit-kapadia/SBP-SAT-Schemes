@@ -24,10 +24,10 @@ par = struct(...
 
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
 par.Kn = 0.1;
-par.t_plot = false;
+par.t_plot = true;
 par.n_eqn = (2 * nc) * (2 * nc);
 % number of points in the spatial discretization
-par.n = [100 100];
+par.n = [50 50];
 
 [par.x_m,par.w_m] = gauss_quadrature(nc,-5,0);
 [par.x_p,par.w_p] = gauss_quadrature(nc,0,5);
@@ -83,7 +83,7 @@ par.value_f0 = arrayfun(@(x,y) f0(x,y),diag(par.system.Ax),diag(par.system.Ay));
 [par.rhoW_vect, par.rhoW_value, par.pos_U]...
     = compute_rhoW_prep_simple(par.system.Ax, par.system.Ay, par.all_w) ;
 
-result = solver_DVM_2x3v(par);
+result = solver_DVM_2x3v_upwind(par);
 
 temp = cell(2,par.n_eqn);
 
@@ -93,44 +93,44 @@ for i = 1 : 2
     end
 end
 
-density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
-[ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
-theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xx = compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_xy = compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
-sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
-qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
-qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
-
-filename = strcat('heated_cavity/result_DVM_',num2str(nc),'.txt');
-dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
-dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
-dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
-
-dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
-
-dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
-
-dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,sigma_xy(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
-
-dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
-dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
+% density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
+% [ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
+% theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
+% sigma_xx = compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
+% sigma_xy = compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
+% sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
+% qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
+% qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
+% 
+% filename = strcat('heated_cavity/result_DVM_',num2str(nc),'.txt');
+% dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
+% dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
+% dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
+% 
+% dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
+% 
+% dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
+% 
+% dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,sigma_xy(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
+% 
+% dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
+% dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
 end
 
 function thetaW = compute_thetaW(bc_id,t)
 thetaW = 0;
 
-if bc_id == 4 % bottom boundary
-    if t <= 1
-        thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
-    else
-        thetaW = 1;
-    end
-end
+% if bc_id == 4 % bottom boundary
+%     if t <= 1
+%         thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
+%     else
+%         thetaW = 1;
+%     end
+% end
 
 end
 
@@ -196,9 +196,9 @@ end
 % we have two systems of the same type
 function f = ic(x,y,Ax,Ay,mass_matrix,inv_mass_matrix,value_f0)
 
-%rho = exp(-(y-0.5).*(y-0.5)*100);
+rho = exp(-(x-0.5).*(x-0.5)*100);
 %rho = exp(-(x-0.5).*(x-0.5)*100-(y-0.5).*(y-0.5)*100);
-rho = x * 0;
+%rho = x * 0;
 ux = x * 0;
 uy = x * 0;
 theta = x * 0;
