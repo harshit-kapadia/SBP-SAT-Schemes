@@ -7,7 +7,7 @@ par = struct(...
     'bc_inhomo_inflow',@bc_inhomo_inflow,... % boundary inhomogeneity for inflow
     'bc_inhomo_wall',@bc_inhomo_wall,... % boundary inhomogeneity for wall 
     'ax',[0 1 0 1],... % coordinates of computational domain
-    't_end',2.0,... % the end time of the computation
+    't_end',10.0,... % the end time of the computation
     'CFL',2.0,...      % the crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'RK_order',4,...
@@ -16,7 +16,13 @@ par = struct(...
     'compute_during', @compute_during, ...
     'compute_density',@compute_density, ...
     'compute_velocity',@compute_velocity, ...
-    'compute_theta',@compute_theta, ...
+    'compute_theta',@compute_theta,...
+    'compute_sigma_xx',@compute_sigma_xx,...
+    'compute_sigma_xy',@compute_sigma_xy,...
+    'compute_sigma_yy',@compute_sigma_yy,...
+    'compute_qx',@compute_qx,...
+    'compute_qy',@compute_qy,...
+    'write_solution',@write_solution,...
     'compute_rhoW_prep',@compute_rhoW_prep,...
     'compute_thetaW',@compute_thetaW,...
     'steady_state',true...
@@ -24,8 +30,9 @@ par = struct(...
 
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
 par.Kn = 0.1;
-par.t_plot = true;
+par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
+par.nc = nc;
 % number of points in the spatial discretization
 par.n = [50 50];
 
@@ -83,7 +90,7 @@ par.value_f0 = arrayfun(@(x,y) f0(x,y),diag(par.system.Ax),diag(par.system.Ay));
 [par.rhoW_vect, par.rhoW_value, par.pos_U]...
     = compute_rhoW_prep_simple(par.system.Ax, par.system.Ay, par.all_w) ;
 
-result = solver_DVM_2x3v_upwind(par);
+result = solver_DVM_2x3v(par);
 
 temp = cell(2,par.n_eqn);
 
@@ -93,44 +100,19 @@ for i = 1 : 2
     end
 end
 
-% density = compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
-% [ux,uy] = compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
-% theta = compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
-% sigma_xx = compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
-% sigma_xy = compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
-% sigma_yy = compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
-% qx = compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
-% qy = compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
-% 
-% filename = strcat('heated_cavity/result_DVM_',num2str(nc),'.txt');
-% dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
-% dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
-% dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
-% 
-% dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
-% dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
-% 
-% dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
-% 
-% dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
-% dlmwrite(filename,sigma_xy(:)','delimiter','\t','-append','precision',10);
-% dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
-% 
-% dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
-% dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
-
 end
 
 function thetaW = compute_thetaW(bc_id,t)
 thetaW = 0;
 
-% if bc_id == 4 % bottom boundary
+if bc_id == 4 % bottom boundary
 %     if t <= 1
 %         thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
 %     else
 %         thetaW = 1;
 %     end
-% end
+    thetaW = 1;
+end
 
 end
 
@@ -193,15 +175,27 @@ end
 
 end
 
+% we can read the moment result and then reinitialize
+function [rho,ux,uy,theta] = read_from_file(M,x)
+filename  = strcat('../heated_cavity/result_M',num2str(M),'.txt');
+data = dlmread(filename,'\t');
+
+rho = reshape(data(3,:),size(x));
+ux = reshape(data(4,:),size(x));
+uy = reshape(data(5,:),size(x));
+theta = reshape(sqrt(2) * (data(6,:) + data(7,:) + data(8,:))/3,size(x));
+
+end
 % we have two systems of the same type
 function f = ic(x,y,Ax,Ay,mass_matrix,inv_mass_matrix,value_f0)
 
-rho = exp(-(x-0.5).*(x-0.5)*100);
-%rho = exp(-(x-0.5).*(x-0.5)*100-(y-0.5).*(y-0.5)*100);
-%rho = x * 0;
-ux = x * 0;
-uy = x * 0;
-theta = x * 0;
+M = 9;
+[rho,ux,uy,theta] = read_from_file(M,x);
+
+% rho = x * 0;
+% ux = x * 0;
+% uy = x * 0;
+% theta = x * 0;
 
 f = store_minimized_entropy(Ax,Ay, ...
      mass_matrix,inv_mass_matrix,rho,ux,uy,theta,value_f0);
@@ -213,18 +207,44 @@ function f = f0(vx,vy)
 f = exp(-(vx^2+vy^2)/2)/(2 * pi);
 end
 
+function [] = write_solution(temp,par,X,Y)
+
+density = par.compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
+[ux,uy] = par.compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
+theta = par.compute_theta(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_xx = par.compute_sigma_xx(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_xy = par.compute_sigma_xy(temp,par.system.Ax,par.system.Ay,par.all_w);
+sigma_yy = par.compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
+qx = par.compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
+qy = par.compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
+
+filename = strcat('heated_cavity/result_DVM_',num2str(par.nc),'.txt');
+dlmwrite(filename,X(:)','delimiter','\t','precision',10);
+dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
+dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
+
+dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,uy(:)','delimiter','\t','-append','precision',10);
+
+dlmwrite(filename,theta(:)','delimiter','\t','-append','precision',10);
+
+dlmwrite(filename,sigma_xx(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,sigma_xy(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
+
+dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
+dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
+
+end
 % compute the density on the complete grid
 function f = compute_density(U,Ax,Ay,all_weights)
 
 [points_x,points_y] = size(U{1,1});
-
 f = zeros(points_x,points_y);
 
 for k = 1 : length(all_weights)
     temp = U{1,k};
-    
     f = f + all_weights(k)*temp;
-    
 end
 
 end

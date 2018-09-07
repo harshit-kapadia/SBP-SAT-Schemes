@@ -99,10 +99,7 @@ end
 %% Related to boundary treatment
 
 % data structure for storing the values at the boundaries
-bc_values = cell(1,par.n_eqn);
-for j = 1:par.n_eqn
-    bc_values{j} = X{1}*0;
-end
+bc_values = cell(par.num_bc,par.n_eqn);
 
 % we need to know which elements are coupled with which one at the
 % boundaries. The 
@@ -152,7 +149,7 @@ cputime = zeros(1,3);
 step_count = 0;
 residual = 0;
 
-while t < par.t_end || residual > 10^(-6)
+while t < par.t_end || residual > 10^(-8)
     
     if t+par.dt > par.t_end && ~par.steady_state
         par.dt = par.t_end-t;
@@ -175,6 +172,13 @@ while t < par.t_end || residual > 10^(-6)
     
     UTemp = U;
     for RK = 1 : par.RK_order
+        
+       % need to reinitialize
+       for i = 1 : par.num_bc
+            for j = 1:par.n_eqn
+                bc_values{i,j} = X{1}*0;
+            end
+       end
         
         evaluate = time_dep & (t_temp(RK) > 0);
             
@@ -203,17 +207,6 @@ while t < par.t_end || residual > 10^(-6)
         % id = 2, y = 1, last column of Y
         % id = 3, x = 0, first row of X
         % id = 4, y = 0, first column of Y
-
-                    
-        bc_ID = 2;
-        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
-        for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
-                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
-                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
-        end
-%         
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
@@ -223,16 +216,26 @@ while t < par.t_end || residual > 10^(-6)
 %                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
 %                 gives us the j-th row of the penalty matrix and the
 %                 entries in all those columns which have no zeros.
-            bc_values{j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+            bc_values{j}(end,:) = bc_values{j}(end,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                                   par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
                                   sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                   par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
         end
+                    
+        bc_ID = 2;
+        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,end) = bc_values{j}(:,end) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+%        
 
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+            bc_values{j}(1,:) = bc_values{j}(1,:) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -243,7 +246,7 @@ while t < par.t_end || residual > 10^(-6)
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
         for j = 1 : par.n_eqn
-            bc_values{j}(:,1) = bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+            bc_values{j}(:,1) = bc_values{j}(:,1) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -263,10 +266,13 @@ while t < par.t_end || residual > 10^(-6)
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
                 [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);            
           
-
-            
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});
+            
+            % add contribution from all the boundaries
+%             for j = 1 : par.num_bc
+%                 k_RK{RK}{i} = k_RK{RK}{i} + bc_values{j,i};
+%             end
             
             k_RK{RK}{i} = k_RK{RK}{i} ...
                            + sumcell(UTemp(Ix_prod{i}),par.system.P(i,Ix_prod{i}))/par.Kn;
@@ -289,18 +295,24 @@ while t < par.t_end || residual > 10^(-6)
                 end
         end
     end
+    residual = sqrt(residual);
     
     step_count = step_count + 1;
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
     
-    if mod(step_count,50) == 0
+    if mod(step_count,100) == 0
         disp('time: neqn: step_count: ');
         disp(t);
         disp(par.n_eqn);
         disp(step_count);
         disp('residual: ');
         disp(residual);
+    end
+    
+    if mod(step_count,500) == 0
+        temp_residual = residual;
+       par.write_solution(U,par,X{1},Y{1},par.M);
     end
     
     %% Plotting
@@ -336,7 +348,7 @@ fprintf('%0.0f time steps\n',step_count)           % Display test
 cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
-
+fprintf('final residual while writting: %0.15e\n',temp_residual);
 
 output = struct('X',X{1}, ...
                 'Y',Y{1}, ...  

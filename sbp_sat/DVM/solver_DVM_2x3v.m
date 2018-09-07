@@ -26,10 +26,6 @@ if ~isfield(par,'source_ind')
     par.source_ind = 1:par.n_eqn;  
 end
 
-% corresponding to every row in Ax, stores the non-zero indices
-Ix = cellfun(@find,num2cell(par.system.Ax',1),'Un',0);         
-Iy = cellfun(@find,num2cell(par.system.Ay',1),'Un',0);
-
 %% Grid Setup
 
 % size of the grid. h1 for the x direction and h2 for the y direction
@@ -93,12 +89,6 @@ end
 % data structure for storing the values at the boundaries
 bc_values = cell(2,par.n_eqn);
 
-for i = 1 : 2
-    for j = 1:par.n_eqn
-        bc_values{i,j} = X{1}*0;
-    end
-end
-
 % we need to know which elements are coupled with which one at the
 % boundaries. The 
 % ID = 1
@@ -148,7 +138,7 @@ initial_total_rho =integrate_xy(rho,PX{1},PY{1});
 
 residual = 0;
 
-while t < par.t_end || residual > 10^(-3)
+while t < par.t_end || residual > 10^(-2)
    
     if ~par.steady_state
         if t+par.dt > par.t_end
@@ -176,6 +166,11 @@ while t < par.t_end || residual > 10^(-3)
      for RK = 1 : par.RK_order
          evaluate = time_dep & (t_temp(RK) > 0);
          
+         for i = 1 : 2
+             for j = 1:par.n_eqn
+                 bc_values{i,j} = X{1} * 0;
+             end
+         end
          
          if evaluate(2)
              for i = 1 : 2
@@ -224,11 +219,13 @@ while t < par.t_end || residual > 10^(-3)
              end
              
              for j = 1 : par.n_eqn
-                 bc_values{i,j}(end,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                 bc_values{i,j}(end,:) = bc_values{i,j}(end,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
              end
+             
+             
              
           bc_ID = 2;
           values = cellfun(@(a) a(:,end),UTemp(i,:),'Un',0);
@@ -243,7 +240,7 @@ while t < par.t_end || residual > 10^(-3)
           end
           
           for j = 1 : par.n_eqn
-              bc_values{i,j}(:,end) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+              bc_values{i,j}(:,end) = bc_values{i,j}(:,end) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                   par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
                   sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                   par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -263,7 +260,7 @@ while t < par.t_end || residual > 10^(-3)
              
              
              for j = 1 : par.n_eqn
-                 bc_values{i,j}(1,:) = bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                 bc_values{i,j}(1,:) = bc_values{i,j}(1,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
@@ -281,7 +278,7 @@ while t < par.t_end || residual > 10^(-3)
              end
              
              for j = 1 : par.n_eqn
-                 bc_values{i,j}(:,1)= bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                 bc_values{i,j}(:,1)= bc_values{i,j}(:,1) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
                      par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                      par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
@@ -289,14 +286,11 @@ while t < par.t_end || residual > 10^(-3)
       
              for j = 1 : par.n_eqn
                  
-                 % multiplication of the derivatives and the system matrices
-%                     W = -sumcell([dxU(i,Ix{j}),dyU(i,Iy{j})],...
-%                         [par.system.Ax(j,Ix{j}),par.system.Ay(j,Iy{j})]); 
                  
                  % assuming that the system is diagonal
                     W = - (dxU{i,j} * par.system.Ax(j,j) +  dyU{i,j} * par.system.Ay(j,j));
                     
-                 k_RK{RK,i}{j} = (W + bc_values{i,j});
+                    k_RK{RK,i}{j} = W + bc_values{i,j};
              
                  k_RK{RK,i}{j} = k_RK{RK,i}{j} + ...
                                  (-UTemp{i,j}+fM{i,j})/par.Kn;
@@ -309,23 +303,34 @@ while t < par.t_end || residual > 10^(-3)
              for i = 1 : 2
                  for j = 1 : par.n_eqn
                      UTemp{i,j} = U{i,j} + k_RK{RK,i}{j} * dt_temp(RK + 1);
-                     
                  end
              end
          end
      end
-    
-    rho = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
-    [ux,uy] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
-    theta = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
-    
+      
+    residual = 0;
+    rho_before = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+    [ux_before,uy_before] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
+    theta_before = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
     for RK = 1 : par.RK_order
         for i = 1 : 2
             for j = 1 : par.n_eqn
                 U{i,j} = U{i,j} + weight(RK) * k_RK{RK,i}{j} * par.dt;
             end
+            
         end
     end
+    
+    rho_after = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
+    [ux_after,uy_after] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
+    theta_after = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+    
+    if par.steady_state
+        residual = norm((rho_after-rho_before)/par.dt)^2 + norm((ux_after-ux_before)/par.dt)^2 ...
+                   +norm((uy_after-uy_before)/par.dt)^2 + norm((theta_after-theta_before)/par.dt)^2;
+    end
+    
+    residual = sqrt(residual);
         
     step_count = step_count + 1;
     t = t + par.dt;
@@ -337,36 +342,27 @@ while t < par.t_end || residual > 10^(-3)
         disp(t);
         disp(par.n_eqn);
         disp(step_count);
-        
-        rho_new = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
-        [ux_new,uy_new] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
-        theta_new = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
-                
-        % if we are computing for the steady state
-        if par.steady_state
-            %residual =  norm(uy-uy_new)^2+ ...
-            %            norm(ux-ux_new)^2+ ...
-            %            norm(theta-theta_new)^2;
                     
-           residual = norm(theta-theta_new)^2/par.dt;
-        end
-    
     % change in density
         disp('change in density');
-        disp(integrate_xy(rho_new,PX{1},PY{1})-integrate_xy(rho,PX{1},PY{1}));
-    % earlier we computed the square of the norm
-        residual = sqrt(residual)/par.dt;
+        disp(integrate_xy(rho,PX{1},PY{1})-initial_total_rho);
+
         disp('residual');
         disp(residual);
+    end
+    
+    if mod(step_count,500) == 0
+        temp_residual = residual;
+        par.write_solution(U,par,X{1},Y{1});
     end
     
     tic
     
     if par.t_plot
-        var_plot = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
-
+        
+        var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
         figure(1);
-        contourf(X{1},Y{1},var_plot), axis xy equal tight;
+        surf(X{1},Y{1},var_plot), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -394,7 +390,7 @@ fprintf('%0.0f time steps\n',step_count)           % Display test
 cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
-
+fprintf('residual while writting %0.15e:\n',temp_residual);
 output = struct('X',X{1}, ...
                 'Y',Y{1}, ...  
                 'sol',U, ...

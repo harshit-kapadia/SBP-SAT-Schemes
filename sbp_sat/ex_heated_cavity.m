@@ -8,7 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[50 50],... % numbers of grid cells in each coordinate direction
+    'n',[100 100],... % numbers of grid cells in each coordinate direction
     't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -16,11 +16,29 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',true,...
+    'to_plot',false,...
+    'compute_density',@compute_density,...
+    'compute_ux',@compute_ux,...
+    'compute_uy',@compute_uy,...
     'compute_theta',@compute_theta,...
+    'compute_sigma_xx',@compute_sigma_xx,...
+    'compute_sigma_xy',@compute_sigma_xy,...
+    'compute_sigma_yy',@compute_sigma_yy,...
+    'compute_qx',@compute_qx,...
+    'compute_qy',@compute_qy,...
+    'write_solution',@write_solution,...
     'steady_state',true...
     );
 
+% incase M if greater then 3 then read the written data. (Only read M + 2)
+filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
+par.M = M;
+if M > 3
+    %par.previous_M_data = dlmread(filename,'\t');
+    par.previous_M_data = zeros(1,1);
+else
+    par.previous_M_data = zeros(1,1);
+end
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
@@ -74,30 +92,61 @@ end
 % end
 
 par.previous_M_data = 0;
-
 result = solver(par);
-
 temp = cell(par.n_eqn);
-
 
 for j = 1 : par.n_eqn
     temp{j} = result(j).sol;
 end
 
+end
 
-density = compute_density(temp);
-ux = compute_ux(temp);
-uy = compute_uy(temp);
-theta = compute_theta(temp);
-sigma_xx = compute_sigma_xx(temp);
-sigma_xy = compute_sigma_xy(temp);
-sigma_yy = compute_sigma_yy(temp);
-qx = compute_qx(temp);
-qy = compute_qy(temp);
+% read data contains the already read files
+function f = initial_condition(x,y,j,read_data)
+
+f = x * 0;
+
+moments_read_data = size(read_data,2) - 2;
+
+% if we have the data from the previous moment system then we initialize
+% from there
+
+if j <= moments_read_data
+        f = reshape(read_data(j+2,:),size(x));
+end
+
+end
+
+function f = bc_inhomo(B,bc_id,t)    
+
+    f = B(:,1)* 0;
+    
+    if t <= 1
+        thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
+    else
+        thetaIn = 1;
+    end
+
+    switch bc_id
+        case 4
+            f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
+    end
+end
+
+function [] = write_solution(temp,par,X,Y,M)
+density = par.compute_density(temp);
+ux = par.compute_ux(temp);
+uy = par.compute_uy(temp);
+theta = par.compute_theta(temp);
+sigma_xx = par.compute_sigma_xx(temp);
+sigma_xy = par.compute_sigma_xy(temp);
+sigma_yy = par.compute_sigma_yy(temp);
+qx = par.compute_qx(temp);
+qy = par.compute_qy(temp);
 
 filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
-dlmwrite(filename,result(1,1).X(:)','delimiter','\t','precision',10);
-dlmwrite(filename,result(1,1).Y(:)','delimiter','\t','precision',10,'-append');
+dlmwrite(filename,X(:)','delimiter','\t','precision',10);
+dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,ux(:)','delimiter','\t','-append','precision',10);
@@ -111,55 +160,6 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
-
-end
-%========================================================================
-% Problem Specific Functions
-%========================================================================
-
-% function f = initial_condition(x,y,j,previous_M_data,n_eqn)
-% 
-% variables_prev = size(previous_M_data,2)-2; % variables in the data
-% 
-% % project the lower order M solution to the present by extending with
-% % zeros.
-% if j > variables_prev
-%     f = x * 0;
-% else
-%     f = reshape(previous_M_data(j,:),size(x,2),size(x,1));
-% end
-% 
-% end
-
-function f = initial_condition(x,y,j)
-% Maxwellian/Gaussian
-x0 = 0.5; % centered in the middle of domain
-y0 = 0.5;
-
-f = x * 0;
-
-switch j
-    case 1 
-        f = exp( -((x-x0).^2 * 100) - ((y-y0).^2*100) );
-end
-end
-
-function f = bc_inhomo(B,bc_id,t)    
-
-    f = B(:,1)* 0;
-    
-    if t <= 1
-        thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
-    else
-        thetaIn = 1;
-    end
-        
-    thetaIn = 0;
-    
-    switch bc_id
-        case 4
-            f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
-    end
 end
 
 function f = compute_density(data)
