@@ -138,7 +138,7 @@ initial_total_rho =integrate_xy(rho,PX{1},PY{1});
 
 residual = 0;
 
-while t < par.t_end || residual > 10^(-2)
+while t < par.t_end || residual > 10^(-10)
    
     if ~par.steady_state
         if t+par.dt > par.t_end

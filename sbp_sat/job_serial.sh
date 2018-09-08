@@ -15,7 +15,7 @@
 #BSUB -M 5000
  
 ### Change to the work directory
-cd /home/ns179556/SBP_2D/sbp_sat
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat
  
 ### load modules and execute
 module load MISC
