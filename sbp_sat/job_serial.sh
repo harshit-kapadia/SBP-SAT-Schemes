@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
  
 ### Job name
-#BSUB -J "MATLAB_ARRAY[3-9]"
+#BSUB -J "MATLAB_ARRAY[11-13]"
  
 ### File / path where STDOUT will be written, the %J is the job id
 #BSUB -o log_files/heated_cavity_%I
