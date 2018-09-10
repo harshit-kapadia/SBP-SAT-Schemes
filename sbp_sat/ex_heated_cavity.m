@@ -183,6 +183,7 @@ f = sqrt(2) * (2 * data{4} - data{6} - data{7})/3;
 end
 
 function f = compute_sigma_xy(data)
+% 110
 f = data{5};
 end
 

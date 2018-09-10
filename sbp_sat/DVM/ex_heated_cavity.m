@@ -328,7 +328,7 @@ f = zeros(points_x,points_y);
 all_weights_xy = (diag(Ax).*diag(Ay)).*all_weights;
 
 for k = 1 : length(all_weights)
-    f = f +  all_weights_xy(k)*U{1,k};
+    f = f + all_weights_xy(k)*U{1,k};
 end
 
 end

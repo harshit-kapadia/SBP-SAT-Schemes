@@ -312,6 +312,12 @@ while t < par.t_end || residual > 10^(-10)
     rho_before = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
     [ux_before,uy_before] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
     theta_before = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_xx_before = par.compute_sigma_xx(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_xy_before = par.compute_sigma_xy(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_yy_before = par.compute_sigma_yy(U,par.system.Ax,par.system.Ay,par.all_w);
+    qx_before = par.compute_qx(U,par.system.Ax,par.system.Ay,par.all_w);
+    qy_before = par.compute_qy(U,par.system.Ax,par.system.Ay,par.all_w);
+    
     for RK = 1 : par.RK_order
         for i = 1 : 2
             for j = 1 : par.n_eqn
@@ -324,10 +330,22 @@ while t < par.t_end || residual > 10^(-10)
     rho_after = par.compute_density(U,par.system.Ax,par.system.Ay,par.all_w);
     [ux_after,uy_after] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
     theta_after = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_xx_after = par.compute_sigma_xx(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_xy_after = par.compute_sigma_xy(U,par.system.Ax,par.system.Ay,par.all_w);
+    sigma_yy_after = par.compute_sigma_yy(U,par.system.Ax,par.system.Ay,par.all_w);
+    qx_after = par.compute_qx(U,par.system.Ax,par.system.Ay,par.all_w);
+    qy_after = par.compute_qy(U,par.system.Ax,par.system.Ay,par.all_w);
     
     if par.steady_state
-        residual = norm((rho_after-rho_before)/par.dt)^2 + norm((ux_after-ux_before)/par.dt)^2 ...
-                   +norm((uy_after-uy_before)/par.dt)^2 + norm((theta_after-theta_before)/par.dt)^2;
+        residual = norm((rho_after-rho_before)/par.dt)^2 ...
+                   +norm((ux_after-ux_before)/par.dt)^2 ...
+                   +norm((uy_after-uy_before)/par.dt)^2 ...
+                   +norm((theta_after-theta_before)/par.dt)^2 ...
+                   +norm((sigma_xx_after-sigma_xx_before)/par.dt)^2 ...
+                   +norm((sigma_xy_after-sigma_xy_before)/par.dt)^2 ...
+                   +norm((sigma_yy_after-sigma_yy_before)/par.dt)^2 ...
+                   +norm((qx_after-qx_before)/par.dt)^2 ...
+                   +norm((qy_after-qy_before)/par.dt)^2;
     end
     
     residual = sqrt(residual);
