@@ -4,7 +4,7 @@
 #BSUB -J "MATLAB_ARRAY[10]"
  
 ### File / path where STDOUT will be written, the %J is the job id
-#BSUB -o log_files/heated_cavity_DVM_%I
+#BSUB -o log_files/lid_driven_cavity_DVM_%I
  
 ### Request the time you need for execution in minutes
 ### The format for the parameter is: [hour:]minute,
@@ -22,7 +22,7 @@ module load MISC
 module load matlab
   
 # start non-interactive batch job
-matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/heated_cavity_DVM_$LSB_JOBINDEX.log <<EOF
-run ex_heated_cavity($LSB_JOBINDEX);
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/lid_driven_cavity_DVM_$LSB_JOBINDEX.log <<EOF
+run ex_lid_driven_cavity($LSB_JOBINDEX);
 quit();
 EOF
