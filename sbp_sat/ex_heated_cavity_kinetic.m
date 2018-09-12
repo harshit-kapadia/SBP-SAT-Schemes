@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_heated_cavity(M)
+function [] = ex_heated_cavity_kinetic(M)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -8,7 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
+    'n',[50 50],... % numbers of grid cells in each coordinate direction
     't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -16,7 +16,7 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',false,...
+    'to_plot',true,...
     'compute_density',@compute_density,...
     'compute_ux',@compute_ux,...
     'compute_uy',@compute_uy,...
@@ -30,9 +30,12 @@ par = struct(...
     'steady_state',true...
     );
 
+% file where the output is written
+par.output_filename = strcat('heated_cavity_kinetic/result_M',num2str(M),'.txt');
+
 % incase M if greater then 3 then read the written data. (Only read M + 2)
-filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
 par.M = M;
+
 if M > 3
     %par.previous_M_data = dlmread(filename,'\t');
     par.previous_M_data = zeros(1,1);
@@ -50,54 +53,31 @@ par.Kn = 0.1;
 
 par.system.Ax = dvlp_Ax2D(M);
 par.system.P = dvlp_Prod2D(M);
-par.system.BIn = dvlp_BInflow2D(M);
-par.system.BWall = dvlp_BWall2D(M);
 
 par.n_eqn = size(par.system.Ax,1);
-
-par.system.BIn = stabilize_boundary(par.system.Ax,par.system.BIn,M);
-par.system.BWall = stabilize_boundary(par.system.Ax,par.system.BWall,M);
 
 % rotation matrices for hermite polynomials
 par.system.rotator = dvlp_RotatorCartesian(M,false);
 
-par.normals_bc = [1,0;0,1;-1,0;0,-1];
-
+% flux along the y direction
 par.system.Ay = par.system.rotator{2}' * par.system.Ax * par.system.rotator{2};
 
+% first boundary
+par.system.penalty{1} = dvlp_penalty_kinetic(par.system.Ax,M);
 
-% id =1, x = 1
-% id = 2 , y = 1
-% id = 3, x = 0
-% id = 4, y = 0
-par.system.B{1} = par.system.BWall;
-par.system.B{2} = par.system.BWall * par.system.rotator{2};
-par.system.B{3} = par.system.BWall * par.system.rotator{3};
-par.system.B{4} = par.system.BWall * par.system.rotator{4};
 
 for i = 1 : par.num_bc
-    An = par.system.Ax * par.normals_bc(i,1) + par.system.Ay * par.normals_bc(i,2);
-    par.system.penalty{i} = dvlp_penalty_char(An,par.system.B{i});
+    par.system.penalty{i} = par.system.rotator{i}' * par.system.penalty{1} * par.system.rotator{i};
+    par.system.B{i} = eye(par.n_eqn); % prescribing B here is just a formality and 
+                                      % is being done only to preserve the code structure
 end
 
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
-% if M == 3
-%     par.previous_M_data = 0;
-% else
-%     filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
-%     par.previous_M_data = dlmread(filename,'\t');
-% end
-
 par.previous_M_data = 0;
 result = solver(par);
-temp = cell(par.n_eqn);
-
-for j = 1 : par.n_eqn
-    temp{j} = result(j).sol;
-end
 
 end
 
@@ -129,12 +109,13 @@ function f = bc_inhomo(B,bc_id,t)
 
     switch bc_id
         case 4
-            f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
+            f(4) = thetaIn/sqrt(2); 
+            f(6) = thetaIn/sqrt(2);
+            f(7) = thetaIn/sqrt(2);
     end
 end
 
-function [] = write_solution(temp,par,X,Y,M)
-
+function [] = write_solution(temp,par,X,Y,M,residual)
 density = par.compute_density(temp);
 ux = par.compute_ux(temp);
 uy = par.compute_uy(temp);
@@ -145,7 +126,7 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
+filename = par.output_filename;
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -161,6 +142,9 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
+
+filename = strcat('heated_cavity_odd/residual_M',num2str(M),'.txt');
+dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
 end
 
 function f = compute_density(data)

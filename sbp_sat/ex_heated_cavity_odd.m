@@ -8,7 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[50 50],... % numbers of grid cells in each coordinate direction
+    'n',[100 100],... % numbers of grid cells in each coordinate direction
     't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -34,7 +34,6 @@ par = struct(...
 par.output_filename = strcat('heated_cavity_odd/result_M',num2str(M),'.txt');
 
 % incase M if greater then 3 then read the written data. (Only read M + 2)
-filename = strcat('heated_cavity_odd/result_M',num2str(M-2),'.txt');
 par.M = M;
 
 if M > 3

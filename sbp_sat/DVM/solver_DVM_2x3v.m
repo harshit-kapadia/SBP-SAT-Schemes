@@ -209,7 +209,8 @@ while t < par.t_end || residual > 10^(-10)
              if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
                 rhoW{bc_ID} = -sumcell(cellfun(@(a) a(end,:),...
                               UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
-                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID}...
+                             - par.compute_vt(bc_ID,t_temp(RK)) * par.rhoW_value_vt{bc_ID};
                 % for a wall bc_g{i,bc_ID} is a cell with every element being a vector. For the in
                 %-flow boundary, every element of the cell is a scalar
                 %quantity. This is because in case of wall, the density at
@@ -233,7 +234,8 @@ while t < par.t_end || residual > 10^(-10)
           if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
               rhoW{bc_ID} = -sumcell(cellfun(@(a) a(:,end),...
                   UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
-                  - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                  - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID} ...
+                  - par.compute_vt(bc_ID,t_temp(RK)) * par.rhoW_value_vt{bc_ID};
               
               bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
                   par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
@@ -253,7 +255,8 @@ while t < par.t_end || residual > 10^(-10)
              if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
                 rhoW{bc_ID} = -sumcell(cellfun(@(a) a(1,:),...
                               UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
-                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                             - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID}...
+                             - par.compute_vt(bc_ID,t_temp(RK)) * par.rhoW_value_vt{bc_ID};
                 bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
                         par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
              end
@@ -272,7 +275,8 @@ while t < par.t_end || residual > 10^(-10)
              if par.wall_boundary(bc_ID) % if the we have a gas wall then we recompute bc_g
                  rhoW{bc_ID} = -sumcell(cellfun(@(a) a(:,1),...
                      UTemp(1,par.pos_U{bc_ID}),'Un',0),par.rhoW_vect{bc_ID})...
-                     - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID};
+                     - par.compute_thetaW(bc_ID,t_temp(RK)) * par.rhoW_value{bc_ID}...
+                     - par.compute_vt(bc_ID,t_temp(RK)) * par.rhoW_value_vt{bc_ID};
                  bc_g{i,bc_ID} = capargs(par.bc_inhomo_wall, par.system.B{bc_ID}, bc_ID,...
                      par.system.Ax, par.system.Ay, rhoW{bc_ID}, i,t_temp(RK));
              end
@@ -350,7 +354,6 @@ while t < par.t_end || residual > 10^(-10)
     
     residual = sqrt(residual);
         
-    step_count = step_count + 1;
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
 
@@ -378,7 +381,9 @@ while t < par.t_end || residual > 10^(-10)
     
     if par.t_plot
         
+        %[var_plot,~] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
         var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+        
         figure(1);
         surf(X{1},Y{1},var_plot), axis xy equal tight;
         
@@ -401,6 +406,7 @@ while t < par.t_end || residual > 10^(-10)
         capargs(par.compute_during,U,weight,k_RK,PX,DX,t);
     end
     
+    step_count = step_count + 1;
     cputime(2) = cputime(2) + toc;
 end
 
