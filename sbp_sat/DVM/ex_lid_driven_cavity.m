@@ -1,5 +1,5 @@
 % we solve the Heat Conduction problem using discrete velocity method
-function ex_heated_cavity(nc)
+function ex_lid_driven_cavity(nc)
 
 par = struct(...
     'name','Inflow DVM',... % name of example
@@ -25,9 +25,11 @@ par = struct(...
     'write_solution',@write_solution,...
     'compute_rhoW_prep',@compute_rhoW_prep,...
     'compute_thetaW',@compute_thetaW,...
+    'compute_vt',@compute_vt,...
     'steady_state',true...
     );
 
+par.output_filename = 'lid_driven_cavity';
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
 par.Kn = 0.1;
 par.t_plot = false;
@@ -87,7 +89,7 @@ par.inv_mass_matrix = inv(par.mass_matrix);
 % store the value of f0 at all the quadrature points
 par.value_f0 = arrayfun(@(x,y) f0(x,y),diag(par.system.Ax),diag(par.system.Ay));
 
-[par.rhoW_vect, par.rhoW_value,par.rhoW_value_vt,par.pos_U]...
+[par.rhoW_vect, par.rhoW_value,par.rhoW_value_vt, par.pos_U]...
     = compute_rhoW_prep_simple(par.system.Ax, par.system.Ay, par.all_w) ;
 
 result = solver_DVM_2x3v(par);
@@ -105,14 +107,29 @@ end
 function thetaW = compute_thetaW(bc_id,t)
 thetaW = 0;
 
-if bc_id == 4 % bottom boundary
+% if bc_id == 2 % bottom boundary
 %     if t <= 1
 %         thetaW = exp(-1/(1-(t-1)^2)) * exp(1);
 %     else
 %         thetaW = 1;
 %     end
-    thetaW = 1;
+% end
+
 end
+
+% tangential velocity of the wall
+function vt = compute_vt(bc_id,t)
+vt = 0;
+
+if bc_id == 2 % top boundary
+    if t <= 1
+        vt = -exp(-1/(1-(t-1)^2)) * exp(1);
+    else
+        vt = -1;
+    end
+    %vt = 1;
+end
+
 
 end
 
@@ -120,9 +137,11 @@ end
 function f = bc_inhomo_wall(B,bc_id,Ax,Ay,rhoW,id_sys,t)
 
 % tangential velocity and normal velocity of the wall
-ux = 0;
 uy = 0;
 
+% at y = 1 we have a tangential velocity
+% minus comes from the tangential direction at the boundary.
+ux = -compute_vt(bc_id,t);
 thetaW = compute_thetaW(bc_id,t);
 
 % we initialiase with a cell because of the data structure used in the code
@@ -177,7 +196,7 @@ end
 
 % we can read the moment result and then reinitialize
 function [rho,ux,uy,theta] = read_from_file(M,x)
-filename  = strcat('../heated_cavity/result_M',num2str(M),'.txt');
+filename  = strcat('../lid_driven_cavity/result_M',num2str(M),'.txt');
 data = dlmread(filename,'\t');
 
 rho = reshape(data(3,:),size(x));
@@ -218,7 +237,7 @@ sigma_yy = par.compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
 qx = par.compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
 qy = par.compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
 
-filename = strcat('heated_cavity/result_DVM_',num2str(par.nc),'.txt');
+filename = strcat(par.output_filename,'/result_DVM_',num2str(par.nc),'.txt');
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);

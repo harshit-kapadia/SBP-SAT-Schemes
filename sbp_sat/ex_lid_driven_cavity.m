@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_heated_cavity(M)
+function [] = ex_lid_driven_cavity(M)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -30,9 +30,12 @@ par = struct(...
     'steady_state',true...
     );
 
+% file where the output is written
+par.output_filename = 'lid_driven_cavity';
+
 % incase M if greater then 3 then read the written data. (Only read M + 2)
-filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
 par.M = M;
+
 if M > 3
     %par.previous_M_data = dlmread(filename,'\t');
     par.previous_M_data = zeros(1,1);
@@ -65,7 +68,6 @@ par.normals_bc = [1,0;0,1;-1,0;0,-1];
 
 par.system.Ay = par.system.rotator{2}' * par.system.Ax * par.system.rotator{2};
 
-
 % id =1, x = 1
 % id = 2 , y = 1
 % id = 3, x = 0
@@ -75,30 +77,33 @@ par.system.B{2} = par.system.BWall * par.system.rotator{2};
 par.system.B{3} = par.system.BWall * par.system.rotator{3};
 par.system.B{4} = par.system.BWall * par.system.rotator{4};
 
+% first boundary
+par.system.penalty{1} = dvlp_penalty_char(par.system.Ax,par.system.B{1});
+
+% rotator for different boundaries
+rotator = dvlp_RotatorCartesian(M,false);
+
 for i = 1 : par.num_bc
-    An = par.system.Ax * par.normals_bc(i,1) + par.system.Ay * par.normals_bc(i,2);
-    par.system.penalty{i} = dvlp_penalty_char(An,par.system.B{i});
+    par.system.penalty{i} = rotator{i}' * par.system.penalty{1};
 end
 
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
-% if M == 3
-%     par.previous_M_data = 0;
-% else
-%     filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
-%     par.previous_M_data = dlmread(filename,'\t');
-% end
-
 par.previous_M_data = 0;
 result = solver(par);
-temp = cell(par.n_eqn);
 
-for j = 1 : par.n_eqn
-    temp{j} = result(j).sol;
 end
 
+function [penalty] = dvlp_penalty_odd(Ax,M)
+
+[odd_ID,~] = get_id_Odd(M);
+
+odd_ID = flatten_cell(odd_ID);
+
+% we pick the columns which get multiplied by the odd variables
+penalty = Ax(:,odd_ID);
 end
 
 % read data contains the already read files
@@ -121,20 +126,26 @@ function f = bc_inhomo(B,bc_id,t)
 
     f = B(:,1)* 0;
     
+    % tangential velocity
+    % tangential direction is -x. Hence the minus
     if t <= 1
-        thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
+        vt = exp(-1/(1-(t-1)^2)) * exp(1);
     else
-        thetaIn = 1;
+        vt = 1;
     end
 
+    % the top wall moves
     switch bc_id
-        case 4
-            f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
+        case 2
+            % The B matrix has already been multiplied by the rotator. As a
+            % result we consider the second column. But in the DG
+            % framework, B is not multiplied by the rotator and so we take
+            % the third column.
+            f = vt * B(:,2); 
     end
 end
 
-function [] = write_solution(temp,par,X,Y,M)
-
+function [] = write_solution(temp,par,X,Y,M,residual)
 density = par.compute_density(temp);
 ux = par.compute_ux(temp);
 uy = par.compute_uy(temp);
@@ -145,7 +156,7 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
+filename = strcat(par.output_filename,'/result_M',num2str(M),'.txt');
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -161,6 +172,9 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
+
+filename_residual = strcat(par.output_filename,'/residual_M',num2str(M),'.txt');
+dlmwrite(filename_residual,residual(:)','delimiter','\t','-append','precision',10);
 end
 
 function f = compute_density(data)

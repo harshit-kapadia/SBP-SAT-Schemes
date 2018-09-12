@@ -297,7 +297,6 @@ while t < par.t_end || residual > 10^(-8)
     end
     residual = sqrt(residual);
     
-    step_count = step_count + 1;
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
     
@@ -312,7 +311,7 @@ while t < par.t_end || residual > 10^(-8)
     
     if mod(step_count,500) == 0
         temp_residual = residual;
-       par.write_solution(U,par,X{1},Y{1},par.M);
+        par.write_solution(U,par,X{1},Y{1},par.M,[t,temp_residual]);
     end
     
     %% Plotting
@@ -324,24 +323,14 @@ while t < par.t_end || residual > 10^(-8)
         colorbar;
         xlabel('x'), ylabel('y');
         
-        
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
         zlim([-1 1.0]);
         
-%         var_plot = par.compute_theta(U)';
-%         plot(Y{1}(1,:),var_plot(:,1),'-o');
-%         
-%         title(sprintf('t = %0.2f',t));
-%         colorbar;
-%         xlabel('x'), ylabel('y');
-%         
-%         
-%         xlim(par.ax([1 2]));
-%         ylim([-1 1]);
-        
         drawnow;
     end
+    
+    step_count = step_count + 1;
 end
 
 fprintf('%0.0f time steps\n',step_count)           % Display test
