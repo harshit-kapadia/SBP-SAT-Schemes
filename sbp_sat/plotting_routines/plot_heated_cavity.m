@@ -1,4 +1,6 @@
 clear all;
+close all;
+
 M_values = 3:2:13;
 
 %% ids of macroscopic quantities
@@ -31,11 +33,33 @@ grid_points = 101;
 X = reshape(X,grid_points,grid_points);
 Y = reshape(Y,grid_points,grid_points);
 
+%% Stress plots
+
+figure(3)
+
+subplot(1,2,1)
+surf(X,Y,reshape(result_dvm(ID_sigma_xy,:),grid_points,grid_points))
+title('Stress from DVM');
+xlabel('X')
+ylabel('Y')
+zlabel('\sigma_{xy}')
+set(gca, 'FontSize', 14);
+
+subplot(1,2,2)
+surf(X,Y,reshape(result_mom{6}(ID_sigma_xy,:),grid_points,grid_points))
+title('Stress from Moment method');
+xlabel('X')
+ylabel('Y')
+zlabel('\sigma_{xy}')
+set(gca, 'FontSize', 14);
+
+
 %% error computation
 delta_x = X(2,1)-X(1,1);
 [~,PX] = sbp_collocated_2(grid_points-1,delta_x);
 
 [error] = compute_error(result_dvm,result_mom,PX);
+
 plot_error(M_values,error,1);
 
 %% residual variation
