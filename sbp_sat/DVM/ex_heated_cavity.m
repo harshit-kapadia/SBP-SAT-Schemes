@@ -87,7 +87,7 @@ par.inv_mass_matrix = inv(par.mass_matrix);
 % store the value of f0 at all the quadrature points
 par.value_f0 = arrayfun(@(x,y) f0(x,y),diag(par.system.Ax),diag(par.system.Ay));
 
-[par.rhoW_vect, par.rhoW_value, par.pos_U]...
+[par.rhoW_vect, par.rhoW_value,par.rhoW_value_vt,par.pos_U]...
     = compute_rhoW_prep_simple(par.system.Ax, par.system.Ay, par.all_w) ;
 
 result = solver_DVM_2x3v(par);
