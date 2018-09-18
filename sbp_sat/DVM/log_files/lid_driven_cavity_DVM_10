@@ -1,3 +1,73 @@
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 44727062[10]: <MATLAB_ARRAY[10]> in cluster <rcc> Exited
+
+Job <MATLAB_ARRAY[10]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Wed Sep 12 22:13:04 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <xx505837> in cluster <rcc> at Wed Sep 12 22:13:08 2018
+</home/xx505837> was used as the home directory.
+</home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM> was used as the working directory.
+Started at Wed Sep 12 22:13:08 2018
+Terminated at Thu Sep 13 23:13:26 2018
+Results reported at Thu Sep 13 23:13:26 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[10]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/lid_driven_cavity_DVM_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 25:00
+
+### Request memory you need for your job in MB
+#BSUB -M 10000
+ 
+### Change to the work directory
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM
+ 
+### load modules and execute
+module load MISC
+module load matlab
+  
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/lid_driven_cavity_DVM_$LSB_JOBINDEX.log <<EOF
+run ex_lid_driven_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+TERM_RUNLIMIT: job killed after reaching LSF run time limit.
+Exited with exit code 140.
+
+Resource usage summary:
+
+    CPU time :                                   90188.00 sec.
+    Max Memory :                                 1235 MB
+    Average Memory :                             1170.09 MB
+    Total Requested Memory :                     10000.00 MB
+    Delta Memory :                               8765.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                45
+    Run time :                                   90017 sec.
+    Turnaround time :                            90022 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.26171
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
@@ -8,7 +78,7 @@
 To get started, type one of these: helpwin, helpdesk, or demo.
 For product information, visit www.mathworks.com.
  
-delta t
+>> delta t
     0.0010
 
 time: neqn: step_count:
@@ -23944,3 +24014,69 @@ change in density
 residual
    8.1542e-10
 
+User defined signal 2
+
+--------------------------------------------------------------------------------
+       Segmentation violation detected at Thu Sep 13 23:13:22 2018 +0200
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  GNU C Library            : 2.17 stable
+  Graphics Driver          : Unknown software 
+  Java Version             : Java 1.8.0_144-b01 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  MATLAB Architecture      : glnxa64
+  MATLAB Entitlement ID    : 870147
+  MATLAB Root              : /rwthfs/rz/SW/MATLAB/matlab_2018a
+  MATLAB Version           : 9.4.0.813654 (R2018a)
+  OpenGL                   : software
+  Operating System         : "CentOS Linux release 7.5.1804 (Core) "
+  Process ID               : 26171
+  Processor ID             : x86 Family 6 Model 46 Stepping 6, GenuineIntel
+  Session Key              : c866542e-8f1f-448c-b5ed-c354a1871562
+  Static TLS mitigation    : Disabled: Unable to open display
+  Window System            : No active display
+
+Fault Count: 1
+
+
+Abnormal termination
+
+Register State (from fault):
+  RAX = 0000000000000000  RBX = 0000000000772c08
+  RCX = ffffffffffffffff  RDX = 00007f878351fbc0
+  RSP = 00007ffe7e924300  RBP = 00007ffe7e9243b0
+  RSI = 00007ffe7e9244f0  RDI = 0000000000000007
+
+   R8 = 0000000000772c00   R9 = 0000000000000000
+  R10 = 0000000000000000  R11 = 0000000000000246
+  R12 = 00007ffe7e9243c0  R13 = 00007ffe7e9244f0
+  R14 = 00007f878351f730  R15 = 0000000000000000
+
+  RIP = 00007f875392f41e  EFL = 0000000000010246
+
+   CS = 0033   FS = 0000   GS = 0000
+
+Stack Trace (from fault):
+[  0] 0x00007f875392f41e /rwthfs/rz/SW/MATLAB/matlab_2018a/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09593886
+[  1] 0x00007f8780de72f0                                   /lib64/libc.so.6+00221936
+[  2] 0x00007f877f5fd993                             /lib64/libpthread.so.0+00047507 pthread_cond_wait+00000195
+[  3] 0x00007f876a529bab                            bin/glnxa64/libmwmcr.so+00748459
+[  4] 0x00007f876a52b32f                            bin/glnxa64/libmwmcr.so+00754479
+[  5] 0x00007f876a52b704                            bin/glnxa64/libmwmcr.so+00755460 _Z12mcr_run_mainRKN7mwboost9function0IiEEbb+00000196
+[  6] 0x00007f876adf0d5b                       bin/glnxa64/libmwMVMLocal.so+00445787
+[  7] 0x00007f8782d09509                            bin/glnxa64/libmwmvm.so+03265801
+[  8] 0x00007f8782d08414                            bin/glnxa64/libmwmvm.so+03261460
+[  9] 0x0000000000406d21 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/MATLAB+00027937
+[ 10] 0x00007f8780dd3445                                   /lib64/libc.so.6+00140357 __libc_start_main+00000245
+[ 11] 0x0000000000407123 /rwthfs/rz/SW/MATLAB/matlab_2018a/bin/glnxa64/MATLAB+00028963
+[ 12] 0x0000000000000000                                   <unknown-module>+00000000
+
+** This crash report has been saved to disk as /home/xx505837/matlab_crash_dump.26171-1 **
+
+
+
+MATLAB is exiting because of fatal error
