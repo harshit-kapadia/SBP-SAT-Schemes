@@ -1,0 +1,1008 @@
+Sender: LSF System <lsfadmin@linuxbmc0290>
+Subject: Job 44980173[4]: <MATLAB_ARRAY[4,6,8,10,12]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[4,6,8,10,12]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Wed Sep 19 09:40:57 2018
+Job was executed on host(s) <linuxbmc0290>, in queue <normal>, as user <xx505837> in cluster <rcc> at Wed Sep 19 09:41:03 2018
+</home/xx505837> was used as the home directory.
+</home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
+Started at Wed Sep 19 09:41:03 2018
+Terminated at Wed Sep 19 10:00:30 2018
+Results reported at Wed Sep 19 10:00:30 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[4,6,8,10,12]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/lid_driven_cavity_odd_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 15:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/lid_driven_cavity_odd_$LSB_JOBINDEX.log <<EOF
+run ex_lid_driven_cavity_odd($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1166.33 sec.
+    Max Memory :                                 694 MB
+    Average Memory :                             634.26 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4306.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                39
+    Run time :                                   1175 sec.
+    Turnaround time :                            1173 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.18351
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count: 
+    0.0018
+
+    22
+
+     0
+
+residual: 
+  5.8079e-122
+
+time: neqn: step_count: 
+    0.1768
+
+    22
+
+   100
+
+residual: 
+   12.1581
+
+time: neqn: step_count: 
+    0.3518
+
+    22
+
+   200
+
+residual: 
+   20.7447
+
+time: neqn: step_count: 
+    0.5268
+
+    22
+
+   300
+
+residual: 
+   18.9790
+
+time: neqn: step_count: 
+    0.7018
+
+    22
+
+   400
+
+residual: 
+   15.7339
+
+time: neqn: step_count: 
+    0.8768
+
+    22
+
+   500
+
+residual: 
+   12.6524
+
+time: neqn: step_count: 
+    1.0518
+
+    22
+
+   600
+
+residual: 
+    9.8840
+
+time: neqn: step_count: 
+    1.2268
+
+    22
+
+   700
+
+residual: 
+    7.3822
+
+time: neqn: step_count: 
+    1.4018
+
+    22
+
+   800
+
+residual: 
+    5.0774
+
+time: neqn: step_count: 
+    1.5768
+
+    22
+
+   900
+
+residual: 
+    3.3608
+
+time: neqn: step_count: 
+    1.7519
+
+    22
+
+        1000
+
+residual: 
+    2.4865
+
+time: neqn: step_count: 
+    1.9269
+
+    22
+
+        1100
+
+residual: 
+    2.1087
+
+time: neqn: step_count: 
+    2.1019
+
+    22
+
+        1200
+
+residual: 
+    1.7099
+
+time: neqn: step_count: 
+    2.2769
+
+    22
+
+        1300
+
+residual: 
+    1.2462
+
+time: neqn: step_count: 
+    2.4519
+
+    22
+
+        1400
+
+residual: 
+    0.9254
+
+time: neqn: step_count: 
+    2.6269
+
+    22
+
+        1500
+
+residual: 
+    0.8057
+
+time: neqn: step_count: 
+    2.8019
+
+    22
+
+        1600
+
+residual: 
+    0.7189
+
+time: neqn: step_count: 
+    2.9769
+
+    22
+
+        1700
+
+residual: 
+    0.5724
+
+time: neqn: step_count: 
+    3.1519
+
+    22
+
+        1800
+
+residual: 
+    0.4046
+
+time: neqn: step_count: 
+    3.3270
+
+    22
+
+        1900
+
+residual: 
+    0.2868
+
+time: neqn: step_count: 
+    3.5020
+
+    22
+
+        2000
+
+residual: 
+    0.2373
+
+time: neqn: step_count: 
+    3.6770
+
+    22
+
+        2100
+
+residual: 
+    0.2052
+
+time: neqn: step_count: 
+    3.8520
+
+    22
+
+        2200
+
+residual: 
+    0.1603
+
+time: neqn: step_count: 
+    4.0270
+
+    22
+
+        2300
+
+residual: 
+    0.1141
+
+time: neqn: step_count: 
+    4.2020
+
+    22
+
+        2400
+
+residual: 
+    0.0867
+
+time: neqn: step_count: 
+    4.3770
+
+    22
+
+        2500
+
+residual: 
+    0.0765
+
+time: neqn: step_count: 
+    4.5520
+
+    22
+
+        2600
+
+residual: 
+    0.0663
+
+time: neqn: step_count: 
+    4.7270
+
+    22
+
+        2700
+
+residual: 
+    0.0508
+
+time: neqn: step_count: 
+    4.9020
+
+    22
+
+        2800
+
+residual: 
+    0.0355
+
+time: neqn: step_count: 
+    5.0771
+
+    22
+
+        2900
+
+residual: 
+    0.0266
+
+time: neqn: step_count: 
+    5.2521
+
+    22
+
+        3000
+
+residual: 
+    0.0231
+
+time: neqn: step_count: 
+    5.4271
+
+    22
+
+        3100
+
+residual: 
+    0.0196
+
+time: neqn: step_count: 
+    5.6021
+
+    22
+
+        3200
+
+residual: 
+    0.0148
+
+time: neqn: step_count: 
+    5.7771
+
+    22
+
+        3300
+
+residual: 
+    0.0104
+
+time: neqn: step_count: 
+    5.9521
+
+    22
+
+        3400
+
+residual: 
+    0.0082
+
+time: neqn: step_count: 
+    6.1271
+
+    22
+
+        3500
+
+residual: 
+    0.0073
+
+time: neqn: step_count: 
+    6.3021
+
+    22
+
+        3600
+
+residual: 
+    0.0061
+
+time: neqn: step_count: 
+    6.4771
+
+    22
+
+        3700
+
+residual: 
+    0.0045
+
+time: neqn: step_count: 
+    6.6522
+
+    22
+
+        3800
+
+residual: 
+    0.0032
+
+time: neqn: step_count: 
+    6.8272
+
+    22
+
+        3900
+
+residual: 
+    0.0025
+
+time: neqn: step_count: 
+    7.0022
+
+    22
+
+        4000
+
+residual: 
+    0.0022
+
+time: neqn: step_count: 
+    7.1772
+
+    22
+
+        4100
+
+residual: 
+    0.0018
+
+time: neqn: step_count: 
+    7.3522
+
+    22
+
+        4200
+
+residual: 
+    0.0013
+
+time: neqn: step_count: 
+    7.5272
+
+    22
+
+        4300
+
+residual: 
+   9.5654e-04
+
+time: neqn: step_count: 
+    7.7022
+
+    22
+
+        4400
+
+residual: 
+   7.9151e-04
+
+time: neqn: step_count: 
+    7.8772
+
+    22
+
+        4500
+
+residual: 
+   7.0191e-04
+
+time: neqn: step_count: 
+    8.0522
+
+    22
+
+        4600
+
+residual: 
+   5.6633e-04
+
+time: neqn: step_count: 
+    8.2272
+
+    22
+
+        4700
+
+residual: 
+   4.0610e-04
+
+time: neqn: step_count: 
+    8.4023
+
+    22
+
+        4800
+
+residual: 
+   2.9170e-04
+
+time: neqn: step_count: 
+    8.5773
+
+    22
+
+        4900
+
+residual: 
+   2.4492e-04
+
+time: neqn: step_count: 
+    8.7523
+
+    22
+
+        5000
+
+residual: 
+   2.1508e-04
+
+time: neqn: step_count: 
+    8.9273
+
+    22
+
+        5100
+
+residual: 
+   1.7013e-04
+
+time: neqn: step_count: 
+    9.1023
+
+    22
+
+        5200
+
+residual: 
+   1.2084e-04
+
+time: neqn: step_count: 
+    9.2773
+
+    22
+
+        5300
+
+residual: 
+   8.8862e-05
+
+time: neqn: step_count: 
+    9.4523
+
+    22
+
+        5400
+
+residual: 
+   7.6517e-05
+
+time: neqn: step_count: 
+    9.6273
+
+    22
+
+        5500
+
+residual: 
+   6.6645e-05
+
+time: neqn: step_count: 
+    9.8023
+
+    22
+
+        5600
+
+residual: 
+   5.1700e-05
+
+time: neqn: step_count: 
+    9.9774
+
+    22
+
+        5700
+
+residual: 
+   3.6395e-05
+
+time: neqn: step_count: 
+   10.1524
+
+    22
+
+        5800
+
+residual: 
+   2.7246e-05
+
+time: neqn: step_count: 
+   10.3274
+
+    22
+
+        5900
+
+residual: 
+   2.3737e-05
+
+time: neqn: step_count: 
+   10.5024
+
+    22
+
+        6000
+
+residual: 
+   2.0387e-05
+
+time: neqn: step_count: 
+   10.6774
+
+    22
+
+        6100
+
+residual: 
+   1.5517e-05
+
+time: neqn: step_count: 
+   10.8524
+
+    22
+
+        6200
+
+residual: 
+   1.0896e-05
+
+time: neqn: step_count: 
+   11.0274
+
+    22
+
+        6300
+
+residual: 
+   8.3867e-06
+
+time: neqn: step_count: 
+   11.2024
+
+    22
+
+        6400
+
+residual: 
+   7.3998e-06
+
+time: neqn: step_count: 
+   11.3774
+
+    22
+
+        6500
+
+residual: 
+   6.2624e-06
+
+time: neqn: step_count: 
+   11.5524
+
+    22
+
+        6600
+
+residual: 
+   4.6797e-06
+
+time: neqn: step_count: 
+   11.7275
+
+    22
+
+        6700
+
+residual: 
+   3.2849e-06
+
+time: neqn: step_count: 
+   11.9025
+
+    22
+
+        6800
+
+residual: 
+   2.5899e-06
+
+time: neqn: step_count: 
+   12.0775
+
+    22
+
+        6900
+
+residual: 
+   2.2943e-06
+
+time: neqn: step_count: 
+   12.2525
+
+    22
+
+        7000
+
+residual: 
+   1.9080e-06
+
+time: neqn: step_count: 
+   12.4275
+
+    22
+
+        7100
+
+residual: 
+   1.4020e-06
+
+time: neqn: step_count: 
+   12.6025
+
+    22
+
+        7200
+
+residual: 
+   9.9056e-07
+
+time: neqn: step_count: 
+   12.7775
+
+    22
+
+        7300
+
+residual: 
+   8.0309e-07
+
+time: neqn: step_count: 
+   12.9525
+
+    22
+
+        7400
+
+residual: 
+   7.1238e-07
+
+time: neqn: step_count: 
+   13.1275
+
+    22
+
+        7500
+
+residual: 
+   5.8168e-07
+
+time: neqn: step_count: 
+   13.3026
+
+    22
+
+        7600
+
+residual: 
+   4.2091e-07
+
+time: neqn: step_count: 
+   13.4776
+
+    22
+
+        7700
+
+residual: 
+   3.0033e-07
+
+time: neqn: step_count: 
+   13.6526
+
+    22
+
+        7800
+
+residual: 
+   2.4932e-07
+
+time: neqn: step_count: 
+   13.8276
+
+    22
+
+        7900
+
+residual: 
+   2.2018e-07
+
+time: neqn: step_count: 
+   14.0026
+
+    22
+
+        8000
+
+residual: 
+   1.7635e-07
+
+time: neqn: step_count: 
+   14.1776
+
+    22
+
+        8100
+
+residual: 
+   1.2600e-07
+
+time: neqn: step_count: 
+   14.3526
+
+    22
+
+        8200
+
+residual: 
+   9.1361e-08
+
+time: neqn: step_count: 
+   14.5276
+
+    22
+
+        8300
+
+residual: 
+   7.7586e-08
+
+time: neqn: step_count: 
+   14.7026
+
+    22
+
+        8400
+
+residual: 
+   6.7997e-08
+
+time: neqn: step_count: 
+   14.8777
+
+    22
+
+        8500
+
+residual: 
+   5.3407e-08
+
+time: neqn: step_count: 
+   15.0527
+
+    22
+
+        8600
+
+residual: 
+   3.7783e-08
+
+time: neqn: step_count: 
+   15.2277
+
+    22
+
+        8700
+
+residual: 
+   2.7927e-08
+
+time: neqn: step_count: 
+   15.4027
+
+    22
+
+        8800
+
+residual: 
+   2.4137e-08
+
+time: neqn: step_count: 
+   15.5777
+
+    22
+
+        8900
+
+residual: 
+   2.0915e-08
+
+time: neqn: step_count: 
+   15.7527
+
+    22
+
+        9000
+
+residual: 
+   1.6111e-08
+
+time: neqn: step_count: 
+   15.9277
+
+    22
+
+        9100
+
+residual: 
+   1.1328e-08
+
+9139 time steps
+CPU-times
+ advection:        1142.00s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 1.611090686599302e-08
+>> 

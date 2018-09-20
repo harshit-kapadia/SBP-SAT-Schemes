@@ -16,7 +16,7 @@ ID_qx = 8 + shift;
 ID_qy = 9 + shift;
 
 filename_moments = cell(length(M_values));
-filename_dvm = '../DVM/heated_cavity/result_DVM_10.txt';
+filename_dvm = '../DVM/heated_cavity/result_DVM_15.txt';
 result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 

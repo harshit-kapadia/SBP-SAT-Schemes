@@ -25,6 +25,7 @@ par = struct(...
     'write_solution',@write_solution,...
     'compute_rhoW_prep',@compute_rhoW_prep,...
     'compute_thetaW',@compute_thetaW,...
+    'compute_vt',@compute_vt,...
     'steady_state',true...
     );
 
@@ -116,11 +117,16 @@ end
 
 end
 
+% tangential velocity of the wall
+function vt = compute_vt(bc_id,t)
+vt = 0;
+end
+
 % wall boundary condition
 function f = bc_inhomo_wall(B,bc_id,Ax,Ay,rhoW,id_sys,t)
 
 % tangential velocity and normal velocity of the wall
-ux = 0;
+ux = -compute_vt(bc_id,t);
 uy = 0;
 
 thetaW = compute_thetaW(bc_id,t);
