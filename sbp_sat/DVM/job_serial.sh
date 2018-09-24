@@ -9,7 +9,7 @@
 ### Request the time you need for execution in minutes
 ### The format for the parameter is: [hour:]minute,
 ### that means for 80 minutes you could also use this: 1:20
-#BSUB -W 60:00
+#BSUB -W 120:00
 
 ### Request memory you need for your job in MB
 #BSUB -M 10000
