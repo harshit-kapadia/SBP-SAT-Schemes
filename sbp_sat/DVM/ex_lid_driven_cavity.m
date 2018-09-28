@@ -8,7 +8,7 @@ par = struct(...
     'bc_inhomo_wall',@bc_inhomo_wall,... % boundary inhomogeneity for wall 
     'ax',[0 1 0 1],... % coordinates of computational domain
     't_end',10.0,... % the end time of the computation
-    'CFL',2.0,...      % the crude cfl number
+    'CFL',(10/8),...      % the crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'RK_order',4,...
     'output',@output,... % problem-specific output routine (defined below)
