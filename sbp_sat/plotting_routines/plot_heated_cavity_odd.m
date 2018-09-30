@@ -21,7 +21,7 @@ result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 
 for i = 1 : length(M_values)
-    filename_moments{i} = strcat('../heated_cavity/','result_M',num2str(M_values(i)),'.txt');
+    filename_moments{i} = strcat('../heated_cavity_odd/','result_M',num2str(M_values(i)),'.txt');
     result_mom{i} = dlmread(filename_moments{i},'\t');
 end
 
