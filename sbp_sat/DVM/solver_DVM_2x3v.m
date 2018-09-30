@@ -381,8 +381,8 @@ while t < par.t_end || residual > 10^(-10)
     
     if par.t_plot
         
-        %[var_plot,~] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
-        var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
+        [var_plot,~] = par.compute_velocity(U,par.system.Ax,par.system.Ay,par.all_w);
+%         var_plot = par.compute_theta(U,par.system.Ax,par.system.Ay,par.all_w);
         
         figure(1);
         surf(X{1},Y{1},var_plot), axis xy equal tight;
