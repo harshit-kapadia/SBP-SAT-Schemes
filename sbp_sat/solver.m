@@ -6,22 +6,30 @@ function output = solver(par)
 if ~isfield(par,'initial_condition')
     par.initial_condition = @zero; % Default: no init. cond.
 end
+
+if ~isfield(par,'steady_state')
+    par.steady_state = false; % Default value for steady state
+end
+
 if ~isfield(par,'source')
     par.source = @zero; % Default: no source.
 end 
+
 if par.num_bc ~=4
     assert(1 == 0, 'not valid num bc');
 end
 
 % % find which of the given data is time dependent
-% time_dep = [nargin(par.source)>2 0];
+time_dep = [nargin(par.source)>3 nargin(par.bc_inhomo)>2];
 
 
 %% Storing index of non-zero entries in system matrices (separately for
                                                            % each equation)
 % corresponding to every row in Ax, stores the non-zero indices
-Ix = cellfun(@find,num2cell(par.system_data.Ax',1),'Un',0);
-Iy = cellfun(@find,num2cell(par.system_data.Ay',1),'Un',0);
+Ix = cellfun(@find,num2cell(par.system.Ax',1),'Un',0);
+Iy = cellfun(@find,num2cell(par.system.Ay',1),'Un',0);
+Ix_prod = cellfun(@find,num2cell(par.system.P,1),'Un',0);  
+
 % each row of Ax in separate cell as here num2cell(Ax',1)
 % what does 'Un',0 do? and purpose of Ix, Iy? --> now clear
 % Error using cellfun
@@ -39,13 +47,15 @@ y{1} = par.ax(3):h(2):par.ax(4);
 
 % Generate both grids. X contains the x coordinates and Y contains
 % the y coordinates.
-[X,Y] = cellfun(@ndgrid,[x],[y],'Un',0);
+
+
+[X,Y] = cellfun(@ndgrid,x,y,'Un',0);
 
 
 %% Time-step
 
 % a crude approximation for delta_t
-par.dt = par.CFL * min(h)/abs(eigs(par.system_data.Ax,1,'lm')); % 1 eigenv.
+par.dt = min(h) * par.CFL/(2 * abs(eigs(par.system.Ax,1,'lm'))); % 1 eigenv.
 % with largest magnitude
 
 
@@ -81,20 +91,67 @@ U = cell(1,par.n_eqn); dxU = U; dyU = U; force = U; UTemp = U;
 k_RK = cell(4,1); % to store the 4 slopes- k1, k2, k3 and k4, i.e. L(U,t)
 
 for j = 1:par.n_eqn
-    U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j);
+    U{j} = X{1}*0 + capargs(par.initial_condition,X{1},Y{1},j,par.previous_M_data,par.n_eqn);
     
     force{j} = X{1}*0;
-    bc_values{j} = X{1}*0;
+end
+
+%% Related to boundary treatment
+
+% data structure for storing the values at the boundaries
+bc_values = cell(par.num_bc,par.n_eqn);
+
+% we need to know which elements are coupled with which one at the
+% boundaries. The 
+% ID = 1
+% a loop over all the boundaries
+% consider the coupling for the Sigma * B term
+bc_coupling_penalty_B = cell(par.num_bc,1);
+
+% consider the coupling for the Sigma * g term
+bc_coupling_penalty = cell(par.num_bc,1);
+
+% we need to do this fixing for the machine error
+for i = 1 : par.num_bc
+    % for the boundary id=i, we find the variables to which every variable
+    % in the moment system
+    % is coupled 
+    % the matrix penalty_B{i} contains Sigma * B at the boundary with ID =
+    % i. the matrix penalty{i} contains the penalty matrix at the boundary
+    % with ID = i.
+    bc_coupling_penalty_B{i} = cellfun ( @(a) find(abs(a) > 1e-14), num2cell(par.system.penalty_B{i},2), 'Un', 0 );
+        % num2cell(par.system.penalty_B{i},2) splits B{i} into 
+        % separate cells where dim specifies which dimensions of A to 
+        % include in each cell
+    bc_coupling_penalty{i} = cellfun ( @(a) find(abs(a)> 1e-14), num2cell(par.system.penalty{i},2), 'Un', 0 );
+end
+
+% scaling for the boundary conditions
+bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
+
+%the boundary inhomogeneity. Every component of the cell will be equal to
+%the number of boundar conditions which we need to prescribe. 
+bc_g = cell(par.num_bc,1);
+
+% compute the boundary inhomogeneity
+t = 0;
+for j = 1:par.num_bc
+    % need to convert to cell for the computations which follow
+    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t));
+end
+
+for j = 1:par.n_eqn
+    force{j} = capargs(par.source,X{1},Y{1},j,t);
 end
 
 %% Time Loop
-par.t_plot = [par.t_plot par.t_end inf]; plot_count = 1;
 cputime = zeros(1,3);
-t = 0; step_count = 0;
+step_count = 0;
+residual = 0;
 
-while t < par.t_end
+while t < par.t_end || residual > 10^(-8)
     
-    if t+par.dt > par.t_end
+    if t+par.dt > par.t_end && ~par.steady_state
         par.dt = par.t_end-t;
     end
     
@@ -115,10 +172,86 @@ while t < par.t_end
     
     UTemp = U;
     for RK = 1 : par.RK_order
+        
+       % need to reinitialize
+       for i = 1 : par.num_bc
+            for j = 1:par.n_eqn
+                bc_values{i,j} = X{1}*0;
+            end
+       end
+        
+        evaluate = time_dep & (t_temp(RK) > 0);
+            
+            if evaluate(1)
+                for j = 1:par.n_eqn 
+                         force{j} = capargs(par.source,X{1},Y{1},j,t_temp(RK)); 
+                end
+            end
+            
+            if evaluate(2)
+                for j = 1:par.num_bc
+                 % need to convert to cell for the computations which follow
+                    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t_temp(RK)));
+   
+                end
+            end
+            
         for i = 1:par.n_eqn
             dxU{i} = DX{1} * UTemp{i};
             dyU{i} = UTemp{i} * DY{1}; % DY is actually transpose of dy
         end
+        
+        %
+        % extract all the values at x = 1, last row of the matrix.
+        % id = 1, x = 1, last row of X
+        % id = 2, y = 1, last column of Y
+        % id = 3, x = 0, first row of X
+        % id = 4, y = 0, first column of Y
+        bc_ID = 1;
+        values = cellfun(@(a) a(end,:),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+%                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
+%                 value of all the variables, at the boundary, which are
+%                 coupled with the j-th variable. 
+%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
+%                 gives us the j-th row of the penalty matrix and the
+%                 entries in all those columns which have no zeros.
+            bc_values{j}(end,:) = bc_values{j}(end,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+                    
+        bc_ID = 2;
+        values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,end) = bc_values{j}(:,end) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                  sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+%        
+
+        bc_ID = 3;
+        values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(1,:) = bc_values{j}(1,:) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+        
+
+        
+        bc_ID = 4;
+        values = cellfun(@(a) a(:,1),UTemp,'Un',0);
+        for j = 1 : par.n_eqn
+            bc_values{j}(:,1) = bc_values{j}(:,1) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+                                par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
+                                sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
+                                par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+        end
+        %
         
         for i = 1 : par.n_eqn
             % Multiplication of dxU and dyU by system matrices Ax and Ay
@@ -131,58 +264,88 @@ while t < par.t_end
             % Ax(1, [3 4 5]) gives (1,3), (1,4) and (1, 5) entries of Ax
             % [3] W is one vector having a value stored at each grid node
             W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
-                [par.system_data.Ax(i,Ix{i}),par.system_data.Ay(i,Iy{i})]);
-                        
+                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);            
+          
             % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
             k_RK{RK}{i} = (W  + force{i} + bc_values{i});
             
+            % add contribution from all the boundaries
+%             for j = 1 : par.num_bc
+%                 k_RK{RK}{i} = k_RK{RK}{i} + bc_values{j,i};
+%             end
+            
+            k_RK{RK}{i} = k_RK{RK}{i} ...
+                           + sumcell(UTemp(Ix_prod{i}),par.system.P(i,Ix_prod{i}))/par.Kn;
+        end
+        
+        for i = 1 : par.n_eqn
             if RK ~= par.RK_order
                 UTemp{i} = U{i} + k_RK{RK}{i} * dt_temp(RK + 1);
             end
         end
     end
     
+    residual = 0; % need to reinitialise
     for RK = 1 : par.RK_order
         for i = 1 : par.n_eqn
             U{i} = U{i} + weight(RK) * k_RK{RK}{i} * par.dt;
+            
+                if par.steady_state && i <= 13 % only check the residual in macroscopic quantities 
+                    residual = residual + norm(weight(RK) * k_RK{RK}{i})^2;
+                end
         end
     end
+    residual = sqrt(residual);
     
-    step_count = step_count + 1;
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
     
-    %% Plotting
-    tic
-    while t>=par.t_plot(plot_count)-1e-14  % If current time has exceeded
-        lambda = (par.t_plot(plot_count)-t+par.dt)/par.dt; %plotting time, define
-        Uplot = U{par.mom_output}; % linear interpolation in time.
-        if plot_count==length(par.t_plot)-1      % Is final time reached?
-            if nargout                   % If yes, save solution at final
-                output = struct('x',x{1},'y',y{1},'U',U,'Px',PX{1},'Py',PY{1});     % time.
-            end
-        else                           % If not, invoke plotting routine.
-            xplot = x{1};             % Assign grids at
-            yplot = y{1};          % outputted moments.
-            %             if length(par.mom_output)==1        % If only a single moment
-            %                 xplot = xplot{:}; yplot = yplot{:}; Uplot = Uplot{par.mom_output};% is
-            %             end                         % plotted, remove cell structure.
-            if nargout(par.output)                     % Call output rou,
-                par = par.output(par,xplot,yplot,Uplot,plot_count);%tine-
-            else                          % allowing for it to modify the
-                par.output(par,xplot,yplot,Uplot,plot_count)% struct par.
-            end
-        end
-        plot_count = plot_count+1;
+    if mod(step_count,100) == 0
+        disp('time: neqn: step_count: ');
+        disp(t);
+        disp(par.n_eqn);
+        disp(step_count);
+        disp('residual: ');
+        disp(residual);
     end
-    cputime(2) = cputime(2) + toc;
+    
+    if mod(step_count,500) == 0
+        temp_residual = residual;
+        par.write_solution(U,par,X{1},Y{1},par.M,[t,temp_residual]);
+    end
+    
+    %% Plotting
+    if par.to_plot && mod(step_count,10) == 0
+        
+        surf(X{1},Y{1},par.compute_ux(U)), axis xy equal tight;
+        
+        title(sprintf('t = %0.2f',t));
+        colorbar;
+        xlabel('x'), ylabel('y');
+        
+        xlim(par.ax([1 2]));
+        ylim(par.ax([3 4]));
+        zlim([-1 1.0]);
+        
+        drawnow;
+    end
+    
+    step_count = step_count + 1;
 end
 
 fprintf('%0.0f time steps\n',step_count)           % Display test
 cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
+fprintf('final residual while writting: %0.15e\n',temp_residual);
 
+output = struct('X',X{1}, ...
+                'Y',Y{1}, ...  
+                'sol',U, ...
+                 'PX',PX{1}, ...
+                 'PY',PY{1}, ...
+                 'h',h);
+             
 end
 
 
@@ -201,10 +364,12 @@ end
 
 function S = sumcell(A,w)
 % Add vector of cells A, weighted with (corresponding entries of) vector w.
-S = A{1}*w(1); % S is a vector as A{1} is vector. Need this separately for
+S = 0; % *S is a vector as A{1} is vector*. Need this separately for
 % initialization of S with proper length? NOPE
-for j = 2:length(w)
-    S = S+A{j}*w(j);
+% A{1} can also be a matrix, right? then mat. vect. multip. *WRONG* A all
+% the entries of matrix but A{i} has non-zero ith column entries
+for j = 1:length(w)
+    S = S + A{j}*w(j);
 end
 end
 
