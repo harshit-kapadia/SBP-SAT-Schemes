@@ -317,7 +317,7 @@ while t < par.t_end || residual > 10^(-8)
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        surf(X{1},Y{1},par.compute_ux(U)), axis xy equal tight;
+        contourf(X{1},Y{1},par.compute_density(U)), axis xy equal tight;
         
         title(sprintf('t = %0.2f',t));
         colorbar;

@@ -7,7 +7,7 @@ par = struct(...
     'bc_inhomo_inflow',@bc_inhomo_inflow,... % boundary inhomogeneity for inflow
     'bc_inhomo_wall',@bc_inhomo_wall,... % boundary inhomogeneity for wall 
     'ax',[0 1 0 1],... % coordinates of computational domain
-    't_end',1.0,... % the end time of the computation
+    't_end',0.3,... % the end time of the computation
     'CFL',(10/8),...      % the crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'RK_order',4,...
@@ -26,12 +26,12 @@ par = struct(...
     'compute_rhoW_prep',@compute_rhoW_prep,...
     'compute_thetaW',@compute_thetaW,...
     'compute_vt',@compute_vt,...
-    'steady_state',true...
+    'steady_state',false...
     );
 
 par.wall_boundary = [true,true,true,true]; % which of the boundaries are wall boundaries
 par.Kn = 0.1;
-par.t_plot = true;
+par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
 par.nc = nc;
 % number of points in the spatial discretization
@@ -189,7 +189,8 @@ function f = ic(x,y,Ax,Ay,mass_matrix,inv_mass_matrix,value_f0)
 % [rho,ux,uy,theta] = read_from_file(M,x);
 
 rho = exp(-(x-0.5).*(x-0.5)*50 - (y-0.5).*(y-0.5)*50); % sigma_x=sigma_y=0.1
-ux = exp(-(x-0.5).*(x-0.5)*50 - (y-0.5).*(y-0.5)*50); % 6*sigma = 0.6
+ux = 0 ; % gaussian not moving in x-direction
+% ux = exp(-(x-0.5).*(x-0.5)*50 - (y-0.5).*(y-0.5)*50); % 6*sigma = 0.6
 uy = x * 0;
 theta = x * 0;
 
