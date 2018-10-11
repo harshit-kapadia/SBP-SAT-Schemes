@@ -63,7 +63,7 @@ delta_x = X(2,1)-X(1,1);
 plot_error(M_values,error,1);
 
 %% residual variation
-filename = '../heated_cavity/residual_M13.txt';
+filename = '../heated_cavity_odd/residual_M13.txt';
 residual = dlmread(filename,'\t');
 
 plot_residual(residual,2);

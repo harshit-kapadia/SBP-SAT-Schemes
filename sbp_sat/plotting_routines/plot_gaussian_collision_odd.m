@@ -16,12 +16,12 @@ ID_qx = 8 + shift;
 ID_qy = 9 + shift;
 
 filename_moments = cell(length(M_values));
-filename_dvm = '../DVM/lid_driven_cavity/result_DVM_20.txt';
+filename_dvm = '../DVM/gaussian_collision/result_DVM_20.txt';
 result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 
 for i = 1 : length(M_values)
-    filename_moments{i} = strcat('../lid_driven_cavity_odd/','result_M',num2str(M_values(i)),'.txt');
+    filename_moments{i} = strcat('../gaussian_collision_odd/','result_M',num2str(M_values(i)),'.txt');
     result_mom{i} = dlmread(filename_moments{i},'\t');
 end
 
@@ -38,7 +38,7 @@ Y = reshape(Y,grid_points,grid_points);
 figure(3)
 
 subplot(1,2,1)
-contourf(X,Y,reshape(result_dvm(ID_theta,:),grid_points,grid_points))
+contourf(X,Y,reshape(result_dvm(ID_sigma_xy,:),grid_points,grid_points))
 title('Discrete Velocity Method');
 xlabel('X')
 ylabel('Y')
@@ -46,7 +46,7 @@ zlabel('\sigma_{xy}')
 set(gca, 'FontSize', 14);
 
 subplot(1,2,2)
-contourf(X,Y,reshape(result_mom{11}(ID_theta,:),grid_points,grid_points))
+contourf(X,Y,reshape(result_mom{6}(ID_sigma_xy,:),grid_points,grid_points))
 title('Moment method');
 xlabel('X')
 ylabel('Y')
@@ -63,7 +63,7 @@ delta_x = X(2,1)-X(1,1);
 plot_error(M_values,error,1);
 
 %% residual variation
-filename = '../lid_driven_cavity_odd/residual_M13.txt';
+filename = '../gaussian_collision_odd/residual_M13.txt';
 residual = dlmread(filename,'\t');
 
 plot_residual(residual,2);
