@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
  
 ### Job name
-#BSUB -J "MATLAB_ARRAY[20]"
+#BSUB -J "MATLAB_ARRAY[50]"
  
 ### File / path where STDOUT will be written, the %J is the job id
 #BSUB -o log_files/gaussian_collision_DVM_%I
@@ -12,7 +12,7 @@
 #BSUB -W 120:00
 
 ### Request memory you need for your job in MB
-#BSUB -M 10000
+#BSUB -M 32000
  
 ### Change to the work directory
 cd /home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM

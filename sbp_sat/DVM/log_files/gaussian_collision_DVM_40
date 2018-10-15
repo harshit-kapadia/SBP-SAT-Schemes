@@ -1,0 +1,337 @@
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 45374563[40]: <MATLAB_ARRAY[40,50]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[40,50]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Sun Oct 14 15:06:47 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <xx505837> in cluster <rcc> at Sun Oct 14 15:06:51 2018
+</home/xx505837> was used as the home directory.
+</home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM> was used as the working directory.
+Started at Sun Oct 14 15:06:51 2018
+Terminated at Sun Oct 14 19:02:44 2018
+Results reported at Sun Oct 14 19:02:44 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[40,50]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/gaussian_collision_DVM_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 120:00
+
+### Request memory you need for your job in MB
+#BSUB -M 18000
+ 
+### Change to the work directory
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM
+ 
+### load modules and execute
+module load MISC
+module load matlab
+  
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/gaussian_collision_DVM_$LSB_JOBINDEX.log <<EOF
+run ex_gaussian_collision($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   14204.00 sec.
+    Max Memory :                                 15895 MB
+    Average Memory :                             15594.10 MB
+    Total Requested Memory :                     18000.00 MB
+    Delta Memory :                               2105.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                45
+    Run time :                                   14175 sec.
+    Turnaround time :                            14157 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.17789
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> delta t
+    0.0016
+
+time: neqn: step_count:
+    0.0016
+
+        6400
+
+     0
+
+change in density
+   2.7756e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0176
+
+        6400
+
+    10
+
+change in density
+  -4.1633e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0336
+
+        6400
+
+    20
+
+change in density
+  -2.7756e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0496
+
+        6400
+
+    30
+
+change in density
+  -6.9389e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0657
+
+        6400
+
+    40
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0817
+
+        6400
+
+    50
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0977
+
+        6400
+
+    60
+
+change in density
+  -2.3592e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1137
+
+        6400
+
+    70
+
+change in density
+  -2.6368e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1297
+
+        6400
+
+    80
+
+change in density
+  -2.7756e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1457
+
+        6400
+
+    90
+
+change in density
+  -3.3307e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1617
+
+        6400
+
+   100
+
+change in density
+  -3.8858e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1778
+
+        6400
+
+   110
+
+change in density
+  -4.1633e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1938
+
+        6400
+
+   120
+
+change in density
+  -4.7184e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2098
+
+        6400
+
+   130
+
+change in density
+  -4.7184e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2258
+
+        6400
+
+   140
+
+change in density
+  -5.4123e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2418
+
+        6400
+
+   150
+
+change in density
+  -5.9674e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2578
+
+        6400
+
+   160
+
+change in density
+  -6.2450e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2738
+
+        6400
+
+   170
+
+change in density
+  -6.6613e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2899
+
+        6400
+
+   180
+
+change in density
+  -7.2164e-16
+
+residual
+     0
+
+188 time steps
+CPU-times
+ advection:       13832.69s  100%
+plotting:            0.01s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:residual while writting 0.000000000000000e+00:
+>> 
