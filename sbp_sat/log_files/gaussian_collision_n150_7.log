@@ -1,0 +1,57 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+time: neqn: step_count: 
+   8.0427e-04
+
+    70
+
+     0
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.0812
+
+    70
+
+   100
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.1617
+
+    70
+
+   200
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.2421
+
+    70
+
+   300
+
+residual: 
+     0
+
+374 time steps
+CPU-times
+ advection:         291.87s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 0.000000000000000e+00
