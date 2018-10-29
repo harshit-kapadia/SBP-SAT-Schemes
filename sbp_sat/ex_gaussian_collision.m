@@ -8,7 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[150 150],... % numbers of grid cells in each coordinate direction
+    'n',[110 110],... % numbers of grid cells in each coordinate direction
     't_end',0.3,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -31,7 +31,7 @@ par = struct(...
     );
 
 % file where the output is written
-par.output_filename = strcat('gaussian_collision/result_n150_M',num2str(M),'.txt');
+par.output_filename = strcat('gaussian_collision/result_n110_M',num2str(M),'.txt');
 
 par.M = M;
 
@@ -175,7 +175,7 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
-filename = strcat('gaussian_collision/residual_n150_M',num2str(M),'.txt');
+filename = strcat('gaussian_collision/residual_n110_M',num2str(M),'.txt');
 dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
 
 end
