@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_gaussian_collision_odd(M)
+function [] = ex_unsteady_lid_driven_cavity(M)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -9,13 +9,13 @@ par = struct(...
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
     'n',[100 100],... % numbers of grid cells in each coordinate direction
-    't_end',0.3,... % end time of computation
+    't_end',1.0,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
     'CFL',1,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
-    'var_plot',1,...
+    'var_plot',1,... % useless
     'to_plot',false,...
     'compute_density',@compute_density,...
     'compute_ux',@compute_ux,...
@@ -31,7 +31,9 @@ par = struct(...
     );
 
 % file where the output is written
-par.output_filename = strcat('gaussian_collision_odd/result_M',num2str(M),'.txt');
+par.output_filename = 'unsteady_lid_driven_cavity';
+
+par.M = M;
 
 % % incase M if greater then 3 then read the written data. (Only read M + 2)
 % par.M = M;
@@ -78,7 +80,7 @@ par.system.B{3} = par.system.BWall * par.system.rotator{3};
 par.system.B{4} = par.system.BWall * par.system.rotator{4};
 
 % first boundary
-par.system.penalty{1} = dvlp_penalty_odd(par.system.Ax,M);
+par.system.penalty{1} = dvlp_penalty_char(par.system.Ax,par.system.B{1});
 
 % rotator for different boundaries
 rotator = dvlp_RotatorCartesian(M,false);
@@ -111,14 +113,6 @@ function f = initial_condition(x,y,j,read_data)
 
 f = x * 0;
 
-x0 = 0.50; % centered in the middle of domain
-y0 = 0.50;
-
-% if j==1 || j==2 % for both density and ux
-if j==1
-    f = exp( -((x-x0).^2 * 50) - ((y-y0).^2 * 50) ); % sigma_x=sigma_y=0.1
-end
-
 % moments_read_data = size(read_data,2) - 2;
 % 
 % % if we have the data from the previous moment system then we initialize
@@ -134,16 +128,19 @@ function f = bc_inhomo(B,bc_id,t)
 
     f = B(:,1)* 0;
     
-%     if t <= 1
-%         thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
-%     else
-%         thetaIn = 1;
-%     end
-% 
-%     switch bc_id
-%         case 4
-%             f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
-%     end
+    % tangential velocity
+    % tangential direction is -x. Hence the minus (? for unsteady)
+    vt = sin(4*pi*t) ;
+
+    % the top wall moves
+    switch bc_id
+        case 2
+            % The B matrix has already been multiplied by the rotator. As a
+            % result we consider the second column. But in the DG
+            % framework, B is not multiplied by the rotator and so we take
+            % the third column.
+            f = vt * B(:,2); 
+    end
 end
 
 function [] = write_solution(temp,par,X,Y,M,residual)
@@ -157,7 +154,7 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = par.output_filename;
+filename = strcat(par.output_filename,'/result_M',num2str(M),'.txt');
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -174,8 +171,8 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
-filename = strcat('gaussian_collision_odd/residual_M',num2str(M),'.txt');
-dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
+filename_residual = strcat(par.output_filename,'/residual_M',num2str(M),'.txt');
+dlmwrite(filename_residual,residual(:)','delimiter','\t','-append','precision',10);
 end
 
 function f = compute_density(data)
