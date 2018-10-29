@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
  
 ### Job name
-#BSUB -J "MATLAB_ARRAY[12,13]"
+#BSUB -J "MATLAB_ARRAY[3-13]"
  
 ### File / path where STDOUT will be written, the %J is the job id
-#BSUB -o log_files/gaussian_collision_n150_%I
+#BSUB -o log_files/gaussian_collision_n110_%I
  
 ### Request the time you need for execution in minutes
 ### The format for the parameter is: [hour:]minute,
@@ -23,7 +23,7 @@ module load matlab
  
  
 # start non-interactive batch job
-matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/gaussian_collision_n150_$LSB_JOBINDEX.log <<EOF
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/gaussian_collision_n110_$LSB_JOBINDEX.log <<EOF
 run ex_gaussian_collision($LSB_JOBINDEX);
 quit();
 EOF
