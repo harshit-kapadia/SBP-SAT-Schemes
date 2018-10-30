@@ -148,6 +148,7 @@ end
 cputime = zeros(1,3);
 step_count = 0;
 residual = 0;
+plot_counter = 0;
 
 while t < par.t_end || residual > 10^(-8)
     
@@ -309,15 +310,16 @@ while t < par.t_end || residual > 10^(-8)
         disp(residual);
     end
     
-    if mod(step_count,500) == 0
-        temp_residual = residual;
-        par.write_solution(U,par,X{1},Y{1},par.M,[t,temp_residual]);
-    end
+%     if mod(step_count,500) == 0
+%         temp_residual = residual;
+%         par.write_solution(U,par,X{1},Y{1},par.M,[t,temp_residual]);
+%     end
     
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        surf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
+        surface_plot = surf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
+       
         
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -325,8 +327,12 @@ while t < par.t_end || residual > 10^(-8)
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([-1 1.0]);
+        zlim([-0.2 0.5]);
         
+        plot_counter = plot_counter + 1;
+        filename_figure = strcat('/Users/neerajsarna/Dropbox/my_papers/MPI_ppt/pictures/odd_bc-',...
+                                 num2str(plot_counter),'.png');                     
+        saveas(surface_plot,filename_figure);                      
         drawnow;
     end
     
