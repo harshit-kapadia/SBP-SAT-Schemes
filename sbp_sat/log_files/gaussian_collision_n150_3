@@ -1,0 +1,118 @@
+Sender: LSF System <lsfadmin@linuxbcsc67>
+Subject: Job 45379596[3]: <MATLAB_ARRAY[3-6,8-13]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-6,8-13]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Tue Oct 16 00:44:39 2018
+Job was executed on host(s) <linuxbcsc67>, in queue <normal>, as user <xx505837> in cluster <rcc> at Tue Oct 16 00:44:44 2018
+</home/xx505837> was used as the home directory.
+</home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
+Started at Tue Oct 16 00:44:44 2018
+Terminated at Tue Oct 16 00:45:46 2018
+Results reported at Tue Oct 16 00:45:46 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-6,8-13]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/gaussian_collision_n150_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 15:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/gaussian_collision_n150_$LSB_JOBINDEX.log <<EOF
+run ex_gaussian_collision($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   63.93 sec.
+    Max Memory :                                 518 MB
+    Average Memory :                             337.00 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4482.00 MB
+    Max Swap :                                   -
+    Max Processes :                              6
+    Max Threads :                                45
+    Run time :                                   66 sec.
+    Turnaround time :                            67 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018a
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.13062
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count: 
+    0.0014
+
+    13
+
+     0
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.1442
+
+    13
+
+   100
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.2870
+
+    13
+
+   200
+
+residual: 
+     0
+
+211 time steps
+CPU-times
+ advection:          32.26s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 0.000000000000000e+00
+>> 

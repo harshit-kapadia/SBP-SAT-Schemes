@@ -1,0 +1,208 @@
+Sender: LSF System <lsfadmin@linuxbmc0395>
+Subject: Job 45466896[12]: <MATLAB_ARRAY[3-13]> in cluster <rcc> Done
+
+Job <MATLAB_ARRAY[3-13]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Mon Oct 29 16:58:24 2018
+Job was executed on host(s) <linuxbmc0395>, in queue <normal>, as user <xx505837> in cluster <rcc> at Mon Oct 29 16:58:34 2018
+</home/xx505837> was used as the home directory.
+</home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
+Started at Mon Oct 29 16:58:34 2018
+Terminated at Mon Oct 29 17:15:42 2018
+Results reported at Mon Oct 29 17:15:42 2018
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/usr/bin/env zsh
+ 
+### Job name
+#BSUB -J "MATLAB_ARRAY[3-13]"
+ 
+### File / path where STDOUT will be written, the %J is the job id
+#BSUB -o log_files/unsteady_lid_driven_cavity_%I
+ 
+### Request the time you need for execution in minutes
+### The format for the parameter is: [hour:]minute,
+### that means for 80 minutes you could also use this: 1:20
+#BSUB -W 15:00
+ 
+### Request memory you need for your job in MB
+#BSUB -M 5000
+ 
+### Change to the work directory
+cd /home/xx505837/SBP-SAT_Schemes/sbp_sat
+ 
+### load modules and execute
+module load MISC
+module load matlab
+ 
+ 
+# start non-interactive batch job
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files/unsteady_lid_driven_cavity_$LSB_JOBINDEX.log <<EOF
+run ex_unsteady_lid_driven_cavity($LSB_JOBINDEX);
+quit();
+EOF
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1026.30 sec.
+    Max Memory :                                 986 MB
+    Average Memory :                             904.65 MB
+    Total Requested Memory :                     5000.00 MB
+    Delta Memory :                               4014.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                65
+    Run time :                                   1057 sec.
+    Turnaround time :                            1038 sec.
+
+The output (if any) follows:
+
+(OK) Loading MISC environment
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018b
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.29669
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+>> time: neqn: step_count: 
+   8.6204e-04
+
+   252
+
+     0
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.0871
+
+   252
+
+   100
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.1733
+
+   252
+
+   200
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.2595
+
+   252
+
+   300
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.3457
+
+   252
+
+   400
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.4319
+
+   252
+
+   500
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.5181
+
+   252
+
+   600
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.6043
+
+   252
+
+   700
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.6905
+
+   252
+
+   800
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.7767
+
+   252
+
+   900
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.8629
+
+   252
+
+        1000
+
+residual: 
+     0
+
+time: neqn: step_count: 
+    0.9491
+
+   252
+
+        1100
+
+residual: 
+     0
+
+1161 time steps
+CPU-times
+ advection:        1002.15s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 0.000000000000000e+00
+>> 

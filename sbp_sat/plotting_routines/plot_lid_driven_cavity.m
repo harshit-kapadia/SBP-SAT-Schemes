@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-M_values = 3:2:13;
+M_values = 3:1:13;
 
 %% ids of macroscopic quantities
 shift = 2; % shift because of coordinate data
@@ -16,7 +16,7 @@ ID_qx = 8 + shift;
 ID_qy = 9 + shift;
 
 filename_moments = cell(length(M_values));
-filename_dvm = '../DVM/lid_driven_cavity/result_DVM_10.txt';
+filename_dvm = '../DVM/lid_driven_cavity/result_DVM_20.txt';
 result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 
@@ -38,16 +38,16 @@ Y = reshape(Y,grid_points,grid_points);
 figure(3)
 
 subplot(1,2,1)
-surf(X,Y,reshape(result_dvm(ID_sigma_xy,:),grid_points,grid_points))
-title('Stress from DVM');
+contourf(X,Y,reshape(result_dvm(ID_theta,:),grid_points,grid_points))
+title('Discrete Velocity Method');
 xlabel('X')
 ylabel('Y')
 zlabel('\sigma_{xy}')
 set(gca, 'FontSize', 14);
 
 subplot(1,2,2)
-surf(X,Y,reshape(result_mom{6}(ID_sigma_xy,:),grid_points,grid_points))
-title('Stress from Moment method');
+contourf(X,Y,reshape(result_mom{11}(ID_theta,:),grid_points,grid_points))
+title('Moment method');
 xlabel('X')
 ylabel('Y')
 zlabel('\sigma_{xy}')
@@ -63,7 +63,7 @@ delta_x = X(2,1)-X(1,1);
 plot_error(M_values,error,1);
 
 %% residual variation
-filename = '../heated_cavity/residual_M13.txt';
+filename = '../lid_driven_cavity/residual_M13.txt';
 residual = dlmread(filename,'\t');
 
 plot_residual(residual,2);

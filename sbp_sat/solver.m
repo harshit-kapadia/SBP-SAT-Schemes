@@ -320,7 +320,7 @@ while t < par.t_end || residual > 10^(-8)
         
         surface_plot = surf(X{1},Y{1},par.compute_theta(U)), axis xy equal tight;
        
-        
+       
         title(sprintf('t = %0.2f',t));
         colorbar;
         xlabel('x'), ylabel('y');

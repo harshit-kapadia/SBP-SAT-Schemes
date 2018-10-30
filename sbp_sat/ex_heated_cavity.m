@@ -30,15 +30,20 @@ par = struct(...
     'steady_state',true...
     );
 
-% incase M if greater then 3 then read the written data. (Only read M + 2)
-filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
+% file where the output is written
+par.output_filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
+
 par.M = M;
-if M > 3
-    %par.previous_M_data = dlmread(filename,'\t');
-    par.previous_M_data = zeros(1,1);
-else
-    par.previous_M_data = zeros(1,1);
-end
+
+% % incase M if greater then 3 then read the written data. (Only read M + 2)
+% filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
+% par.M = M;
+% if M > 3
+%     %par.previous_M_data = dlmread(filename,'\t');
+%     par.previous_M_data = zeros(1,1);
+% else
+%     par.previous_M_data = zeros(1,1);
+% end
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
@@ -133,7 +138,7 @@ function f = bc_inhomo(B,bc_id,t)
     end
 end
 
-function [] = write_solution(temp,par,X,Y,M)
+function [] = write_solution(temp,par,X,Y,M,residual)
 
 density = par.compute_density(temp);
 ux = par.compute_ux(temp);
@@ -145,7 +150,7 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = strcat('heated_cavity/result_M',num2str(M),'.txt');
+filename = par.output_filename;
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -161,6 +166,10 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
+
+filename = strcat('heated_cavity/residual_M',num2str(M),'.txt');
+dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
+
 end
 
 function f = compute_density(data)

@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-M_values = 3:2:13;
+M_values = 3:1:13;
 
 %% ids of macroscopic quantities
 shift = 2; % shift because of coordinate data
@@ -38,16 +38,16 @@ Y = reshape(Y,grid_points,grid_points);
 figure(3)
 
 subplot(1,2,1)
-surf(X,Y,reshape(result_dvm(ID_sigma_xy,:),grid_points,grid_points))
-title('Stress from DVM');
+contourf(X,Y,reshape(result_dvm(ID_sigma_xy,:),grid_points,grid_points))
+title('Discrete Velocity Method');
 xlabel('X')
 ylabel('Y')
 zlabel('\sigma_{xy}')
 set(gca, 'FontSize', 14);
 
 subplot(1,2,2)
-surf(X,Y,reshape(result_mom{6}(ID_sigma_xy,:),grid_points,grid_points))
-title('Stress from Moment method');
+contourf(X,Y,reshape(result_mom{6}(ID_sigma_xy,:),grid_points,grid_points))
+title('Moment method');
 xlabel('X')
 ylabel('Y')
 zlabel('\sigma_{xy}')
