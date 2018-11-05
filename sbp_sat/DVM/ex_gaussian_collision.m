@@ -35,7 +35,7 @@ par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
 par.nc = nc;
 % number of points in the spatial discretization
-par.n = [150 150];
+par.n = [100 100];
 
 [par.x_m,par.w_m] = gauss_quadrature(nc,-5,0);
 [par.x_p,par.w_p] = gauss_quadrature(nc,0,5);
@@ -204,7 +204,7 @@ function f = f0(vx,vy)
 f = exp(-(vx^2+vy^2)/2)/(2 * pi);
 end
 
-function [] = write_solution(temp,par,X,Y,t)
+function [] = write_solution(temp,par,X,Y)
 
 density = par.compute_density(temp,par.system.Ax,par.system.Ay,par.all_w);
 [ux,uy] = par.compute_velocity(temp,par.system.Ax,par.system.Ay,par.all_w);
@@ -215,7 +215,7 @@ sigma_yy = par.compute_sigma_yy(temp,par.system.Ax,par.system.Ay,par.all_w);
 qx = par.compute_qx(temp,par.system.Ax,par.system.Ay,par.all_w);
 qy = par.compute_qy(temp,par.system.Ax,par.system.Ay,par.all_w);
 
-filename = strcat('gaussian_collision/result_n',num2str(par.n(1)),'_DVM_',num2str(par.nc),'t',num2str(t),'.txt');
+filename = strcat('gaussian_collision/result_n',num2str(par.n(1)),'_DVM_',num2str(par.nc),'.txt');
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);

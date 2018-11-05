@@ -372,10 +372,10 @@ while t < par.t_end || residual > 10^(-10)
         disp(residual);
     end
     
-    if mod(step_count,10) == 0
-        temp_residual = residual;
-        par.write_solution(U,par,X{1},Y{1},t-par.dt);
-    end
+%     if mod(step_count,10) == 0
+%         temp_residual = residual;
+%         par.write_solution(U,par,X{1},Y{1},t-par.dt);
+%     end
     
     tic
     
@@ -422,7 +422,7 @@ output = struct('X',X{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
              
-par.write_solution(U,par,X{1},Y{1},t-par.dt);
+par.write_solution(U,par,X{1},Y{1});
 end
 
 
