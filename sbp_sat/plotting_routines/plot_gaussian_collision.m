@@ -16,19 +16,19 @@ ID_qx = 8 + shift;
 ID_qy = 9 + shift;
 
 filename_moments = cell(length(M_values));
-filename_dvm = '../DVM/gaussian_collision/result_n110_DVM_20.txt';
+filename_dvm = '../DVM/gaussian_collision/result_n100_DVM_20.txt';
 result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 
 for i = 1 : length(M_values)
-    filename_moments{i} = strcat('../gaussian_collision/','result_n110_M',num2str(M_values(i)),'.txt');
+    filename_moments{i} = strcat('../gaussian_collision/','result_n100_M',num2str(M_values(i)),'.txt');
     result_mom{i} = dlmread(filename_moments{i},'\t');
 end
 
 X = result_dvm(1,:);
 Y = result_dvm(2,:);
 
-grid_points = 111;
+grid_points = 101;
 
 X = reshape(X,grid_points,grid_points);
 Y = reshape(Y,grid_points,grid_points);
@@ -63,7 +63,7 @@ delta_x = X(2,1)-X(1,1);
 plot_error(M_values,error,1);
 
 %% residual variation
-filename = '../gaussian_collision/residual_n110_M13.txt';
+filename = '../gaussian_collision/residual_n100_M13.txt';
 residual = dlmread(filename,'\t');
 
 % plot_residual(residual,2);
