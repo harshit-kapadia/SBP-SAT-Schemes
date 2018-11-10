@@ -135,8 +135,7 @@ function f = bc_inhomo_wall(B,bc_id,Ax,Ay,rhoW,id_sys,t)
 uy = 0;
 
 % at y = 1 we have a tangential velocity
-% minus comes from the tangential direction at the boundary.
-ux = -compute_vt(bc_id,t);
+ux = compute_vt(bc_id,t);
 thetaW = compute_thetaW(bc_id,t);
 
 % we initialiase with a cell because of the data structure used in the code

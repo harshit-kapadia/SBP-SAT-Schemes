@@ -103,7 +103,7 @@ min_y_value = 0.75 * min_y_value;
 
 figure(fig_id);
 
-[reference_line] = exact_order(M_values(3),error(3,5)+0.001,M_values(5),-1);
+[reference_line] = exact_order(M_values(3),error(3,4)-0.001,M_values(6),-1);
 
 loglog(M_values,error(:,1),'-go', ...
        M_values,error(:,2),'--m+', ...
