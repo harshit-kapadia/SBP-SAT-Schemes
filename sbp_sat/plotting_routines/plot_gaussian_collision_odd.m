@@ -16,7 +16,7 @@ ID_qx = 8 + shift;
 ID_qy = 9 + shift;
 
 filename_moments = cell(length(M_values));
-filename_dvm = '../DVM/gaussian_collision/result_DVM_20.txt';
+filename_dvm = '../DVM/gaussian_collision/result_n100_DVM_20.txt';
 result_mom = cell(length(M_values));% result from moments
 result_dvm = dlmread(filename_dvm,'\t');
 
@@ -66,7 +66,7 @@ plot_error(M_values,error,1);
 filename = '../gaussian_collision_odd/residual_M13.txt';
 residual = dlmread(filename,'\t');
 
-plot_residual(residual,2);
+% plot_residual(residual,2);
 
 
 %% computes error in all macroscopic quantities

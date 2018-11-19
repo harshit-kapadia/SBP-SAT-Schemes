@@ -110,7 +110,7 @@ residual:
 
 972 time steps
 CPU-times
- advection:         405.54s  100%
+ advection:         429.32s  100%
 plotting:            0.00s    0%
 CPU-times
  advection:           0.00s    0%

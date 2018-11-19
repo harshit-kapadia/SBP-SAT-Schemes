@@ -1,13 +1,13 @@
-Sender: LSF System <lsfadmin@linuxbmc0193>
-Subject: Job 45339309[13]: <MATLAB_ARRAY[3-13]> in cluster <rcc> Done
+Sender: LSF System <lsfadmin@linuxbmc1118>
+Subject: Job 45495679[13]: <MATLAB_ARRAY[3-13]> in cluster <rcc> Done
 
-Job <MATLAB_ARRAY[3-13]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Wed Oct 10 18:25:26 2018
-Job was executed on host(s) <linuxbmc0193>, in queue <normal>, as user <xx505837> in cluster <rcc> at Wed Oct 10 18:27:59 2018
+Job <MATLAB_ARRAY[3-13]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Mon Nov  5 02:35:42 2018
+Job was executed on host(s) <linuxbmc1118>, in queue <normal>, as user <xx505837> in cluster <rcc> at Mon Nov  5 02:41:00 2018
 </home/xx505837> was used as the home directory.
 </home/xx505837/SBP-SAT_Schemes/sbp_sat> was used as the working directory.
-Started at Wed Oct 10 18:27:59 2018
-Terminated at Wed Oct 10 18:35:19 2018
-Results reported at Wed Oct 10 18:35:19 2018
+Started at Mon Nov  5 02:41:00 2018
+Terminated at Mon Nov  5 02:47:41 2018
+Results reported at Mon Nov  5 02:47:41 2018
 
 Your job looked like:
 
@@ -49,33 +49,33 @@ Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   438.20 sec.
-    Max Memory :                                 1202 MB
-    Average Memory :                             1093.79 MB
+    CPU time :                                   395.07 sec.
+    Max Memory :                                 1333 MB
+    Average Memory :                             1215.64 MB
     Total Requested Memory :                     5000.00 MB
-    Delta Memory :                               3798.00 MB
+    Delta Memory :                               3667.00 MB
     Max Swap :                                   -
     Max Processes :                              5
-    Max Threads :                                39
-    Run time :                                   440 sec.
-    Turnaround time :                            593 sec.
+    Max Threads :                                65
+    Run time :                                   400 sec.
+    Turnaround time :                            719 sec.
 
 The output (if any) follows:
 
 (OK) Loading MISC environment
 (WW) Matlab affects the shell environment. Other programs may have become unusable.
 (WW) Use another terminal for any program other than matlab!
-(OK) Loading matlab 2018a
+(OK) Loading matlab 2018b
 Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
-Opening log file:  /home/xx505837/java.log.13010
+Opening log file:  /home/xx505837/java.log.10092
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
-                   R2018a (9.4.0.813654) 64-bit (glnxa64)
-                             February 23, 2018
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
 
  
-To get started, type one of these: helpwin, helpdesk, or demo.
+To get started, type doc.
 For product information, visit www.mathworks.com.
  
 >> time: neqn: step_count: 
@@ -120,7 +120,7 @@ residual:
 
 366 time steps
 CPU-times
- advection:         418.45s  100%
+ advection:         373.16s  100%
 plotting:            0.00s    0%
 CPU-times
  advection:           0.00s    0%

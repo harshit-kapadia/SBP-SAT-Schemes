@@ -1,0 +1,397 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+delta t
+    0.0011
+
+time: neqn: step_count:
+    0.0011
+
+        1600
+
+     0
+
+change in density
+   6.9389e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0118
+
+        1600
+
+    10
+
+change in density
+  -1.3878e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0225
+
+        1600
+
+    20
+
+change in density
+   5.5511e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0332
+
+        1600
+
+    30
+
+change in density
+  -1.3878e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0439
+
+        1600
+
+    40
+
+change in density
+   2.7756e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0546
+
+        1600
+
+    50
+
+change in density
+  -5.5511e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0653
+
+        1600
+
+    60
+
+change in density
+  -2.7756e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0760
+
+        1600
+
+    70
+
+change in density
+  -5.5511e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0867
+
+        1600
+
+    80
+
+change in density
+  -6.9389e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.0974
+
+        1600
+
+    90
+
+change in density
+  -8.3267e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1081
+
+        1600
+
+   100
+
+change in density
+  -1.2490e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1188
+
+        1600
+
+   110
+
+change in density
+  -9.7145e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1295
+
+        1600
+
+   120
+
+change in density
+  -9.7145e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1402
+
+        1600
+
+   130
+
+change in density
+  -5.5511e-17
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1509
+
+        1600
+
+   140
+
+change in density
+  -1.1102e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1616
+
+        1600
+
+   150
+
+change in density
+  -1.2490e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1723
+
+        1600
+
+   160
+
+change in density
+  -1.1102e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1830
+
+        1600
+
+   170
+
+change in density
+  -1.2490e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.1937
+
+        1600
+
+   180
+
+change in density
+  -1.5266e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2044
+
+        1600
+
+   190
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2151
+
+        1600
+
+   200
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2258
+
+        1600
+
+   210
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2365
+
+        1600
+
+   220
+
+change in density
+  -1.8041e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2472
+
+        1600
+
+   230
+
+change in density
+  -1.6653e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2580
+
+        1600
+
+   240
+
+change in density
+  -1.8041e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2687
+
+        1600
+
+   250
+
+change in density
+  -2.2204e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2794
+
+        1600
+
+   260
+
+change in density
+  -2.2204e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.2901
+
+        1600
+
+   270
+
+change in density
+  -2.0817e-16
+
+residual
+     0
+
+time: neqn: step_count:
+    0.3000
+
+        1600
+
+   280
+
+change in density
+  -2.0817e-16
+
+residual
+     0
+
+281 time steps
+CPU-times
+ advection:       12811.48s  100%
+plotting:            0.01s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:residual while writting 0.000000000000000e+00:

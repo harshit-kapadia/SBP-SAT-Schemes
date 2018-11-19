@@ -35,7 +35,7 @@ par.t_plot = false;
 par.n_eqn = (2 * nc) * (2 * nc);
 par.nc = nc;
 % number of points in the spatial discretization
-par.n = [110 110];
+par.n = [100 100];
 
 [par.x_m,par.w_m] = gauss_quadrature(nc,-5,0);
 [par.x_p,par.w_p] = gauss_quadrature(nc,0,5);

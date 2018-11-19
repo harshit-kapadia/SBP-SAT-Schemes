@@ -1,11 +1,11 @@
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
-                   R2018a (9.4.0.813654) 64-bit (glnxa64)
-                             February 23, 2018
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
 
  
-To get started, type one of these: helpwin, helpdesk, or demo.
+To get started, type doc.
 For product information, visit www.mathworks.com.
  
 time: neqn: step_count: 
@@ -50,7 +50,7 @@ residual:
 
 312 time steps
 CPU-times
- advection:         195.77s  100%
+ advection:         177.24s  100%
 plotting:            0.00s    0%
 CPU-times
  advection:           0.00s    0%

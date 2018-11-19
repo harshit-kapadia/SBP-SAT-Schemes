@@ -33,6 +33,8 @@ par = struct(...
 % file where the output is written
 par.output_filename = strcat('gaussian_collision_odd/result_M',num2str(M),'.txt');
 
+par.M = M;
+
 % % incase M if greater then 3 then read the written data. (Only read M + 2)
 % par.M = M;
 % 

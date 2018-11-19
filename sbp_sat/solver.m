@@ -343,7 +343,7 @@ fprintf('%0.0f time steps\n',step_count)           % Display test
 cputime = reshape([cputime;cputime/sum(cputime)*1e2],1,[]);   % case info
 fprintf(['CPU-times\n advection:%15.2fs%5.0f%%\n',... % and CPU times.
     'plotting:%16.2fs%5.0f%%\n'],cputime)
-fprintf('final residual while writting: %0.15e\n',temp_residual);
+fprintf('final residual while writting: %0.15e\n',residual);
 
 output = struct('X',X{1}, ...
                 'Y',Y{1}, ...  
@@ -351,6 +351,8 @@ output = struct('X',X{1}, ...
                  'PX',PX{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
+             
+par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
              
 end
 

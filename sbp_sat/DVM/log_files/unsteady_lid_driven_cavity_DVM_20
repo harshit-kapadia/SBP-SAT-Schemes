@@ -1,13 +1,13 @@
-Sender: LSF System <lsfadmin@linuxbmc0052>
-Subject: Job 45466894[20]: <MATLAB_ARRAY[20]> in cluster <rcc> Done
+Sender: LSF System <lsfadmin@linuxbmc0044>
+Subject: Job 45522324[20]: <MATLAB_ARRAY[20]> in cluster <rcc> Done
 
-Job <MATLAB_ARRAY[20]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Mon Oct 29 16:56:11 2018
-Job was executed on host(s) <linuxbmc0052>, in queue <normal>, as user <xx505837> in cluster <rcc> at Mon Oct 29 16:56:22 2018
+Job <MATLAB_ARRAY[20]> was submitted from host <cluster-linux> by user <xx505837> in cluster <rcc> at Wed Nov  7 16:45:51 2018
+Job was executed on host(s) <linuxbmc0044>, in queue <normal>, as user <xx505837> in cluster <rcc> at Wed Nov  7 16:45:55 2018
 </home/xx505837> was used as the home directory.
 </home/xx505837/SBP-SAT_Schemes/sbp_sat/DVM> was used as the working directory.
-Started at Mon Oct 29 16:56:22 2018
-Terminated at Mon Oct 29 18:31:47 2018
-Results reported at Mon Oct 29 18:31:47 2018
+Started at Wed Nov  7 16:45:55 2018
+Terminated at Wed Nov  7 18:30:48 2018
+Results reported at Wed Nov  7 18:30:48 2018
 
 Your job looked like:
 
@@ -48,16 +48,16 @@ Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   5737.64 sec.
-    Max Memory :                                 3996 MB
-    Average Memory :                             3912.59 MB
+    CPU time :                                   6307.37 sec.
+    Max Memory :                                 3848 MB
+    Average Memory :                             3748.67 MB
     Total Requested Memory :                     32000.00 MB
-    Delta Memory :                               28004.00 MB
+    Delta Memory :                               28152.00 MB
     Max Swap :                                   -
     Max Processes :                              5
     Max Threads :                                65
-    Run time :                                   5725 sec.
-    Turnaround time :                            5736 sec.
+    Run time :                                   6292 sec.
+    Turnaround time :                            6297 sec.
 
 The output (if any) follows:
 
@@ -66,7 +66,7 @@ The output (if any) follows:
 (WW) Use another terminal for any program other than matlab!
 (OK) Loading matlab 2018b
 Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
-Opening log file:  /home/xx505837/java.log.6331
+Opening log file:  /home/xx505837/java.log.6139
 
                             < M A T L A B (R) >
                   Copyright 1984-2018 The MathWorks, Inc.
@@ -88,7 +88,7 @@ time: neqn: step_count:
      0
 
 change in density
-   4.4075e-22
+   1.2465e-22
 
 residual
      0
@@ -101,7 +101,7 @@ time: neqn: step_count:
     10
 
 change in density
-   1.0627e-19
+   2.8431e-20
 
 residual
      0
@@ -114,7 +114,7 @@ time: neqn: step_count:
     20
 
 change in density
-   2.4126e-19
+   4.0176e-19
 
 residual
      0
@@ -127,7 +127,7 @@ time: neqn: step_count:
     30
 
 change in density
-   8.3313e-19
+   3.9905e-19
 
 residual
      0
@@ -140,7 +140,7 @@ time: neqn: step_count:
     40
 
 change in density
-   1.3271e-18
+   9.5716e-19
 
 residual
      0
@@ -153,7 +153,7 @@ time: neqn: step_count:
     50
 
 change in density
-   2.1083e-18
+   1.5217e-18
 
 residual
      0
@@ -166,7 +166,7 @@ time: neqn: step_count:
     60
 
 change in density
-   2.5290e-18
+   2.2089e-18
 
 residual
      0
@@ -179,7 +179,7 @@ time: neqn: step_count:
     70
 
 change in density
-   3.7938e-18
+   2.5021e-18
 
 residual
      0
@@ -192,7 +192,7 @@ time: neqn: step_count:
     80
 
 change in density
-   4.5128e-18
+   2.7278e-18
 
 residual
      0
@@ -205,7 +205,7 @@ time: neqn: step_count:
     90
 
 change in density
-   5.6050e-18
+   4.5861e-18
 
 residual
      0
@@ -218,7 +218,7 @@ time: neqn: step_count:
    100
 
 change in density
-   6.0720e-18
+   4.2668e-18
 
 residual
      0
@@ -231,7 +231,7 @@ time: neqn: step_count:
    110
 
 change in density
-   7.4561e-18
+   4.2005e-18
 
 residual
      0
@@ -244,7 +244,7 @@ time: neqn: step_count:
    120
 
 change in density
-   8.6366e-18
+   4.9934e-18
 
 residual
      0
@@ -257,7 +257,7 @@ time: neqn: step_count:
    130
 
 change in density
-   9.1292e-18
+   4.0133e-18
 
 residual
      0
@@ -270,7 +270,7 @@ time: neqn: step_count:
    140
 
 change in density
-   9.0060e-18
+   4.4459e-18
 
 residual
      0
@@ -283,7 +283,7 @@ time: neqn: step_count:
    150
 
 change in density
-   9.0884e-18
+   4.9292e-18
 
 residual
      0
@@ -296,7 +296,7 @@ time: neqn: step_count:
    160
 
 change in density
-   1.0046e-17
+   4.5619e-18
 
 residual
      0
@@ -309,7 +309,7 @@ time: neqn: step_count:
    170
 
 change in density
-   9.0383e-18
+   5.5263e-18
 
 residual
      0
@@ -322,7 +322,7 @@ time: neqn: step_count:
    180
 
 change in density
-   1.0206e-17
+   4.6501e-18
 
 residual
      0
@@ -335,7 +335,7 @@ time: neqn: step_count:
    190
 
 change in density
-   1.0266e-17
+   2.8104e-18
 
 residual
      0
@@ -348,7 +348,7 @@ time: neqn: step_count:
    200
 
 change in density
-   1.0508e-17
+   1.5381e-18
 
 residual
      0
@@ -361,7 +361,7 @@ time: neqn: step_count:
    210
 
 change in density
-   9.5018e-18
+   3.1076e-18
 
 residual
      0
@@ -374,7 +374,7 @@ time: neqn: step_count:
    220
 
 change in density
-   7.6889e-18
+   7.3190e-19
 
 residual
      0
@@ -387,7 +387,7 @@ time: neqn: step_count:
    230
 
 change in density
-   7.4133e-18
+  -1.9105e-19
 
 residual
      0
@@ -400,7 +400,7 @@ time: neqn: step_count:
    240
 
 change in density
-   7.0633e-18
+  -7.8866e-19
 
 residual
      0
@@ -413,7 +413,7 @@ time: neqn: step_count:
    250
 
 change in density
-   5.7827e-18
+  -2.8404e-19
 
 residual
      0
@@ -426,7 +426,7 @@ time: neqn: step_count:
    260
 
 change in density
-   4.7509e-18
+  -1.5373e-18
 
 residual
      0
@@ -439,7 +439,7 @@ time: neqn: step_count:
    270
 
 change in density
-   5.5344e-18
+  -3.2847e-18
 
 residual
      0
@@ -452,7 +452,7 @@ time: neqn: step_count:
    280
 
 change in density
-   2.7128e-18
+  -2.4071e-18
 
 residual
      0
@@ -465,7 +465,7 @@ time: neqn: step_count:
    290
 
 change in density
-   3.3627e-18
+  -3.0181e-18
 
 residual
      0
@@ -478,7 +478,7 @@ time: neqn: step_count:
    300
 
 change in density
-   1.7558e-18
+  -2.2520e-18
 
 residual
      0
@@ -491,7 +491,7 @@ time: neqn: step_count:
    310
 
 change in density
-   1.9149e-18
+  -2.1622e-18
 
 residual
      0
@@ -504,7 +504,7 @@ time: neqn: step_count:
    320
 
 change in density
-   2.7941e-18
+  -2.4933e-18
 
 residual
      0
@@ -517,7 +517,7 @@ time: neqn: step_count:
    330
 
 change in density
-   3.0259e-18
+  -2.5408e-18
 
 residual
      0
@@ -530,7 +530,7 @@ time: neqn: step_count:
    340
 
 change in density
-   3.2266e-18
+  -1.8214e-18
 
 residual
      0
@@ -543,7 +543,7 @@ time: neqn: step_count:
    350
 
 change in density
-   2.7865e-18
+  -8.6454e-19
 
 residual
      0
@@ -556,7 +556,7 @@ time: neqn: step_count:
    360
 
 change in density
-   3.4531e-18
+   1.6934e-19
 
 residual
      0
@@ -569,7 +569,7 @@ time: neqn: step_count:
    370
 
 change in density
-   3.8351e-18
+   8.8888e-19
 
 residual
      0
@@ -582,7 +582,7 @@ time: neqn: step_count:
    380
 
 change in density
-   5.0309e-18
+   1.1466e-18
 
 residual
      0
@@ -595,7 +595,7 @@ time: neqn: step_count:
    390
 
 change in density
-   5.3558e-18
+   1.7826e-18
 
 residual
      0
@@ -608,7 +608,7 @@ time: neqn: step_count:
    400
 
 change in density
-   6.5546e-18
+   1.9893e-18
 
 residual
      0
@@ -621,7 +621,7 @@ time: neqn: step_count:
    410
 
 change in density
-   7.5764e-18
+   3.1990e-18
 
 residual
      0
@@ -634,7 +634,7 @@ time: neqn: step_count:
    420
 
 change in density
-   8.1197e-18
+   3.7018e-18
 
 residual
      0
@@ -647,7 +647,7 @@ time: neqn: step_count:
    430
 
 change in density
-   8.4697e-18
+   4.2185e-18
 
 residual
      0
@@ -660,7 +660,7 @@ time: neqn: step_count:
    440
 
 change in density
-   9.7351e-18
+   4.5815e-18
 
 residual
      0
@@ -673,7 +673,7 @@ time: neqn: step_count:
    450
 
 change in density
-   1.0295e-17
+   4.4916e-18
 
 residual
      0
@@ -686,7 +686,7 @@ time: neqn: step_count:
    460
 
 change in density
-   9.9109e-18
+   4.4889e-18
 
 residual
      0
@@ -699,7 +699,7 @@ time: neqn: step_count:
    470
 
 change in density
-   1.0960e-17
+   3.5804e-18
 
 residual
      0
@@ -712,7 +712,7 @@ time: neqn: step_count:
    480
 
 change in density
-   9.8933e-18
+   3.5573e-18
 
 residual
      0
@@ -725,7 +725,7 @@ time: neqn: step_count:
    490
 
 change in density
-   8.7790e-18
+   4.7208e-18
 
 residual
      0
@@ -738,7 +738,7 @@ time: neqn: step_count:
    500
 
 change in density
-   9.9995e-18
+   3.0950e-18
 
 residual
      0
@@ -751,7 +751,7 @@ time: neqn: step_count:
    510
 
 change in density
-   9.7514e-18
+   2.4683e-18
 
 residual
      0
@@ -764,7 +764,7 @@ time: neqn: step_count:
    520
 
 change in density
-   8.2850e-18
+   2.3285e-18
 
 residual
      0
@@ -777,7 +777,7 @@ time: neqn: step_count:
    530
 
 change in density
-   8.2170e-18
+   1.0367e-18
 
 residual
      0
@@ -790,7 +790,7 @@ time: neqn: step_count:
    540
 
 change in density
-   6.7281e-18
+   7.6360e-19
 
 residual
      0
@@ -803,7 +803,7 @@ time: neqn: step_count:
    550
 
 change in density
-   6.2635e-18
+   3.0792e-19
 
 residual
      0
@@ -816,7 +816,7 @@ time: neqn: step_count:
    560
 
 change in density
-   5.5707e-18
+  -7.0501e-19
 
 residual
      0
@@ -829,7 +829,7 @@ time: neqn: step_count:
    570
 
 change in density
-   5.0156e-18
+  -1.4949e-18
 
 residual
      0
@@ -842,7 +842,7 @@ time: neqn: step_count:
    580
 
 change in density
-   3.9832e-18
+  -1.5887e-18
 
 residual
      0
@@ -855,7 +855,7 @@ time: neqn: step_count:
    590
 
 change in density
-   3.1667e-18
+  -1.9265e-18
 
 residual
      0
@@ -868,7 +868,7 @@ time: neqn: step_count:
    600
 
 change in density
-   1.8727e-18
+  -1.0565e-18
 
 residual
      0
@@ -881,7 +881,7 @@ time: neqn: step_count:
    610
 
 change in density
-   2.0576e-18
+  -1.9628e-18
 
 residual
      0
@@ -894,15 +894,15 @@ time: neqn: step_count:
    620
 
 change in density
-   2.9517e-18
+  -2.4092e-18
 
 residual
      0
 
 623 time steps
 CPU-times
- advection:        5696.03s  100%
-plotting:            0.00s    0%
+ advection:        6264.38s  100%
+plotting:            0.01s    0%
 CPU-times
  advection:           0.00s    0%
 plotting:residual while writting 0.000000000000000e+00:
