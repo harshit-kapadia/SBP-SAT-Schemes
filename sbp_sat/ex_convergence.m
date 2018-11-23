@@ -121,7 +121,7 @@ function f = initial_condition(x,y,j,read_data)
 f = x * 0;
 
 if j==1
-    k = 4*pi;
+    k = pi;
     t=0;
     f = sin(k*x) .* sin(k*y) .* cos(k*t) ;
 end
@@ -134,10 +134,14 @@ function F = source(x,y,n_eqn,t)
 F = x * 0;
 
 if n_eqn==1
-    k = 4*pi;
-    F = k * sin(k*x) .* cos(k*y) .* cos(k*t) + ...
-        k * cos(k*x) .* sin(k*y) .* cos(k*t) - ...
-        k * sin(k*x) .* sin(k*y) .* sin(k*t);
+    k = pi;
+    F = - k * sin(k*x) .* sin(k*y) .* sin(k*t);
+elseif n_eqn==2
+    k = pi;
+    F = k * cos(k*x) .* sin(k*y) .* cos(k*t);
+elseif n_eqn==3
+    k = pi;
+    F = k * sin(k*x) .* cos(k*y) .* cos(k*t) ;
 end
 
 end
