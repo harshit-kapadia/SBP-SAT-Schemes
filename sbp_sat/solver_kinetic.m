@@ -1,4 +1,4 @@
-function output = solver(par)
+function output = solver_kinetic(par)
 
 %% Few Checks
 
@@ -135,10 +135,6 @@ bc_g = cell(par.num_bc,1);
 
 % compute the boundary inhomogeneity
 t = 0;
-for j = 1:par.num_bc
-    % need to convert to cell for the computations which follow
-    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t));
-end
 
 for j = 1:par.n_eqn
     force{j} = capargs(par.source,X{1},Y{1},j,t);
@@ -180,63 +176,44 @@ while t < par.t_end || residual > 10^(-8)
                 bc_values{i,j} = X{1}*0;
             end
        end
-        
-        evaluate = time_dep & (t_temp(RK) > 0);
-            
-            if evaluate(1)
-                for j = 1:par.n_eqn 
-                         force{j} = capargs(par.source,X{1},Y{1},j,t_temp(RK)); 
-                end
-            end
-            
-            if evaluate(2)
-                for j = 1:par.num_bc
-                 % need to convert to cell for the computations which follow
-                    bc_g{j} = num2cell(capargs(par.bc_inhomo,par.system.B{j},j,t_temp(RK)));
-   
-                end
-            end
-            
+              
         for i = 1:par.n_eqn
             dxU{i} = DX{1} * UTemp{i};
             dyU{i} = UTemp{i} * DY{1}; % DY is actually transpose of dy
         end
         
-        %
-        % extract all the values at x = 1, last row of the matrix.
-        % id = 1, x = 1, last row of X
-        % id = 2, y = 1, last column of Y
-        % id = 3, x = 0, first row of X
-        % id = 4, y = 0, first column of Y
         bc_ID = 1;
         values = cellfun(@(a) a(end,:),UTemp,'Un',0);
+        rhoW = sumcell(values,par.system.rhoW{bc_ID});
+        bc_g{bc_ID} = capargs(par.bc_inhomo,par.system.B{bc_ID},rhoW);
+        
         for j = 1 : par.n_eqn
-%                 the term, values(bc_coupling_penalty_B{bc_ID}{j}), gives us the
-%                 value of all the variables, at the boundary, which are
-%                 coupled with the j-th variable. 
-%                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})
-%                 gives us the j-th row of the penalty matrix and the
-%                 entries in all those columns which have no zeros.
-            bc_values{j}(end,:) = bc_values{j}(end,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
-                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+            bc_values{j}(end,:) = bc_values{j}(end,:) + ...
+                                  bc_scaling(bc_ID) * (sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                                  par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}))-...
                                   sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
         end
                     
         bc_ID = 2;
         values = cellfun(@(a) a(:,end),UTemp,'Un',0);
+        rhoW = sumcell(values,par.system.rhoW{bc_ID});
+        bc_g{bc_ID} = capargs(par.bc_inhomo,par.system.B{bc_ID},rhoW);
         for j = 1 : par.n_eqn
-            bc_values{j}(:,end) = bc_values{j}(:,end) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+            bc_values{j}(:,end) = bc_values{j}(:,end) + ...
+                                  bc_scaling(bc_ID)*(sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                                   par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                                   sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+                                  par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
         end
-%        
 
         bc_ID = 3;
         values = cellfun(@(a) a(1,:),UTemp,'Un',0);
+        rhoW = sumcell(values,par.system.rhoW{bc_ID});
+        bc_g{bc_ID} = capargs(par.bc_inhomo,par.system.B{bc_ID},rhoW);
         for j = 1 : par.n_eqn
-            bc_values{j}(1,:) = bc_values{j}(1,:) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+            bc_values{j}(1,:) = bc_values{j}(1,:)...
+                                + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -246,8 +223,11 @@ while t < par.t_end || residual > 10^(-8)
         
         bc_ID = 4;
         values = cellfun(@(a) a(:,1),UTemp,'Un',0);
+        rhoW = sumcell(values,par.system.rhoW{bc_ID});
+        bc_g{bc_ID} = capargs(par.bc_inhomo,par.system.B{bc_ID},rhoW);
         for j = 1 : par.n_eqn
-            bc_values{j}(:,1) = bc_values{j}(:,1) + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
+            bc_values{j}(:,1) = bc_values{j}(:,1)...
+                                + bc_scaling(bc_ID) * ( sumcell(values(bc_coupling_penalty_B{bc_ID}{j}), ...
                                 par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                                 sumcell(bc_g{bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
                                 par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
@@ -255,25 +235,11 @@ while t < par.t_end || residual > 10^(-8)
         %
         
         for i = 1 : par.n_eqn
-            % Multiplication of dxU and dyU by system matrices Ax and Ay
-            % [1] dxU(Ix{i}) returns a cell with components of dxU where Ax
-            % has non-zero entries for that particular row (component no.)
-            % --> each dxU entry is a cell as for each component the values
-            % need to be stored at all grid nodes
-            % [2] For Ax(i,Ix{i}), lets say i = 1 (component/equ. 1) then
-            % Ix{1} is [3 4 5] non-zero entries in 1st row of Ax.
-            % Ax(1, [3 4 5]) gives (1,3), (1,4) and (1, 5) entries of Ax
-            % [3] W is one vector having a value stored at each grid node
-            W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
-                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]);            
-          
-            % for each RK stage k_RK{RK} contains 1 x n_equ sized cell
-            k_RK{RK}{i} = (W  + force{i} + bc_values{i});
             
-            % add contribution from all the boundaries
-%             for j = 1 : par.num_bc
-%                 k_RK{RK}{i} = k_RK{RK}{i} + bc_values{j,i};
-%             end
+            W = -sumcell([dxU(Ix{i}),dyU(Iy{i})],...
+                [par.system.Ax(i,Ix{i}),par.system.Ay(i,Iy{i})]); 
+            
+            k_RK{RK}{i} = (W  + force{i} + bc_values{i});
             
             k_RK{RK}{i} = k_RK{RK}{i} ...
                            + sumcell(UTemp(Ix_prod{i}),par.system.P(i,Ix_prod{i}))/par.Kn;
@@ -318,21 +284,41 @@ while t < par.t_end || residual > 10^(-8)
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        surface_plot = surf(X{1},Y{1},par.compute_rho(U)), axis xy equal tight;
-       
-       
-        title(sprintf('t = %0.2f',t));
-        colorbar;
-        xlabel('x'), ylabel('y');
+        hFig = figure(1);
+        set(hFig, 'Position', [0 0 800 800]);
         
-        xlim(par.ax([1 2]));
-        ylim(par.ax([3 4]));
-        zlim([-0.2 0.5]);
+%         surface_plot = surf(X{1},Y{1},par.compute_density(U)), axis xy equal tight;
+%        
+%         title('$\tilde{\rho}(x_1,x_2)$, T=0.2','Interpreter','latex');
+%         colorbar('Location','southoutside');
+%         xlabel('x_1'), ylabel('x_2');
+%         
+%         xlim(par.ax([1 2]));
+%         ylim(par.ax([3 4]));
+%         zlim([-0.1 1]);
+%         
+%         xt = get(gca, 'YTick');
+%         set(gca, 'FontSize', 20);
         
-        plot_counter = plot_counter + 1;
+        temp = par.compute_density(U);
+        
+
+%         filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/kinetic_M_T02.txt';
+%         
+%         dlmwrite(filename,X{1}(:,50)','delimiter','\t');
+%         dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
+%         plot_counter = plot_counter + 1;
 %         filename_figure = strcat('/Users/neerajsarna/Dropbox/my_papers/MPI_ppt/pictures/odd_bc-',...
 %                                  num2str(plot_counter),'.png');                     
 %         saveas(surface_plot,filename_figure);                      
+        
+        plot(X{1}(:,50),temp(:,50),'-bo');
+        ylim([0,0.3]);
+        title('$\tilde{\rho}(x_1,x_2=0.5,t=0.3)$','Interpreter','latex');
+        xlabel('x_1');
+        set(gca,'FontSize',20);
+        grid on;
+        
         drawnow;
     end
     
@@ -352,7 +338,7 @@ output = struct('X',X{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
              
-par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
+%par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
              
 end
 

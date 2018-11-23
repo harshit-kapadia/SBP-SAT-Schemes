@@ -110,7 +110,6 @@ end
 % scaling for the boundary conditions
 bc_scaling = [1/PX{1}(1,1) 1/PY{1}(1,1) 1/PX{1}(1,1) 1/PY{1}(1,1)];
 
-
 bc_g = cell(2,par.num_bc);
 rhoW = cell(par.num_bc,1);
 
@@ -220,10 +219,11 @@ while t < par.t_end || residual > 10^(-10)
              end
              
              for j = 1 : par.n_eqn
-                 bc_values{i,j}(end,:) = bc_values{i,j}(end,:) + bc_scaling(bc_ID) * ( sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
-                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j}) ) - ...
+                 bc_values{i,j}(end,:) = bc_values{i,j}(end,:)...
+                     + bc_scaling(bc_ID) * (sumcell( values(bc_coupling_penalty_B{bc_ID}{j}),...
+                     par.system.penalty_B{bc_ID}(j,bc_coupling_penalty_B{bc_ID}{j})) - ...
                      sumcell(bc_g{i,bc_ID}(bc_coupling_penalty{bc_ID}{j}),...
-                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})) );
+                     par.system.penalty{bc_ID}(j,bc_coupling_penalty{bc_ID}{j})));
              end
              
              

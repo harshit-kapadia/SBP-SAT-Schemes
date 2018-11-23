@@ -56,18 +56,3 @@ function modA_kinetic = dvlp_Amod_kinetic_1D(M)
     end
     
 end
-
-function modA = compute_Amod(A)
-
-% eig does not support sparse matrices
-[V,D] = eig(full(A));
-modA = V * abs(D)/V;
-end
-
-% compute the eigenvector corresponding to the negative eigenvalues
-function Xminus = compute_Xminus(A)
-[V,D] = eig(full(A));
-D= D(sub2ind(size(D),1:size(D,1),1:size(D,2)));
-loc_neg = D<-(1e-10);
-Xminus = V(:,loc_neg);
-end
