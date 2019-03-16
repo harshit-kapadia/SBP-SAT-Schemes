@@ -301,14 +301,14 @@ while t < par.t_end || residual > 10^(-8)
     t = t + par.dt;
     cputime(1) = cputime(1) + toc;
     
-    if mod(step_count,100) == 0
-        disp('time: neqn: step_count: ');
-        disp(t);
-        disp(par.n_eqn);
-        disp(step_count);
-        disp('residual: ');
-        disp(residual);
-    end
+%     if mod(step_count,100) == 0
+%         disp('time: neqn: step_count: ');
+%         disp(t);
+%         disp(par.n_eqn);
+%         disp(step_count);
+%         disp('residual: ');
+%         disp(residual);
+%     end
     
 %     if mod(step_count,500) == 0
 %         temp_residual = residual;
@@ -318,8 +318,7 @@ while t < par.t_end || residual > 10^(-8)
     %% Plotting
     if par.to_plot && mod(step_count,10) == 0
         
-        surface_plot = surf(X{1},Y{1},par.compute_rho(U)), axis xy equal tight;
-       
+        contour(X{1},Y{1},par.compute_density(U)), axis xy equal tight;
        
         title(sprintf('t = %0.2f',t));
         colorbar;
@@ -327,7 +326,7 @@ while t < par.t_end || residual > 10^(-8)
         
         xlim(par.ax([1 2]));
         ylim(par.ax([3 4]));
-        zlim([-0.2 0.5]);
+        zlim([-1 1]);
         
         plot_counter = plot_counter + 1;
 %         filename_figure = strcat('/Users/neerajsarna/Dropbox/my_papers/MPI_ppt/pictures/odd_bc-',...
@@ -352,7 +351,12 @@ output = struct('X',X{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
              
-par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
+%par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
+% temp = par.compute_density(U);
+% filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/odd_T02.txt';
+%         
+% dlmwrite(filename,X{1}(:,50)','delimiter','\t');
+% dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
              
 end
 

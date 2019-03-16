@@ -65,20 +65,21 @@ filename = strcat(base_output,'convg_rate_','odd');
 print(filename,'-depsc');
 
 %% making pie charts
-per_diff_Odd = 100 * abs(convg_MOdd - convg_MOdd_penalty_Odd)./convg_MOdd_penalty_Odd;
-per_diff_Even = 100 * abs(convg_MEven - convg_MEven_penalty_Odd)./convg_MEven_penalty_Odd;
+per_diff_Odd = 100 * (convg_MOdd - convg_MOdd_penalty_Odd)./convg_MOdd_penalty_Odd;
+per_diff_Even = 100 * (convg_MEven - convg_MEven_penalty_Odd)./convg_MEven_penalty_Odd;
 
 per_diff = zeros(length(per_diff_Odd),2);
 per_diff(:,1) = per_diff_Odd;
 per_diff(:,2) = per_diff_Even;
 
-figure(5);
+hFig = figure(5);
+set(hFig, 'Position', [5 5 800 800]);
 b = bar(per_diff,'BarWidth',1);
 grid on;
 legend('Odd M','Even M');
-num_quantities = length(per_diff_Odd);
-xticks = {'\rho','v_1','v_2','\theta','\sigma_{11}','\sigma_{12}','\sigma_{22}','q_1','q_2'};
-set(gca,'xtick',1:num_quantities,'xticklabel',xticks);
+set(gca,'xtick',1:9,'xticklabel',...
+    {'$\tilde{\rho}$','$\tilde{v}_1$','$\tilde{v}_2$','$\tilde{\theta}$','$\tilde{\sigma}_{11}$','$\tilde{\sigma}_{12}$','$\tilde{\sigma}_{22}$','$\tilde{q}_1$','$\tilde{q}_2$'},...
+    'TickLabelInterpreter','latex');
 set(gca, 'FontSize', 20);
 title('% Difference in convergence rates');
 

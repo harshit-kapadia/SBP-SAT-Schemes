@@ -53,7 +53,8 @@ par.system.BIn = stabilize_boundary(par.system.Ax,par.system.BIn,M);
 Btemp1 = change_odd_sign(par.system.BIn);
 
 % first boundary
-par.system.penalty{1} = dvlp_penalty_kinetic(par.system.Ax,M);
+par.system.penalty{1} = dvlp_penalty_kinetic(par.system.Ax,M); 
+%par.system.penalty{1} = dvlp_penalty_char(par.system.Ax,par.system.BWall);
 
 % rotator for different boundaries
 rotator = dvlp_RotatorCartesian(M,false);
@@ -65,9 +66,8 @@ par.system.Ay = rotator{2}' * par.system.Ax * rotator{2};
 
 for i = 1 : par.num_bc
     par.system.penalty{i} = rotator{i}' * par.system.penalty{1} * rotator{i}; % kinetic penalty
-    %par.system.penalty{i} = rotator{i}' * par.system.penalty{1}; %odd penalty
     par.system.B{i} = eye(par.n_eqn); % kinetic penalty
-    %par.system.B{i} = par.system.BIn * rotator{i}; % odd penalty
+    
     Btemp{i} = Btemp1 * rotator{i};
     par.system.rhoW{i} = Btemp{i}(1,:);
     par.system.rhoW{i} = par.system.rhoW{i}/par.system.rhoW{i}(1);
@@ -102,8 +102,7 @@ y0 = 0.50;
 
 % if j==1 || j==2 % for both density and ux
 if j==1
-    %f = exp( -((x-x0).^2 * 50) - ((y-y0).^2 * 50) ); % sigma_x=sigma_y=0.1
-    f = exp( -((x-x0).^2 * 100)); % sigma_x=sigma_y=0.1
+    f = exp( -((x-x0).^2 * 50) - ((y-y0).^2 * 50) ); % sigma_x=sigma_y=0.1
 end
 
 
@@ -120,6 +119,8 @@ function f = bc_inhomo(B,rhoW)
         f{i} = f{1} * 0;
     end
 end
+
+
 
 function f = change_odd_sign(B)
 

@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_convergence(M)
+function [] = ex_manufactured_solution(M)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -8,8 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
-    't_end',0.5,... % end time of computation
+    't_end',1,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
     'CFL',1,...      % crude cfl number
@@ -17,7 +16,7 @@ par = struct(...
     'bc_inhomo',@bc_inhomo,... 
     'source',@source,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',true,...
+    'to_plot',false,...
     'compute_density',@compute_density,...
     'compute_ux',@compute_ux,...
     'compute_uy',@compute_uy,...
@@ -37,8 +36,8 @@ par.output_filename = strcat('convergence/result_M',num2str(M),'.txt');
 par.M = M;
 
 % % incase M if greater then 3 then read the written data. (Only read M + 2)
-% filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
 % par.M = M;
+% 
 % if M > 3
 %     %par.previous_M_data = dlmread(filename,'\t');
 %     par.previous_M_data = zeros(1,1);
@@ -55,13 +54,7 @@ par.system.rotator = cell(par.num_bc,1);
 par.Kn = 0.1;
 
 par.system.Ax = dvlp_Ax2D(M);
-export_Ax = full(par.system.Ax) ;
-save('convergence_mathematica/Ax_M3','-v7','export_Ax') ;
-
 par.system.P = dvlp_Prod2D(M);
-export_P = full(par.system.P) ;
-save('convergence_mathematica/P_M3','-v7','export_P') ;
-
 par.system.BIn = dvlp_BInflow2D(M);
 par.system.BWall = dvlp_BWall2D(M);
 
@@ -76,9 +69,6 @@ par.system.rotator = dvlp_RotatorCartesian(M,false);
 par.normals_bc = [1,0;0,1;-1,0;0,-1];
 
 par.system.Ay = par.system.rotator{2}' * par.system.Ax * par.system.rotator{2};
-export_Ay = full(par.system.Ay) ;
-save('convergence_mathematica/Ay_M3','-v7','export_Ay') ;
-
 
 % id =1, x = 1
 % id = 2 , y = 1
@@ -89,28 +79,59 @@ par.system.B{2} = par.system.BWall * par.system.rotator{2};
 par.system.B{3} = par.system.BWall * par.system.rotator{3};
 par.system.B{4} = par.system.BWall * par.system.rotator{4};
 
-for i = 1 : par.num_bc
-    An = par.system.Ax * par.normals_bc(i,1) + par.system.Ay * par.normals_bc(i,2);
-    par.system.penalty{i} = dvlp_penalty_char(An,par.system.B{i});
-end
+% first boundary
+par.system.penalty{1} = dvlp_penalty_odd(par.system.Ax,M);
+
+% rotator for different boundaries
+rotator = dvlp_RotatorCartesian(M,false);
 
 for i = 1 : par.num_bc
-    par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
+    par.system.penalty{i} = rotator{i}' * par.system.penalty{1};
+    par.system.penalty_B{i} = par.system.penalty{i} * par.system.B{i};
 end
 
-% if M == 3
-%     par.previous_M_data = 0;
-% else
-%     filename = strcat('heated_cavity/result_M',num2str(M-2),'.txt');
-%     par.previous_M_data = dlmread(filename,'\t');
-% end
+par.previous_M_data = 0; 
 
-par.previous_M_data = 0;
-result = solver(par);
-temp = cell(par.n_eqn);
+%========================================================================
+% Run solver and study convergence
+%========================================================================
 
-for j = 1 : par.n_eqn
-    temp{j} = result(j).sol;
+resolution = [16 32 64 128 256];
+grid_spacing = [];
+
+for k = 1:length(resolution)                       % Loop over various grid resolutions.
+    par.n = [1 1]*resolution(k);                   % Numbers of grid cells.
+    solution = solver(par);                         % Run solver.
+    error_temp = 0;
+    disp('Resolution :');
+    disp(par.n);
+    for j = 1:par.n_eqn                               % Loop over solution components.
+        X = solution(j).X;
+        Y = solution(j).Y;
+        PX = solution(j).PX;
+        PY = solution(j).PY;
+        U_theo = exact_solution(X,Y,j,par.t_end);     % Evaluate true solution.
+        error = abs(solution(j).sol-U_theo);               % Difference between num. and true sol.
+        int_x = dot(transpose(error),transpose(PX * error),2);  % integral along x.
+        int_xy = sum(PY*int_x);  % integral along xy.
+        error_temp = int_xy + error_temp;%Sc. L2 error.
+    end
+    error_L2(k) = sqrt(error_temp)
+    grid_spacing = [grid_spacing max(solution(1).h)];
+end
+
+filename = 'discretization_error/odd_penalty_M3.txt';
+dlmwrite(filename,grid_spacing,'delimiter','\t','precision',10);
+dlmwrite(filename,error_L2,'delimiter','\t','-append','precision',10);
+end
+
+% exact solution
+function f = exact_solution(X,Y,j,t)
+
+f = X * 0;
+
+if j == 1
+    f = cos(pi * t).*sin(pi * X).*sin(pi * Y);
 end
 
 end
@@ -121,27 +142,25 @@ function f = initial_condition(x,y,j,read_data)
 f = x * 0;
 
 if j==1
-    k = pi;
     t=0;
-    f = sin(k*x) .* sin(k*y) .* cos(k*t) ;
+    f = sin(pi*x) .* sin(pi*y) .* cos(pi*t) ;
 end
 
 
 end
 
-function F = source(x,y,n_eqn,t)
+function F = source(x,y,j,t)
 
 F = x * 0;
 
-if n_eqn==1
-    k = pi;
-    F = - k * sin(k*x) .* sin(k*y) .* sin(k*t);
-elseif n_eqn==2
-    k = pi;
-    F = k * cos(k*x) .* sin(k*y) .* cos(k*t);
-elseif n_eqn==3
-    k = pi;
-    F = k * sin(k*x) .* cos(k*y) .* cos(k*t) ;
+if j==1
+    F = - pi * sin(pi*x) .* sin(pi*y) .* sin(pi*t);
+end
+if j==2
+    F = pi * cos(pi*x) .* sin(pi*y) .* cos(pi*t);
+end
+if j==3
+    F = pi * sin(pi*x) .* cos(pi*y) .* cos(pi*t) ;
 end
 
 end
@@ -150,16 +169,16 @@ function f = bc_inhomo(B,bc_id,t)
 
     f = B(:,1)* 0;
     
-%     if t <= 1
-%         thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
-%     else
-%         thetaIn = 1;
-%     end
-% 
-%     switch bc_id
-%         case 4
-%             f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
-%     end
+end
+
+function [penalty] = dvlp_penalty_odd(Ax,M)
+
+[odd_ID,~] = get_id_Odd(M);
+
+odd_ID = flatten_cell(odd_ID);
+
+% we pick the columns which get multiplied by the odd variables
+penalty = Ax(:,odd_ID);
 end
 
 function [] = write_solution(temp,par,X,Y,M,residual)

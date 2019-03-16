@@ -44,7 +44,8 @@ delta_x = X(2,1)-X(1,1);
 error_entropy = sqrt(dot(error,error,2));
 error_entropy_odd = sqrt(dot(error_odd,error_odd,2));
 
-plot_error_entropy(M_values,error_entropy,error_entropy_odd,1);
+slope = 1;
+plot_error_entropy(M_values,error_entropy,error_entropy_odd,slope);
 
 filename = strcat(base_output,'EM');
 print(filename,'-depsc');

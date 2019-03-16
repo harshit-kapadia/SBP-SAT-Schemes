@@ -302,18 +302,13 @@ while t < par.t_end || residual > 10^(-8)
         
         temp = par.compute_density(U);
         
-
-%         filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/kinetic_M_T02.txt';
-%         
-%         dlmwrite(filename,X{1}(:,50)','delimiter','\t');
-%         dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
 %         plot_counter = plot_counter + 1;
 %         filename_figure = strcat('/Users/neerajsarna/Dropbox/my_papers/MPI_ppt/pictures/odd_bc-',...
 %                                  num2str(plot_counter),'.png');                     
 %         saveas(surface_plot,filename_figure);                      
         
         plot(X{1}(:,50),temp(:,50),'-bo');
-        ylim([0,0.3]);
+        ylim([-0.5,0.3]);
         title('$\tilde{\rho}(x_1,x_2=0.5,t=0.3)$','Interpreter','latex');
         xlabel('x_1');
         set(gca,'FontSize',20);
@@ -337,6 +332,15 @@ output = struct('X',X{1}, ...
                  'PX',PX{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
+             
+             
+temp = par.compute_density(U);
+        
+
+filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/kinetic_M5_T03.txt';
+        
+dlmwrite(filename,X{1}(:,50)','delimiter','\t');
+dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
              
 %par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
              
