@@ -1,3 +1,5 @@
+% Plot the L2 error in moment approximation, ||f-f_M||, corresponding to 
+% odd and characteristic boundary implementation. 
 function[] = plot_error_entropy(M_values,error_entropy,error_entropy_odd,slope)
 
 min_x_value = min(M_values)-0.25;

@@ -1,3 +1,4 @@
+%plot_error: plots the L2 error in different macroscopic quantities
 function[fig] = plot_error(M_values,error,fig_id)
 
 min_x_value = min(M_values)-0.25;
