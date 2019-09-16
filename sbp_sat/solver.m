@@ -352,11 +352,9 @@ output = struct('X',X{1}, ...
                  'h',h);
              
 %par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
-% temp = par.compute_density(U);
-% filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/odd_T02.txt';
-%         
-% dlmwrite(filename,X{1}(:,50)','delimiter','\t');
-% dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
+temp = par.compute_density(U);        
+dlmwrite(par.output_filename,X{1}(:,floor(par.n(1)/2))','delimiter','\t');
+dlmwrite(par.output_filename,temp(:,floor(par.n(1)/2))','delimiter','\t','-append');
              
 end
 

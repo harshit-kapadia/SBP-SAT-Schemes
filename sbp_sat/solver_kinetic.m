@@ -307,9 +307,9 @@ while t < par.t_end || residual > 10^(-8)
 %                                  num2str(plot_counter),'.png');                     
 %         saveas(surface_plot,filename_figure);                      
         
-        plot(X{1}(:,50),temp(:,50),'-bo');
-        ylim([-0.5,0.3]);
-        title('$\tilde{\rho}(x_1,x_2=0.5,t=0.3)$','Interpreter','latex');
+        plot(X{1}(:,floor(par.n(1)/2)),temp(:,floor(par.n(1)/2)),'-bo');
+        %ylim([-0.5,0.3]);
+        title(strcat('time = ',num2str(t)));
         xlabel('x_1');
         set(gca,'FontSize',20);
         grid on;
@@ -334,13 +334,9 @@ output = struct('X',X{1}, ...
                  'h',h);
              
              
-temp = par.compute_density(U);
-        
-
-filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/kinetic_M5_T03.txt';
-        
-dlmwrite(filename,X{1}(:,50)','delimiter','\t');
-dlmwrite(filename,temp(:,50)','delimiter','\t','-append');
+temp = par.compute_density(U);        
+dlmwrite(par.output_filename,X{1}(:,floor(par.n(1)/2))','delimiter','\t');
+dlmwrite(par.output_filename,temp(:,floor(par.n(1)/2))','delimiter','\t','-append');
              
 %par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
              
