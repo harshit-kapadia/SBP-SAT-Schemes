@@ -8,7 +8,7 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
+    'n',[10 10],... % numbers of grid cells in each coordinate direction
     't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -31,7 +31,8 @@ par = struct(...
     );
 
 % file where the output is written
-par.output_filename = 'lid_driven_cavity';
+% par.output_filename = 'lid_driven_cavity';
+par.output_filename = strcat('lid_driven_cavity/result_n',num2str(par.n(1)),'_M',num2str(M),'.txt');
 
 % incase M if greater then 3 then read the written data. (Only read M + 2)
 par.M = M;
@@ -156,7 +157,8 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = strcat(par.output_filename,'/result_M',num2str(M),'.txt');
+% filename = strcat(par.output_filename,'/result_M',num2str(M),'.txt');
+filename = par.output_filename;
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -173,7 +175,8 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
-filename_residual = strcat(par.output_filename,'/residual_M',num2str(M),'.txt');
+% filename_residual = strcat(par.output_filename,'/residual_M',num2str(M),'.txt');
+filename_residual = strcat('lid_driven_cavity/residual_n',num2str(par.n(1)),'_M',num2str(M),'.txt');
 dlmwrite(filename_residual,residual(:)','delimiter','\t','-append','precision',10);
 end
 

@@ -351,7 +351,7 @@ output = struct('X',X{1}, ...
                  'PY',PY{1}, ...
                  'h',h);
              
-%par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
+par.write_solution(U,par,X{1},Y{1},par.M,[t,residual]);
 % temp = par.compute_density(U);
 % filename = '/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/gaussian_collision/odd_T02.txt';
 %         
