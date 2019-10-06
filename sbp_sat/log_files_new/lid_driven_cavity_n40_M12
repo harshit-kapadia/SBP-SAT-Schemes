@@ -1,0 +1,26 @@
+(OK) Loading MISC environment
+(!!) The NAG Toolbox https://www.nag.com/nag-toolbox-matlab available at request.
+(!!) please contact servicedesk@itc.rwth-aachen.de 
+(WW) Matlab affects the shell environment. Other programs may have become unusable.
+(WW) Use another terminal for any program other than matlab!
+(OK) Loading matlab 2018b
+Picked up JAVA_TOOL_OPTIONS: -Xmx2048m
+Opening log file:  /home/xx505837/java.log.4277
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018b (9.5.0.944444) 64-bit (glnxa64)
+                              August 28, 2018
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+>> 7025 time steps
+CPU-times
+ advection:        1426.65s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 9.966180892558741e-09
+>> 

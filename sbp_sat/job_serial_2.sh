@@ -4,7 +4,7 @@
 #SBATCH --job-name=MATLAB_SERIAL
  
 ### File / path where STDOUT will be written, the %J is the job id
-#SBATCH --output=log_files_new/heated_cavity_n80_M12
+#SBATCH --output=log_files_new/lid_driven_cavity_n20_M12
  
 ### Request the time you need for execution. The full format is D-HH:MM:SS
 ### You must at least specify minutes or days and hours and may add or
@@ -24,7 +24,7 @@ module load matlab
  
  
 # start non-interactive batch job
-matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files_new/heated_cavity_n80_M12.txt <<EOF
-run ex_heated_cavity(12);
+matlab -singleCompThread -nodisplay -nodesktop -nosplash -logfile log_files_new/lid_driven_cavity_n20_M12.txt <<EOF
+run ex_lid_driven_cavity(12);
 quit();
 EOF
