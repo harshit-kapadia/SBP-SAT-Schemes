@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_gaussian_collision(M)
+function [] = test1_grid_refine(M,nx)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -8,7 +8,6 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
     't_end',0.3,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
@@ -16,7 +15,7 @@ par = struct(...
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',true,...
+    'to_plot',false,...
     'compute_density',@compute_density,...
     'compute_ux',@compute_ux,...
     'compute_uy',@compute_uy,...
@@ -30,11 +29,11 @@ par = struct(...
     'steady_state',false...
     );
 
-% file where the output is written
-par.output_filename = strcat('gaussian_collision/result_n',num2str(par.n(1)),'_M',num2str(M),...
-                             '.txt');
-
+par.n = [nx,nx];
 par.M = M;
+
+% file where the output is written
+par.output_filename = strcat('results/gaussian_collision_char/result_n',num2str(par.n(1)),'_M',num2str(par.M),'.txt');
 
 % % incase M if greater then 3 then read the written data. (Only read M + 2)
 % filename = strcat('gaussian_collision/result_M',num2str(M-2),'.txt');
@@ -90,14 +89,7 @@ for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
-% if M == 3
-%     par.previous_M_data = 0;
-% else
-%     filename = strcat('gaussian_collision/result_M',num2str(M-2),'.txt');
-%     par.previous_M_data = dlmread(filename,'\t');
-% end
-
-par.previous_M_data = 0; % actually useless for this example (unsteady)
+par.previous_M_data = 0;
 result = solver(par);
 temp = cell(par.n_eqn);
 
@@ -120,14 +112,6 @@ if j==1
     f = exp( -((x-x0).^2 * 50) - ((y-y0).^2 * 50) ); % sigma_x=sigma_y=0.1
 end
 
-% moments_read_data = size(read_data,2) - 2;
-% 
-% % if we have the data from the previous moment system then we initialize
-% % from there
-% 
-% if j <= moments_read_data
-%         f = reshape(read_data(j+2,:),size(x));
-% end
 
 end
 
@@ -176,9 +160,6 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
 
-filename = strcat('gaussian_collision/residual_n',num2str(par.n(1)),'_M',num2str(M),'.txt');
-
-dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
 
 end
 

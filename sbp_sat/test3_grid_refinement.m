@@ -1,5 +1,5 @@
 % M is the highest tensor degree
-function [] = ex_gaussian_collision(M)
+function [] = test3_grid_refinement(M,nx)
 %========================================================================
 % Problem Parameters
 %========================================================================
@@ -8,15 +8,14 @@ par = struct(...
     'initial_condition',@initial_condition,... % it is defined below
     'exact_solution',@exact_solution,...
     'ax',[0 1 0 1],... % extents of computational domain
-    'n',[100 100],... % numbers of grid cells in each coordinate direction
-    't_end',0.3,... % end time of computation
+    't_end',0.5,... % end time of computation
     'diff_order',2,... % the difference order in the physical space
     'RK_order',4,...
     'CFL',1,...      % crude cfl number
     'num_bc',4,... % number of boundaries in the domain
     'bc_inhomo',@bc_inhomo,... % source term (defined below)
     'var_plot',1,...
-    'to_plot',true,...
+    'to_plot',false,...
     'compute_density',@compute_density,...
     'compute_ux',@compute_ux,...
     'compute_uy',@compute_uy,...
@@ -27,24 +26,17 @@ par = struct(...
     'compute_qx',@compute_qx,...
     'compute_qy',@compute_qy,...
     'write_solution',@write_solution,...
-    'steady_state',false...
+    'steady_state',true...
     );
 
 % file where the output is written
-par.output_filename = strcat('gaussian_collision/result_n',num2str(par.n(1)),'_M',num2str(M),...
-                             '.txt');
-
+par.n = [nx,nx];
 par.M = M;
 
-% % incase M if greater then 3 then read the written data. (Only read M + 2)
-% filename = strcat('gaussian_collision/result_M',num2str(M-2),'.txt');
-% par.M = M;
-% if M > 3
-%     %par.previous_M_data = dlmread(filename,'\t');
-%     par.previous_M_data = zeros(1,1);
-% else
-%     par.previous_M_data = zeros(1,1);
-% end
+% file where the output is written
+par.output_filename = strcat('results/lid_driven_cavity_char/result_n',...
+                             num2str(par.n(1)),'_M',num2str(par.M),'.txt');
+
 
 % we need the boundary matrix and the penalty matrix for all the
 % boundaries
@@ -71,7 +63,6 @@ par.normals_bc = [1,0;0,1;-1,0;0,-1];
 
 par.system.Ay = par.system.rotator{2}' * par.system.Ax * par.system.rotator{2};
 
-
 % id =1, x = 1
 % id = 2 , y = 1
 % id = 3, x = 0
@@ -81,30 +72,33 @@ par.system.B{2} = par.system.BWall * par.system.rotator{2};
 par.system.B{3} = par.system.BWall * par.system.rotator{3};
 par.system.B{4} = par.system.BWall * par.system.rotator{4};
 
+% first boundary
+par.system.penalty{1} = dvlp_penalty_char(par.system.Ax,par.system.B{1});
+
+% rotator for different boundaries
+rotator = dvlp_RotatorCartesian(M,false);
+
 for i = 1 : par.num_bc
-    An = par.system.Ax * par.normals_bc(i,1) + par.system.Ay * par.normals_bc(i,2);
-    par.system.penalty{i} = dvlp_penalty_char(An,par.system.B{i});
+    par.system.penalty{i} = rotator{i}' * par.system.penalty{1};
 end
 
 for i = 1 : par.num_bc
     par.system.penalty_B{i} = par.system.penalty{i}*par.system.B{i};
 end
 
-% if M == 3
-%     par.previous_M_data = 0;
-% else
-%     filename = strcat('gaussian_collision/result_M',num2str(M-2),'.txt');
-%     par.previous_M_data = dlmread(filename,'\t');
-% end
-
-par.previous_M_data = 0; % actually useless for this example (unsteady)
+par.previous_M_data = 0;
 result = solver(par);
-temp = cell(par.n_eqn);
 
-for j = 1 : par.n_eqn
-    temp{j} = result(j).sol;
 end
 
+function [penalty] = dvlp_penalty_odd(Ax,M)
+
+[odd_ID,~] = get_id_Odd(M);
+
+odd_ID = flatten_cell(odd_ID);
+
+% we pick the columns which get multiplied by the odd variables
+penalty = Ax(:,odd_ID);
 end
 
 % read data contains the already read files
@@ -112,22 +106,14 @@ function f = initial_condition(x,y,j,read_data)
 
 f = x * 0;
 
-x0 = 0.50; % centered in the middle of domain
-y0 = 0.50;
+moments_read_data = size(read_data,2) - 2;
 
-% if j==1 || j==2 % for both density and ux
-if j==1
-    f = exp( -((x-x0).^2 * 50) - ((y-y0).^2 * 50) ); % sigma_x=sigma_y=0.1
+% if we have the data from the previous moment system then we initialize
+% from there
+
+if j <= moments_read_data
+        f = reshape(read_data(j+2,:),size(x));
 end
-
-% moments_read_data = size(read_data,2) - 2;
-% 
-% % if we have the data from the previous moment system then we initialize
-% % from there
-% 
-% if j <= moments_read_data
-%         f = reshape(read_data(j+2,:),size(x));
-% end
 
 end
 
@@ -135,20 +121,26 @@ function f = bc_inhomo(B,bc_id,t)
 
     f = B(:,1)* 0;
     
-%     if t <= 1
-%         thetaIn = exp(-1/(1-(t-1)^2)) * exp(1);
-%     else
-%         thetaIn = 1;
-%     end
-% 
-%     switch bc_id
-%         case 4
-%             f = thetaIn * (B(:,4)+B(:,6)+B(:,7))/sqrt(2); 
-%     end
+    % tangential velocity
+    % tangential direction is -x. Hence the minus
+    if t <= 1
+        vt = exp(-1/(1-(t-1)^2)) * exp(1);
+    else
+        vt = 1;
+    end
+
+    % the top wall moves
+    switch bc_id
+        case 2
+            % The B matrix has already been multiplied by the rotator. As a
+            % result we consider the second column. But in the DG
+            % framework, B is not multiplied by the rotator and so we take
+            % the third column.
+            f = vt * B(:,2); 
+    end
 end
 
 function [] = write_solution(temp,par,X,Y,M,residual)
-
 density = par.compute_density(temp);
 ux = par.compute_ux(temp);
 uy = par.compute_uy(temp);
@@ -159,7 +151,6 @@ sigma_yy = par.compute_sigma_yy(temp);
 qx = par.compute_qx(temp);
 qy = par.compute_qy(temp);
 
-filename = par.output_filename;
 dlmwrite(filename,X(:)','delimiter','\t','precision',10);
 dlmwrite(filename,Y(:)','delimiter','\t','precision',10,'-append');
 dlmwrite(filename,density(:)','delimiter','\t','-append','precision',10);
@@ -175,10 +166,6 @@ dlmwrite(filename,sigma_yy(:)','delimiter','\t','-append','precision',10);
 
 dlmwrite(filename,qx(:)','delimiter','\t','-append','precision',10);
 dlmwrite(filename,qy(:)','delimiter','\t','-append','precision',10);
-
-filename = strcat('gaussian_collision/residual_n',num2str(par.n(1)),'_M',num2str(M),'.txt');
-
-dlmwrite(filename,residual(:)','delimiter','\t','-append','precision',10);
 
 end
 
