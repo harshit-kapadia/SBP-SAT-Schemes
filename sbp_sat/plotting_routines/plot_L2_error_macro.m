@@ -1,12 +1,14 @@
+% does the plotting for L2 error in macroscopic quantities
+
 % test case could either be :
 % 1. gaussian_collision
 % 2. unsteady_lid_driven_cavity
 % 3. lid_driven_cavity
 % 4. heated_cavity
 
-function [] = plot_L2_error(test_case)
+function [] = plot_L2_error_macro(test_case)
 
-base_output = strcat('/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/',...
+base_output = strcat('/Users/neerajsarna/Dropbox/PhD_Thesis/L2_FE/results/',...
               test_case,'/');
 
 M_values = 3:1:13;

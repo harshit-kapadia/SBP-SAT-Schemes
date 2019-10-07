@@ -1,5 +1,6 @@
-% we compare the results from the characteristic penalty matrix and the odd
-% penalty matrix
+% compare the L2 error in moment approximation computed through odd and
+% characteristic boundary conditions. 
+
 % test case could either be :
 % 1. gaussian_collision
 % 2. unsteady_lid_driven_cavity
