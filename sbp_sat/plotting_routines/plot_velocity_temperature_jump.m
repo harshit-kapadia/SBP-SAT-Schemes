@@ -36,7 +36,7 @@ plot(grid_x,ux_lid_dvm(mid_point,:),'--go',...
      'LineWidth',4);
 title('v_1 along a cross-section'); 
 h = xlabel('x_2','FontSize',20);
-ylabel('v_1');
+ylabel('v_1(x_1=0.5,x_2)');
 ylim([-0.2,1.1]);
 grid on;
 lg = legend('DVM','characteristic','odd','wall velocity (v_1^{in})','Location','best');
@@ -80,7 +80,7 @@ plot(grid_x,theta_lid_dvm(mid_point,:),'--go',...
      'LineWidth',4);
 title('\theta along a cross-section'); 
 h = xlabel('x_2','FontSize',20);
-ylabel('v_1');
+ylabel('\theta(x_1=0.5,x_2)');
 ylim([0,1.1]);
 grid on;
 lg = legend('DVM','characteristic','odd','wall temperature (\theta^{in})','Location','best');

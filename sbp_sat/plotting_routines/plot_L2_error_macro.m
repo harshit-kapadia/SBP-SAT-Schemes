@@ -8,7 +8,7 @@
 
 function [] = plot_L2_error_macro(test_case)
 
-base_output = strcat('/Users/neerajsarna/Dropbox/PhD_Thesis/L2_FE/results/',...
+base_output = strcat('/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/',...
               test_case,'/');
 
 M_values = 3:1:13;

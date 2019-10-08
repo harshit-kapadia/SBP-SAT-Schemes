@@ -25,8 +25,8 @@ fig = loglog(M_values,error(:,1),'-ko', ...
        'markersize',10,...
        'LineWidth',3);
     
-lg = legend({'$\tilde{\rho}$','$\tilde{v}_1$','$\tilde{v}_2$','$\tilde{\theta}$','$\tilde{\sigma}_{11}$',...
-        '$\tilde{\sigma}_{12}$','$\tilde{\sigma}_{22}$','$\tilde{q}_1$','$\tilde{q}_2$'},...
+lg = legend({'$\rho$','$v_1$','$v_2$','$\theta$','$\sigma_{11}$',...
+        '$\sigma_{12}$','$\sigma_{22}$','$q_1$','$q_2$'},...
         'Interpreter','latex','Location','eastoutside');
     
 lg.FontSize = 20;
@@ -36,7 +36,7 @@ xlim([min_x_value,max_x_value]);
 ylim([min_y_value,max_y_value]);
 
 h = xlabel('M','FontSize',20);
-ylabel('e_M^{\alpha}');
+ylabel('e_{\alpha,M}');
 xticks(min(M_values):2:max(M_values));
 xt = get(gca, 'YTick');
 grid on;

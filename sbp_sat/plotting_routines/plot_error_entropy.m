@@ -26,7 +26,7 @@ legend('Characteristic Penalty','Odd Penalty','reference (slope=-1)');
 xlim([min_x_value,max_x_value]);
 ylim([min_y_value,max_y_value]);
 h = xlabel('M','FontSize',20);
-ylabel('E_M');
+ylabel('E_{I,M}');
 xticks(min(M_values):2:max(M_values));
 xt = get(gca, 'YTick');
 grid on;
