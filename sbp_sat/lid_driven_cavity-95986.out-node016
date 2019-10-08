@@ -1,0 +1,1048 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+For online documentation, see http://www.mathworks.com/support
+For product information, visit www.mathworks.com.
+ 
+time: neqn: step_count: 
+    0.0016
+
+   252
+
+     0
+
+residual: 
+  8.7790e-137
+
+time: neqn: step_count: 
+    0.1583
+
+   252
+
+   100
+
+residual: 
+    7.2119
+
+time: neqn: step_count: 
+    0.3150
+
+   252
+
+   200
+
+residual: 
+   15.2167
+
+time: neqn: step_count: 
+    0.4718
+
+   252
+
+   300
+
+residual: 
+   15.8276
+
+time: neqn: step_count: 
+    0.6285
+
+   252
+
+   400
+
+residual: 
+   14.2587
+
+time: neqn: step_count: 
+    0.7852
+
+   252
+
+   500
+
+residual: 
+   12.0985
+
+time: neqn: step_count: 
+    0.9420
+
+   252
+
+   600
+
+residual: 
+   10.0072
+
+time: neqn: step_count: 
+    1.0987
+
+   252
+
+   700
+
+residual: 
+    8.4571
+
+time: neqn: step_count: 
+    1.2554
+
+   252
+
+   800
+
+residual: 
+    7.3299
+
+time: neqn: step_count: 
+    1.4122
+
+   252
+
+   900
+
+residual: 
+    6.0973
+
+time: neqn: step_count: 
+    1.5689
+
+   252
+
+        1000
+
+residual: 
+    4.7174
+
+time: neqn: step_count: 
+    1.7257
+
+   252
+
+        1100
+
+residual: 
+    3.4115
+
+time: neqn: step_count: 
+    1.8824
+
+   252
+
+        1200
+
+residual: 
+    2.4123
+
+time: neqn: step_count: 
+    2.0391
+
+   252
+
+        1300
+
+residual: 
+    1.8037
+
+time: neqn: step_count: 
+    2.1959
+
+   252
+
+        1400
+
+residual: 
+    1.4642
+
+time: neqn: step_count: 
+    2.3526
+
+   252
+
+        1500
+
+residual: 
+    1.2011
+
+time: neqn: step_count: 
+    2.5093
+
+   252
+
+        1600
+
+residual: 
+    0.9413
+
+time: neqn: step_count: 
+    2.6661
+
+   252
+
+        1700
+
+residual: 
+    0.7097
+
+time: neqn: step_count: 
+    2.8228
+
+   252
+
+        1800
+
+residual: 
+    0.5535
+
+time: neqn: step_count: 
+    2.9795
+
+   252
+
+        1900
+
+residual: 
+    0.4698
+
+time: neqn: step_count: 
+    3.1363
+
+   252
+
+        2000
+
+residual: 
+    0.4103
+
+time: neqn: step_count: 
+    3.2930
+
+   252
+
+        2100
+
+residual: 
+    0.3413
+
+time: neqn: step_count: 
+    3.4497
+
+   252
+
+        2200
+
+residual: 
+    0.2635
+
+time: neqn: step_count: 
+    3.6065
+
+   252
+
+        2300
+
+residual: 
+    0.1936
+
+time: neqn: step_count: 
+    3.7632
+
+   252
+
+        2400
+
+residual: 
+    0.1472
+
+time: neqn: step_count: 
+    3.9199
+
+   252
+
+        2500
+
+residual: 
+    0.1230
+
+time: neqn: step_count: 
+    4.0767
+
+   252
+
+        2600
+
+residual: 
+    0.1063
+
+time: neqn: step_count: 
+    4.2334
+
+   252
+
+        2700
+
+residual: 
+    0.0874
+
+time: neqn: step_count: 
+    4.3902
+
+   252
+
+        2800
+
+residual: 
+    0.0667
+
+time: neqn: step_count: 
+    4.5469
+
+   252
+
+        2900
+
+residual: 
+    0.0492
+
+time: neqn: step_count: 
+    4.7036
+
+   252
+
+        3000
+
+residual: 
+    0.0384
+
+time: neqn: step_count: 
+    4.8604
+
+   252
+
+        3100
+
+residual: 
+    0.0330
+
+time: neqn: step_count: 
+    5.0171
+
+   252
+
+        3200
+
+residual: 
+    0.0286
+
+time: neqn: step_count: 
+    5.1738
+
+   252
+
+        3300
+
+residual: 
+    0.0233
+
+time: neqn: step_count: 
+    5.3306
+
+   252
+
+        3400
+
+residual: 
+    0.0175
+
+time: neqn: step_count: 
+    5.4873
+
+   252
+
+        3500
+
+residual: 
+    0.0129
+
+time: neqn: step_count: 
+    5.6440
+
+   252
+
+        3600
+
+residual: 
+    0.0102
+
+time: neqn: step_count: 
+    5.8008
+
+   252
+
+        3700
+
+residual: 
+    0.0089
+
+time: neqn: step_count: 
+    5.9575
+
+   252
+
+        3800
+
+residual: 
+    0.0077
+
+time: neqn: step_count: 
+    6.1142
+
+   252
+
+        3900
+
+residual: 
+    0.0061
+
+time: neqn: step_count: 
+    6.2710
+
+   252
+
+        4000
+
+residual: 
+    0.0046
+
+time: neqn: step_count: 
+    6.4277
+
+   252
+
+        4100
+
+residual: 
+    0.0034
+
+time: neqn: step_count: 
+    6.5844
+
+   252
+
+        4200
+
+residual: 
+    0.0027
+
+time: neqn: step_count: 
+    6.7412
+
+   252
+
+        4300
+
+residual: 
+    0.0024
+
+time: neqn: step_count: 
+    6.8979
+
+   252
+
+        4400
+
+residual: 
+    0.0021
+
+time: neqn: step_count: 
+    7.0547
+
+   252
+
+        4500
+
+residual: 
+    0.0016
+
+time: neqn: step_count: 
+    7.2114
+
+   252
+
+        4600
+
+residual: 
+    0.0012
+
+time: neqn: step_count: 
+    7.3681
+
+   252
+
+        4700
+
+residual: 
+   8.8940e-04
+
+time: neqn: step_count: 
+    7.5249
+
+   252
+
+        4800
+
+residual: 
+   7.3604e-04
+
+time: neqn: step_count: 
+    7.6816
+
+   252
+
+        4900
+
+residual: 
+   6.5097e-04
+
+time: neqn: step_count: 
+    7.8383
+
+   252
+
+        5000
+
+residual: 
+   5.5256e-04
+
+time: neqn: step_count: 
+    7.9951
+
+   252
+
+        5100
+
+residual: 
+   4.2951e-04
+
+time: neqn: step_count: 
+    8.1518
+
+   252
+
+        5200
+
+residual: 
+   3.1400e-04
+
+time: neqn: step_count: 
+    8.3085
+
+   252
+
+        5300
+
+residual: 
+   2.3636e-04
+
+time: neqn: step_count: 
+    8.4653
+
+   252
+
+        5400
+
+residual: 
+   1.9981e-04
+
+time: neqn: step_count: 
+    8.6220
+
+   252
+
+        5500
+
+residual: 
+   1.7712e-04
+
+time: neqn: step_count: 
+    8.7787
+
+   252
+
+        5600
+
+residual: 
+   1.4844e-04
+
+time: neqn: step_count: 
+    8.9355
+
+   252
+
+        5700
+
+residual: 
+   1.1380e-04
+
+time: neqn: step_count: 
+    9.0922
+
+   252
+
+        5800
+
+residual: 
+   8.2724e-05
+
+time: neqn: step_count: 
+    9.2489
+
+   252
+
+        5900
+
+residual: 
+   6.3338e-05
+
+time: neqn: step_count: 
+    9.4057
+
+   252
+
+        6000
+
+residual: 
+   5.4569e-05
+
+time: neqn: step_count: 
+    9.5624
+
+   252
+
+        6100
+
+residual: 
+   4.8274e-05
+
+time: neqn: step_count: 
+    9.7192
+
+   252
+
+        6200
+
+residual: 
+   3.9857e-05
+
+time: neqn: step_count: 
+    9.8759
+
+   252
+
+        6300
+
+residual: 
+   3.0126e-05
+
+time: neqn: step_count: 
+   10.0326
+
+   252
+
+        6400
+
+residual: 
+   2.1857e-05
+
+time: neqn: step_count: 
+   10.1894
+
+   252
+
+        6500
+
+residual: 
+   1.7067e-05
+
+time: neqn: step_count: 
+   10.3461
+
+   252
+
+        6600
+
+residual: 
+   1.4943e-05
+
+time: neqn: step_count: 
+   10.5028
+
+   252
+
+        6700
+
+residual: 
+   1.3152e-05
+
+time: neqn: step_count: 
+   10.6596
+
+   252
+
+        6800
+
+residual: 
+   1.0695e-05
+
+time: neqn: step_count: 
+   10.8163
+
+   252
+
+        6900
+
+residual: 
+   7.9882e-06
+
+time: neqn: step_count: 
+   10.9730
+
+   252
+
+        7000
+
+residual: 
+   5.8208e-06
+
+time: neqn: step_count: 
+   11.1298
+
+   252
+
+        7100
+
+residual: 
+   4.6531e-06
+
+time: neqn: step_count: 
+   11.2865
+
+   252
+
+        7200
+
+residual: 
+   4.1195e-06
+
+time: neqn: step_count: 
+   11.4432
+
+   252
+
+        7300
+
+residual: 
+   3.5918e-06
+
+time: neqn: step_count: 
+   11.6000
+
+   252
+
+        7400
+
+residual: 
+   2.8729e-06
+
+time: neqn: step_count: 
+   11.7567
+
+   252
+
+        7500
+
+residual: 
+   2.1231e-06
+
+time: neqn: step_count: 
+   11.9134
+
+   252
+
+        7600
+
+residual: 
+   1.5598e-06
+
+time: neqn: step_count: 
+   12.0702
+
+   252
+
+        7700
+
+residual: 
+   1.2774e-06
+
+time: neqn: step_count: 
+   12.2269
+
+   252
+
+        7800
+
+residual: 
+   1.1394e-06
+
+time: neqn: step_count: 
+   12.3837
+
+   252
+
+        7900
+
+residual: 
+   9.8352e-07
+
+time: neqn: step_count: 
+   12.5404
+
+   252
+
+        8000
+
+residual: 
+   7.7703e-07
+
+time: neqn: step_count: 
+   12.6971
+
+   252
+
+        8100
+
+residual: 
+   5.7362e-07
+
+time: neqn: step_count: 
+   12.8539
+
+   252
+
+        8200
+
+residual: 
+   4.3022e-07
+
+time: neqn: step_count: 
+   13.0106
+
+   252
+
+        8300
+
+residual: 
+   3.6145e-07
+
+time: neqn: step_count: 
+   13.1673
+
+   252
+
+        8400
+
+residual: 
+   3.2253e-07
+
+time: neqn: step_count: 
+   13.3241
+
+   252
+
+        8500
+
+residual: 
+   2.7461e-07
+
+time: neqn: step_count: 
+   13.4808
+
+   252
+
+        8600
+
+residual: 
+   2.1509e-07
+
+time: neqn: step_count: 
+   13.6375
+
+   252
+
+        8700
+
+residual: 
+   1.5969e-07
+
+time: neqn: step_count: 
+   13.7943
+
+   252
+
+        8800
+
+residual: 
+   1.2315e-07
+
+time: neqn: step_count: 
+   13.9510
+
+   252
+
+        8900
+
+residual: 
+   1.0596e-07
+
+time: neqn: step_count: 
+   14.1077
+
+   252
+
+        9000
+
+residual: 
+   9.4547e-08
+
+time: neqn: step_count: 
+   14.2645
+
+   252
+
+        9100
+
+residual: 
+   8.0219e-08
+
+time: neqn: step_count: 
+   14.4212
+
+   252
+
+        9200
+
+residual: 
+   6.3695e-08
+
+time: neqn: step_count: 
+   14.5779
+
+   252
+
+        9300
+
+residual: 
+   4.9156e-08
+
+time: neqn: step_count: 
+   14.7347
+
+   252
+
+        9400
+
+residual: 
+   3.9783e-08
+
+time: neqn: step_count: 
+   14.8914
+
+   252
+
+        9500
+
+residual: 
+   3.4871e-08
+
+time: neqn: step_count: 
+   15.0482
+
+   252
+
+        9600
+
+residual: 
+   3.0838e-08
+
+time: neqn: step_count: 
+   15.2049
+
+   252
+
+        9700
+
+residual: 
+   2.6173e-08
+
+time: neqn: step_count: 
+   15.3616
+
+   252
+
+        9800
+
+residual: 
+   2.1307e-08
+
+time: neqn: step_count: 
+   15.5184
+
+   252
+
+        9900
+
+residual: 
+   1.7279e-08
+
+time: neqn: step_count: 
+   15.6751
+
+   252
+
+       10000
+
+residual: 
+   1.4612e-08
+
+time: neqn: step_count: 
+   15.8318
+
+   252
+
+       10100
+
+residual: 
+   1.2927e-08
+
+time: neqn: step_count: 
+   15.9886
+
+   252
+
+       10200
+
+residual: 
+   1.1439e-08
+
+10294 time steps
+CPU-times
+ advection:        3248.95s  100%
+plotting:            0.00s    0%
+CPU-times
+ advection:           0.00s    0%
+plotting:final residual while writting: 9.998276058476977e-09
+>> 

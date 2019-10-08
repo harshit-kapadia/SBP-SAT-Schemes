@@ -15,7 +15,8 @@ function f = compare_EM_grid_refine(test_case)
 
 base_output = strcat('/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/',test_case,'/');
 
-nx_values = 10:5:45;
+%nx_values = 10:5:55;
+nx_values = [10:5:55,95,100];
 
 %% ids of macroscopic quantities
 filename_dvm = strcat('../DVM/',test_case,'/result_n100_DVM_20.txt');
@@ -35,6 +36,7 @@ delta_x = X(2,1)-X(1,1);
 for i = 1 : length(nx_values)
     filename_moments = strcat('../results/',test_case,'_','char','/',...
                         'result_n',num2str(nx_values(i)),'_M12','.txt');
+   % filename_moments = strcat('../results/heated_cavity_char/result_M12.txt');
     result_mom{i} = dlmread(filename_moments,'\t');
     result_mom{i} = interpolate_2D(result_mom{i},nx_values(i),X,Y);
 
@@ -45,7 +47,7 @@ end
 error_entropy = sqrt(dot(error,error,2));
 
 f = error_entropy;
-loglog(error_entropy,'-o');
+% loglog(error_entropy,'-o');
 % slope = 1;
 % plot_error_entropy(M_values,error_entropy,error_entropy_odd,slope);
 % 
