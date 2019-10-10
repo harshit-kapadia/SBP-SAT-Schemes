@@ -22,7 +22,7 @@ grid on;
 legend('Odd Penalty','Characteristic Penalty',...
        'Reference (slope=2)','Location','southeast');
 xlabel('h');
-ylabel('$\tilde{E}_h$','Interpreter','latex');
+ylabel('$E_{\Omega_h,M}$','Interpreter','latex');
 title('Discretization Error');
 set(gca,'FontSize',20);
 

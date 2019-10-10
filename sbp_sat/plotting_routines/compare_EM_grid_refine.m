@@ -24,7 +24,7 @@ error_test2 = grid_refine(test_case,nx_values2);
 convg2 = -log(error_test2(1:end-1)'./error_test2(2:end)')./log(nx_values2(1:end-1)./nx_values2(2:end));
 
 test_case = 'lid_driven_cavity';
-nx_values3 = 10:5:45;
+nx_values3 = 10:5:40;
 error_test3 = grid_refine(test_case,nx_values3);
 convg3 = -log(error_test3(1:end-1)'./error_test3(2:end)')./log(nx_values3(1:end-1)./nx_values3(2:end));
 
@@ -48,7 +48,8 @@ legend('Test-1','Test-2','Test-3','Test-4','Location','best');
 grid on;
 set(gca, 'FontSize', 20);
 
-base_output = strcat('/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/',test_case,'/');
+base_output = strcat('/Users/neerajsarna/Dropbox/my_papers/Publications/Comparitive_BC/results/EM_grid_refine');
+print(base_output,'-depsc');
 
 
 
